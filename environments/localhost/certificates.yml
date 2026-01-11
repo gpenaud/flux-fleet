@@ -11,7 +11,7 @@ spec:
     kind: GitRepository
     name: flux-fleet
   wait: true
-  path: "./infrastructure/certificates/cert-manager"
+  path: "./infrastructure/certificates/helm-cert-manager"
   prune: true
   timeout: 1m
 
