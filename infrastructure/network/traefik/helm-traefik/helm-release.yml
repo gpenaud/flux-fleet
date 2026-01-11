@@ -9,7 +9,7 @@ spec:
   timeout: 5m
   chartRef:
     kind: OCIRepository
-    name: cert-manager
+    name: traefik
     namespace: kube-system
   install:
     remediation:
