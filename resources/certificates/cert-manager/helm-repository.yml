@@ -1,0 +1,10 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cert-manager
+  namespace: kube-system
+spec:
+  interval: 1m0s
+  url: oci://quay.io/jetstack/charts/cert-manager
+  wait: true
