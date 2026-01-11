@@ -10,6 +10,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-fleet
+  wait: true
   path: "./resources/certificates/cert-manager"
   prune: true
   timeout: 1m
