@@ -29,6 +29,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-fleet
-  path: "./resources/issuers/mkcert-issuers"
+  path: "./resources/certificates/issuers"
   prune: true
   timeout: 1m
