@@ -10,7 +10,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.gpenaud.localhost`)
+    - match: Host(`${traefik_fqdn}`)
       kind: Rule
       services:
         - name: api@internal

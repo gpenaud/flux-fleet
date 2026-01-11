@@ -33,3 +33,6 @@ spec:
   path: "./infrastructure/network/traefik/traefik-dashboard"
   prune: true
   timeout: 1m
+  postBuild:
+    substitute:
+      traefik_fqdn: traefikant.gpenaud.localhost
