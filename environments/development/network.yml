@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: traefik
+  name: gateway-api
   namespace: kube-system
 spec:
   interval: 1m
@@ -11,7 +11,7 @@ spec:
     kind: GitRepository
     name: flux-fleet
   wait: true
-  path: "./infrastructure/network/traefik/helm-traefik"
+  path: "./infrastructure/network/istio/gateway-api"
   prune: true
   timeout: 1m
 
@@ -19,20 +19,15 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: traefik-dashboard
+  name: istio
   namespace: kube-system
 spec:
-  dependsOn:
-    - name: traefik
-    - name: mkcert-issuer
   interval: 1m
   targetNamespace: kube-system
   sourceRef:
     kind: GitRepository
     name: flux-fleet
-  path: "./infrastructure/network/traefik/traefik-dashboard"
+  wait: true
+  path: "./infrastructure/network/istio/helm-istio"
   prune: true
   timeout: 1m
-  postBuild:
-    substitute:
-      traefik_fqdn: traefikant.gpenaud.localhost
