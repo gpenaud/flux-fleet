@@ -9,7 +9,7 @@ spec:
   timeout: 5m
   chart:
     spec:
-      chart: ingress
+      chart: gateway
       sourceRef:
         kind: HelmRepository
         name: istio
