@@ -14,3 +14,6 @@ spec:
   path: "./infrastructure/cd/ui/capacitor"
   prune: true
   timeout: 1m
+  postBuild:
+    substitute:
+      capacitor_fqdn: capacitor.gpenaud.localhost
