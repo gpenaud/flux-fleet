@@ -11,9 +11,6 @@ spec:
     - match: Host(`${capacitor_fqdn}`)
       kind: Rule
       services:
-        - kind: Service
-          name: capacitor
-          namespace: flux-system
-          port: 9000
+        - name: capacitor
   tls:
     secretName: capacitor-cert
