@@ -1,0 +1,67 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: podinfo
+  namespace: podinfo
+spec:
+  chart:
+    spec:
+      version: ">=1.0.0"
+  values:
+    nameOverride: ""
+    fullnameOverride: ""
+    alterconso:
+      configuration:
+        webapp:
+          vhost: alterconso.gpenaud.localhost
+      containers:
+        webapp:
+          env:
+            MYSQL_PASSWORD: alterconso
+          env_as_secrets:
+            MYSQL_ROOT_PASSWORD: |-
+              AgCOfgSiEcSXoGmTZldMyYvocBhGraKABc0mjd3wWzbvsB6uI3UwgNyFbRZ49QNsfMSdfPEYz2V9gHGt/ANcuynIUFeodVSen9JkdemInkNOJnYD7L8LIuV04lgfnITcGQCTwYgyWJzgqVBjqsoLReG8U1bIDqRXENsZ6tUgCuP6s1TOFISlHRDahxcyZnbjlonE6NSHMtdpgaDfl
+              naw54o6ll8sIOgYvK8nXeNUkTfhvYgeAnhX4Fofl3MvPn/XMSsIQdJbN9Y7PF9O38L7JWT916SlaK8lQAJth+6cZQO1S34U48kSb1dUXCslfpT9tRIPbTpyT02OI1z8n9+SLSRIH74aoXfaqggsTHJZfSR/Ey2OFVAyr5om3/00LmFeT5Q2wAwhcC4oXYGwziT95oCrM8dhPZmxIH
+              EacdNL8bkVMMewFjxdiUF+0iuFpRNAnuXLe4Vh0R7CHiHRBPqPX6BAHEjET+pTvnwbbLytYw9tE5myPndOvZ/W6JI1Qx5xkl145Ds41imIUbJtjv6+Mo6uc1ZCLkteUPoo3sLZB9yjasxtQAoYvqHIyw8fGPxDsQfjhxHeYyB2qTOilweik4UdSVrTz1roaSmG5ffDU+2fuJRqB9I
+              hBwu0vFshb8hGemHNh+BhV8RzMFIz6xLzGviqhkVL1rvElUmsdLrnLLVcUOf0r494zgSlv4Tm4L/UVQoPoqQucA==
+            SMTP_USER: |-
+              AgCZ3aG/mVZMTosF7b+IP+2bj1PYw44FQsZ9+MQqVVxiqoKiC5lxM98DZCzQDF5KsJ9+k6fm4wtvkWwvQEzKbITI+vpG65cvIW/ri9/rGjhRVSjmLxnOCBs6nYiVwBF4JpMCv9aAJz5u7wGf9P7H5EflFxZUfyWftP+eWZqX2WslWazK2CanEjaAlzfDBSRVDXAOFC+vRpOSjJhdL
+              9blSC4cs/Z5ktVmJ1ZZFXYg5V5QEOSJjKmZ4U8/rHbgNfmq6ahd86+8vS/XnZHtufdMz9YKugoWsNJcKrEA3598tLdnkTVRP1IBNq8M6f0i8chpwgaE+3jYzxlnF4MNx6XKCJh6VJ1A9hQnbn9sPgk+32dyJuI1jrdgFrZQkacCNDufesY/JUZflEUITAhyJVvguUUuNz/zb5tYBr
+              3xAPkLfJBjYsenAJ8Ss/3iPBeEK7Hm+kGiUEFvbSK+j44d+l9peZsYXzPvgaY44riXfBYeIVdqb4ck78oqwefDadXTmxKzSDwg41FacqgCGQM1IUspve7SJd0yAs36HJi4KXGhuHVwIYqJgzTvpCfe9uK89EI+6qo+CKN09kh5J5oWVRub7lLZpmhRhGVo8SsHUeyM24pAzFkF7gU
+              ee10fuDYO6pGsyN4UMt3/dZMVZoiyUdZrct+KZJ8ouEihK991P8/s8ND4OmRUpuMoI0vNLfFKsqhetofh3RPpBKhB9XSZPk+fLbC2/4QmdzHHo3o=
+            SMTP_PASSWORD: |-
+              AgB3tjDy4QRGxowCLa+Cg6Lr8qkRfW3E0GwtZAwfWBLrBmbxzQ/EONUVbjUz8kV+PPnJeZOnX9TvA8jIXzC0qaLDPaMF0/LKuXoHXxZwFvIWErbDw0cocXttRspOLu35vyHGUxMSw4RNWitvoyodL7OPYG/1r/tqU2N4ubd0NvHKOmrZGPlrq8KinI8F1gs8Aohoy5aoKkJVMwRvb
+              NnYg5xjmYXtgaBSFjV+UkAwqfu1DhIFqSL2a7xQkKF5wjSiBO1eKQeLfmPGWKH0TKXDEopLVLAxAm8XkPcMOUa9YwF6Qu9Mbf8QuHPZ5kUHsqGSFFCmIqf04u1gf6ot0ohysp+sDAQ3cI6CVuJMkWzuRhQbE1/cNG0milLB3f5SS3Y87WtChBQFUd0+8ad7rQfzdPytNbFHBy+smp
+              42MqFyW1umY0T5RLJNlO5vi/4Qdswx3OAPDJFufHBa0Fkrnw1QVxIYuzifJu6GIeDDH5onzVUVQzFDjCasdQojI2XGtH13YdG0+VHaca/aU4UK4KBzg5CvyI663xeGIJ/YZ8giDn6CqAdui1qGHwdG7EbRzFhT061pri9lr5ySYRiFaFq8R9MJk8G78qU+ezyYiG1WmOORc4SlEa3
+              u5rLpBkbQ0GvJBFVp9BxvqQpDe9zKF9732cIzT9SPMHDCvVh6YpfvbN0FddrGGxsTqb0YYzJ98CNn8EhU955Yj5WqGIo=
+
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "traefik"
+          cert-manager.io/cluster-issuer: "mkcert-issuer"
+        hosts:
+          - host: alterconso.gpenaud.localhost
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  port: 80
+        tls:
+          - hosts:
+            - alterconso.gpenaud.localhost
+            secretName: alterconso.gpenaud.localhost-tls
+
+    database:
+      backup:
+        enabled: false
+      containers:
+        database:
+          env:
+            MYSQL_PASSWORD: alterconso
+          env_as_secrets:
+            MYSQL_ROOT_PASSWORD: |-
+              AgCOfgSiEcSXoGmTZldMyYvocBhGraKABc0mjd3wWzbvsB6uI3UwgNyFbRZ49QNsfMSdfPEYz2V9gHGt/ANcuynIUFeodVSen9JkdemInkNOJnYD7L8LIuV04lgfnITcGQCTwYgyWJzgqVBjqsoLReG8U1bIDqRXENsZ6tUgCuP6s1TOFISlHRDahxcyZnbjlonE6NSHMtdpgaDfl
+              naw54o6ll8sIOgYvK8nXeNUkTfhvYgeAnhX4Fofl3MvPn/XMSsIQdJbN9Y7PF9O38L7JWT916SlaK8lQAJth+6cZQO1S34U48kSb1dUXCslfpT9tRIPbTpyT02OI1z8n9+SLSRIH74aoXfaqggsTHJZfSR/Ey2OFVAyr5om3/00LmFeT5Q2wAwhcC4oXYGwziT95oCrM8dhPZmxIH
+              EacdNL8bkVMMewFjxdiUF+0iuFpRNAnuXLe4Vh0R7CHiHRBPqPX6BAHEjET+pTvnwbbLytYw9tE5myPndOvZ/W6JI1Qx5xkl145Ds41imIUbJtjv6+Mo6uc1ZCLkteUPoo3sLZB9yjasxtQAoYvqHIyw8fGPxDsQfjhxHeYyB2qTOilweik4UdSVrTz1roaSmG5ffDU+2fuJRqB9I
+              hBwu0vFshb8hGemHNh+BhV8RzMFIz6xLzGviqhkVL1rvElUmsdLrnLLVcUOf0r494zgSlv4Tm4L/UVQoPoqQucA==

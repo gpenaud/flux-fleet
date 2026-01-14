@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alterconso
+  namespace: default
+spec:
+  releaseName: alterconso
+  chart:
+    spec:
+      chart: alterconso
+      sourceRef:
+        kind: HelmRepository
+        name: gpenaud
+  interval: 5m
+  install:
+    remediation:
+      retries: 3
