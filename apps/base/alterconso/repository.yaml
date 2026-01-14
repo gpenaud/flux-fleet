@@ -6,4 +6,4 @@ metadata:
   namespace: alterconso
 spec:
   interval: 5m
-  url: https://raw.githubusercontent.com/gpenaud/helm-charts
+  url: https://raw.githubusercontent.com/gpenaud/helm-charts/master
