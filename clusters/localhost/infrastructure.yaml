@@ -10,8 +10,8 @@ spec:
   timeout: 5m
   sourceRef:
     kind: ExternalArtifact
-    name: infrastructure
-  path: ./controllers
+    name: infrastructure-controllers
+  path: ./localhost
   prune: true
   wait: true
 ---
@@ -28,8 +28,8 @@ spec:
   timeout: 5m
   sourceRef:
     kind: ExternalArtifact
-    name: infrastructure
-  path: ./configs
+    name: infrastructure-configs
+  path: ./localhost
   prune: true
   patches:
     - target:
