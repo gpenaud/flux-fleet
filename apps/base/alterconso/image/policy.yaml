@@ -1,0 +1,12 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: alterconso
+  namespace: alterconso
+spec:
+  imageRepositoryRef:
+    name: alterconso
+  policy:
+    semver:
+      range: 1.0.x

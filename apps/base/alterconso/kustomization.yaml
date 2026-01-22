@@ -4,5 +4,8 @@ kind: Kustomization
 namespace: alterconso
 resources:
   - namespace.yaml
-  - repository.yaml
-  - release.yaml
+  - helm/repository.yaml
+  - helm/release.yaml
+  - image/repository.yaml
+  - image/policy.yaml
+  - image/updateautomation.yaml
