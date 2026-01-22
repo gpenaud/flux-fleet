@@ -11,10 +11,13 @@ spec:
         tag: latest # {"$imagepolicy": "alterconso:alterconso:tag"}
       env_as_values:
         MYSQL_ROOT_PASSWORD: |-
-          AgCOfgSiEcSXoGmTZldMyYvocBhGraKABc0mjd3wWzbvsB6uI3UwgNyFbRZ49QNsfMSdfPEYz2V9gHGt/ANcuynIUFeodVSen9JkdemInkNOJnYD7L8LIuV04lgfnITcGQCTwYgyWJzgqVBjqsoLReG8U1bIDqRXENsZ6tUgCuP6s1TOFISlHRDahxcyZnbjlonE6NSHMtdpgaDfl
-          naw54o6ll8sIOgYvK8nXeNUkTfhvYgeAnhX4Fofl3MvPn/XMSsIQdJbN9Y7PF9O38L7JWT916SlaK8lQAJth+6cZQO1S34U48kSb1dUXCslfpT9tRIPbTpyT02OI1z8n9+SLSRIH74aoXfaqggsTHJZfSR/Ey2OFVAyr5om3/00LmFeT5Q2wAwhcC4oXYGwziT95oCrM8dhPZmxIH
-          EacdNL8bkVMMewFjxdiUF+0iuFpRNAnuXLe4Vh0R7CHiHRBPqPX6BAHEjET+pTvnwbbLytYw9tE5myPndOvZ/W6JI1Qx5xkl145Ds41imIUbJtjv6+Mo6uc1ZCLkteUPoo3sLZB9yjasxtQAoYvqHIyw8fGPxDsQfjhxHeYyB2qTOilweik4UdSVrTz1roaSmG5ffDU+2fuJRqB9I
-          hBwu0vFshb8hGemHNh+BhV8RzMFIz6xLzGviqhkVL1rvElUmsdLrnLLVcUOf0r494zgSlv4Tm4L/UVQoPoqQucA==
+          AgBMorT6J5hu8kycbA48ptcFFB5FQb1NiCEQqmHzwqdyk4uZWJhxNXwUKkHSejVgvE7zBiygQ+q2j304DdEMWs/P+CTlgfdEqpE5O4c
+          whvPV/c/IwqUxJS3WKcgit0RubawdRHgaiV/ubd9iO02c8fFln7w/ALmZAU23cQvCM4pyf4OtfrJxJYUhABrRP+5soguM5ZpbfwDRLn
+          yAhh+J/r5aQXkeGuBTx68BFGaG/8PzMdaldoHUEfQF79+t/DHce+oQlUEyBxFa//x7+YSOjjLDirwP4zJAuqUmiuPL/M+0g6eABJGzh
+          dGFccTLbzYiKxoEtbe9Rsrds3m9LnQD8d5usEq7AzG9ht9BYj1uqHwYkp9amo29QKLHCE9bIdiBUFWqBwD0gCeRLctBv2InTf6yEwzY
+          smqBhB0tbHS2c/uYvCTbm/BMiMqc7DJW010PfUrxzkiDojWbY6/gPn1IEforJyvrPT18rCXh8XWBvUUBAI5/AOMQNSQjxu2O5wJmGJf
+          O7MouklGO/gxZPdm5QAKkIXwH8gQTIGLVTZWS/5R9atrM5m4bhz50ZwR9wHpTL7Z8FZhi7Rl+AKaQGnMaFSkpKWJP923F9Jca4oH0cl
+          3hQu0SHT1qLOj2av4OY7C9yr/mzs2DvEUhYR/+nDaB20mfEg7tdkpEhdLUzrczglRR9DFRqNi/zl6i3R+0oePjyniooiOU2g==
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: "mkcert-issuer"
@@ -28,10 +31,13 @@ spec:
         MYSQL_PASSWORD: alterconso
       env_as_secrets:
         MYSQL_ROOT_PASSWORD: |-
-          AgCOfgSiEcSXoGmTZldMyYvocBhGraKABc0mjd3wWzbvsB6uI3UwgNyFbRZ49QNsfMSdfPEYz2V9gHGt/ANcuynIUFeodVSen9JkdemInkNOJnYD7L8LIuV04lgfnITcGQCTwYgyWJzgqVBjqsoLReG8U1bIDqRXENsZ6tUgCuP6s1TOFISlHRDahxcyZnbjlonE6NSHMtdpgaDfl
-          naw54o6ll8sIOgYvK8nXeNUkTfhvYgeAnhX4Fofl3MvPn/XMSsIQdJbN9Y7PF9O38L7JWT916SlaK8lQAJth+6cZQO1S34U48kSb1dUXCslfpT9tRIPbTpyT02OI1z8n9+SLSRIH74aoXfaqggsTHJZfSR/Ey2OFVAyr5om3/00LmFeT5Q2wAwhcC4oXYGwziT95oCrM8dhPZmxIH
-          EacdNL8bkVMMewFjxdiUF+0iuFpRNAnuXLe4Vh0R7CHiHRBPqPX6BAHEjET+pTvnwbbLytYw9tE5myPndOvZ/W6JI1Qx5xkl145Ds41imIUbJtjv6+Mo6uc1ZCLkteUPoo3sLZB9yjasxtQAoYvqHIyw8fGPxDsQfjhxHeYyB2qTOilweik4UdSVrTz1roaSmG5ffDU+2fuJRqB9I
-          hBwu0vFshb8hGemHNh+BhV8RzMFIz6xLzGviqhkVL1rvElUmsdLrnLLVcUOf0r494zgSlv4Tm4L/UVQoPoqQucA==
+          AgBMorT6J5hu8kycbA48ptcFFB5FQb1NiCEQqmHzwqdyk4uZWJhxNXwUKkHSejVgvE7zBiygQ+q2j304DdEMWs/P+CTlgfdEqpE5O4c
+          whvPV/c/IwqUxJS3WKcgit0RubawdRHgaiV/ubd9iO02c8fFln7w/ALmZAU23cQvCM4pyf4OtfrJxJYUhABrRP+5soguM5ZpbfwDRLn
+          yAhh+J/r5aQXkeGuBTx68BFGaG/8PzMdaldoHUEfQF79+t/DHce+oQlUEyBxFa//x7+YSOjjLDirwP4zJAuqUmiuPL/M+0g6eABJGzh
+          dGFccTLbzYiKxoEtbe9Rsrds3m9LnQD8d5usEq7AzG9ht9BYj1uqHwYkp9amo29QKLHCE9bIdiBUFWqBwD0gCeRLctBv2InTf6yEwzY
+          smqBhB0tbHS2c/uYvCTbm/BMiMqc7DJW010PfUrxzkiDojWbY6/gPn1IEforJyvrPT18rCXh8XWBvUUBAI5/AOMQNSQjxu2O5wJmGJf
+          O7MouklGO/gxZPdm5QAKkIXwH8gQTIGLVTZWS/5R9atrM5m4bhz50ZwR9wHpTL7Z8FZhi7Rl+AKaQGnMaFSkpKWJP923F9Jca4oH0cl
+          3hQu0SHT1qLOj2av4OY7C9yr/mzs2DvEUhYR/+nDaB20mfEg7tdkpEhdLUzrczglRR9DFRqNi/zl6i3R+0oePjyniooiOU2g==
       local:
         path: /mnt/k3s/alterconso
       nodeAffinity:
