@@ -7,3 +7,10 @@ patches:
   - path: alterconso-values.yaml
     target:
       kind: HelmRelease
+  - target:
+      kind: ImageUpdateAutomation
+      name: alterconso
+    patch: |
+      - op: replace
+        path: /spec/update/path
+        value: ./clusters/localhost 
