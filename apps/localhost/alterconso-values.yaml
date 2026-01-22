@@ -10,14 +10,7 @@ spec:
       image:
         tag: latest # {"$imagepolicy": "alterconso:alterconso:tag"}
       env_as_values:
-        MYSQL_ROOT_PASSWORD: |-
-          AgBMorT6J5hu8kycbA48ptcFFB5FQb1NiCEQqmHzwqdyk4uZWJhxNXwUKkHSejVgvE7zBiygQ+q2j304DdEMWs/P+CTlgfdEqpE5O4c
-          whvPV/c/IwqUxJS3WKcgit0RubawdRHgaiV/ubd9iO02c8fFln7w/ALmZAU23cQvCM4pyf4OtfrJxJYUhABrRP+5soguM5ZpbfwDRLn
-          yAhh+J/r5aQXkeGuBTx68BFGaG/8PzMdaldoHUEfQF79+t/DHce+oQlUEyBxFa//x7+YSOjjLDirwP4zJAuqUmiuPL/M+0g6eABJGzh
-          dGFccTLbzYiKxoEtbe9Rsrds3m9LnQD8d5usEq7AzG9ht9BYj1uqHwYkp9amo29QKLHCE9bIdiBUFWqBwD0gCeRLctBv2InTf6yEwzY
-          smqBhB0tbHS2c/uYvCTbm/BMiMqc7DJW010PfUrxzkiDojWbY6/gPn1IEforJyvrPT18rCXh8XWBvUUBAI5/AOMQNSQjxu2O5wJmGJf
-          O7MouklGO/gxZPdm5QAKkIXwH8gQTIGLVTZWS/5R9atrM5m4bhz50ZwR9wHpTL7Z8FZhi7Rl+AKaQGnMaFSkpKWJP923F9Jca4oH0cl
-          3hQu0SHT1qLOj2av4OY7C9yr/mzs2DvEUhYR/+nDaB20mfEg7tdkpEhdLUzrczglRR9DFRqNi/zl6i3R+0oePjyniooiOU2g==
+        MYSQL_ROOT_PASSWORD: AgCTLgLh1iLUwn7kFuUvvunVIf7MISXhKhI5ICFhawsXHM0nOThLO7luwcqlb4Px3fbozstVhC3cOS7CBc8GRgNymp+3sq6yokLnQo20p5P3BAXTlx0QHFAmgBp+rzzaxypDc08BxrASKCncPv3DiACd4v5qungCnT3o5kqHmBv4oQyVVx1z9ZNctzOp3DbqEOEokphQoWbwds+LQSwBwCQwDLbETdvbOQqDaj9CyiJWajkLYEO7JqIEh3Wuf9aZ9Z3O0INIvpRZn9Ed8UPp1PZf7CltitmTcWk84gN5ERb25hVqZcN3STu8tE3bwsZBZFnAjqwirOOHDouoLcC+oIvgVadOk6mm789k7fxhp9e4rgFS3z1ONAZeM6ZM/sWuSW/YktQrGhx+/9d4KNyy1onR6GFDe+xteSmbSzldTXWtX+eRGUq4ztg6M1yuXntVb9cEfAS6zY5f8KAlF7AsFYWQnMZUTbQrQt5vgLf+w7tUlAy43Eb9xeyhJ1oSN1YyuxNJYEjg1kiYn5vWOOfwHjmQChVxagG6yuawLC8k5JD/XNYZ1YSkNnVSprzAxwSkdjOVajnSZjaSXdW5nNS6E0E4vwcr9uYS1aS/RxkfVhNefDOEAH4K3MCJrH6j1mbt9udwCREBf7bFh53PsZ51OduzdcYfvslZjykkfBRqI9lLr1QPecS1r3RmYDkOoe2F9GgTqO3Ixw=
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: "mkcert-issuer"
@@ -30,14 +23,7 @@ spec:
       env:
         MYSQL_PASSWORD: alterconso
       env_as_secrets:
-        MYSQL_ROOT_PASSWORD: |-
-          AgBMorT6J5hu8kycbA48ptcFFB5FQb1NiCEQqmHzwqdyk4uZWJhxNXwUKkHSejVgvE7zBiygQ+q2j304DdEMWs/P+CTlgfdEqpE5O4c
-          whvPV/c/IwqUxJS3WKcgit0RubawdRHgaiV/ubd9iO02c8fFln7w/ALmZAU23cQvCM4pyf4OtfrJxJYUhABrRP+5soguM5ZpbfwDRLn
-          yAhh+J/r5aQXkeGuBTx68BFGaG/8PzMdaldoHUEfQF79+t/DHce+oQlUEyBxFa//x7+YSOjjLDirwP4zJAuqUmiuPL/M+0g6eABJGzh
-          dGFccTLbzYiKxoEtbe9Rsrds3m9LnQD8d5usEq7AzG9ht9BYj1uqHwYkp9amo29QKLHCE9bIdiBUFWqBwD0gCeRLctBv2InTf6yEwzY
-          smqBhB0tbHS2c/uYvCTbm/BMiMqc7DJW010PfUrxzkiDojWbY6/gPn1IEforJyvrPT18rCXh8XWBvUUBAI5/AOMQNSQjxu2O5wJmGJf
-          O7MouklGO/gxZPdm5QAKkIXwH8gQTIGLVTZWS/5R9atrM5m4bhz50ZwR9wHpTL7Z8FZhi7Rl+AKaQGnMaFSkpKWJP923F9Jca4oH0cl
-          3hQu0SHT1qLOj2av4OY7C9yr/mzs2DvEUhYR/+nDaB20mfEg7tdkpEhdLUzrczglRR9DFRqNi/zl6i3R+0oePjyniooiOU2g==
+        MYSQL_ROOT_PASSWORD: AgCTLgLh1iLUwn7kFuUvvunVIf7MISXhKhI5ICFhawsXHM0nOThLO7luwcqlb4Px3fbozstVhC3cOS7CBc8GRgNymp+3sq6yokLnQo20p5P3BAXTlx0QHFAmgBp+rzzaxypDc08BxrASKCncPv3DiACd4v5qungCnT3o5kqHmBv4oQyVVx1z9ZNctzOp3DbqEOEokphQoWbwds+LQSwBwCQwDLbETdvbOQqDaj9CyiJWajkLYEO7JqIEh3Wuf9aZ9Z3O0INIvpRZn9Ed8UPp1PZf7CltitmTcWk84gN5ERb25hVqZcN3STu8tE3bwsZBZFnAjqwirOOHDouoLcC+oIvgVadOk6mm789k7fxhp9e4rgFS3z1ONAZeM6ZM/sWuSW/YktQrGhx+/9d4KNyy1onR6GFDe+xteSmbSzldTXWtX+eRGUq4ztg6M1yuXntVb9cEfAS6zY5f8KAlF7AsFYWQnMZUTbQrQt5vgLf+w7tUlAy43Eb9xeyhJ1oSN1YyuxNJYEjg1kiYn5vWOOfwHjmQChVxagG6yuawLC8k5JD/XNYZ1YSkNnVSprzAxwSkdjOVajnSZjaSXdW5nNS6E0E4vwcr9uYS1aS/RxkfVhNefDOEAH4K3MCJrH6j1mbt9udwCREBf7bFh53PsZ51OduzdcYfvslZjykkfBRqI9lLr1QPecS1r3RmYDkOoe2F9GgTqO3Ixw==
       local:
         path: /mnt/k3s/alterconso
       nodeAffinity:
