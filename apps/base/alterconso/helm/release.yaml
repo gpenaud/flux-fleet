@@ -1,4 +1,3 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -20,4 +19,4 @@ spec:
   values:
     webapp:
       image:
-        tag: 1.0.0 # {"$imagepolicy": "alterconso:alterconso:tag"}
+        tag: 1.0.1 # {"$imagepolicy": "alterconso:alterconso:tag"}
