@@ -7,6 +7,8 @@ metadata:
 spec:
   values:
     webapp:
+      image:
+        tag: latest # {"$imagepolicy": "alterconso:alterconso:tag"}
       env_as_values:
         MYSQL_ROOT_PASSWORD: |-
           AgCOfgSiEcSXoGmTZldMyYvocBhGraKABc0mjd3wWzbvsB6uI3UwgNyFbRZ49QNsfMSdfPEYz2V9gHGt/ANcuynIUFeodVSen9JkdemInkNOJnYD7L8LIuV04lgfnITcGQCTwYgyWJzgqVBjqsoLReG8U1bIDqRXENsZ6tUgCuP6s1TOFISlHRDahxcyZnbjlonE6NSHMtdpgaDfl
