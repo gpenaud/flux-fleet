@@ -13,6 +13,7 @@ spec:
         kind: HelmRepository
         name: alterconso
   interval: 5m
+  timeout: 1m
   install:
     remediation:
       retries: 3
