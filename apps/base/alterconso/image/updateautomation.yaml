@@ -22,5 +22,5 @@ spec:
     push:
       branch: master
   update:
-    path: ./clusters/TO_REPLACE
+    path: ./apps/base/alterconso/helm
     strategy: Setters

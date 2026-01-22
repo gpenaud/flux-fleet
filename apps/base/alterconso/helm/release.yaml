@@ -20,5 +20,4 @@ spec:
   values:
     webapp:
       image:
-        repository: ghcr.io/gpenaud/alterconso # {"$imagepolicy": "alterconso:alterconso:name"}
         tag: 1.0.0 # {"$imagepolicy": "alterconso:alterconso:tag"}
