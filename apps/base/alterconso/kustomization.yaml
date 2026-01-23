@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: alterconso
 resources:
   - namespace.yaml
+  - dockerconfig-secret.yaml
   - helm/repository.yaml
   - helm/release.yaml
   - image/repository.yaml

@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - sealed-secrets.yaml
-  - cluster-secret.yaml
+  - external-secrets.yaml
