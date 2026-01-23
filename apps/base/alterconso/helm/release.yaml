@@ -19,4 +19,4 @@ spec:
   values:
     webapp:
       image:
-        tag: 1.0.1 # {"$imagepolicy": "alterconso:alterconso:tag"}
+        tag: 1.0.2 # {"$imagepolicy": "alterconso:alterconso:tag"}
