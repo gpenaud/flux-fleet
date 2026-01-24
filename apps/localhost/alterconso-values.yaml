@@ -7,7 +7,7 @@ spec:
   values:
     webapp:
       image:
-        version: 1.0.4 # {"$imagepolicy": "alterconso:alterconso:tag"}
+        version: 1.0.5 # {"$imagepolicy": "alterconso:alterconso:tag"}
       env_as_values:
         MYSQL_ROOT_PASSWORD: AgBf5EIWSXm0ZCW1kHFIceE9b1yKMP7eD6QcTvzRWoDyMCTL5vbiSZfB3IoKl3ROMRXlmHQgNzZjCsKMHV+qn4Wr005eAmzrJBgo+yp//rsFAztCRU4KDT8Mc1+5UkiKu5yxELy2YR4LNlW2mHzQrcJPYTbKl2Eh8spSMN4m/Axg/Oyq01dmCyW4bOWf2bkvNltHKarAvEd9jBKVz4vSE5/DaRAcWKZEmB2F/fklsRuPr/7fYyOAjSHTJMRuCCJmoJdjOvgh8zPAzqrpJtvPBeZMxXckoqLhliW7Ca4flXZTqsn9VBupXxPgrnOpb3x0TKsPdWhuEQi3wJi79FdGfT1ykxdknQ2ZrYKZIkR8kyygcYlfdZr2tM1WBWOjdXXqrggdTcBX0JoPHoAdI3oglDdpEpgbSUoyYlpYouku6oNSxF6a2KtgwwR4tyzDhdjN5vMWtCpbSzArZ2GLeCT2B/1FoMcLaBrgn1zbZQfYDpKlI555oTPvLUf/PcHK5xLjmZe3mai2COyhSIfQk/w/7C2szXs6tw0gs4vvTzjDMpi8oy/Wq0ciKjpBOISIL26Rx90xriq4Oq/Y6BIc8JzFzsncSFumcaW9JSME9Pd2bcBGLfPcN0RjPAT0yvgg55wcVMlhLR0xM4Er8F5PhlBcvzbTsUMTWSw0B6bxt/NICl1u7FQ2bDLMlfeqcaluXHOr3FlBpw93oA==
       ingress:
