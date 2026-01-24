@@ -19,6 +19,12 @@ commands:
     command: |-
       devspace run reconcile-source
       flux -n flux-system reconcile kustomization apps
+      flux -n alterconso reconcile source helm alterconso
+      flux -n alterconso reconcile helmrelease alterconso
+
+  reconcile-alterconso:
+    description: Reconcile alterconso helmrelease resource
+    command: |-
       flux -n alterconso reconcile helmrelease alterconso
 
   reconcile-all:
