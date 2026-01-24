@@ -7,6 +7,7 @@ patches:
   - path: alterconso-values.yaml
     target:
       kind: HelmRelease
+      name: alterconso
   - target:
       kind: ImageUpdateAutomation
       name: alterconso
