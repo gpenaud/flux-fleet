@@ -27,7 +27,7 @@ spec:
       hostname: le-portail.gpenaud.localhost
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: mkcert
+        cert-manager.io/cluster-issuer: mkcert-issuer
       extraTls:
         - hosts:
             - le-portail.gpenaud.localhost
