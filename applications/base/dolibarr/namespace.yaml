@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dolibarr
+  labels:
+    alter-it.org/tenant: "${TENANT}"
+    alter-it.org/app: "dolibarr"
+    alter-it.org/managed-by: "fluxcd"
