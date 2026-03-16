@@ -10,6 +10,8 @@ spec:
       enabled: false
     homeWorker:
       envVars:
+        GRIST_DOCS: "/persist/docs"
+        GRIST_DATA_DIR: "/persist/docs"
         GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
       probes:
         liveness:
@@ -27,6 +29,7 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
       envVars:
+        GRIST_DOCS: "/persist/docs"
         GRIST_DATA_DIR: "/persist/docs"
         GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
         GRIST_SANDBOX_FLAVOR: "unsandboxed"
