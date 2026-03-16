@@ -9,7 +9,11 @@ resources:
 patches:
   - target:
       kind: Namespace
-      name: le-portail-grist
+      name: grist
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: le-portail-grist
   - path: values.yaml
     target:
       kind: HelmRelease
