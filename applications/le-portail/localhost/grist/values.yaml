@@ -18,10 +18,19 @@ spec:
           initialDelaySeconds: 10
     docWorker:
       replicas: 1
-      # useVolume:
-      #   enabled: true
-      #   storageSize: "10Gi"
-      persistence:
+      useVolume:
+        enabled: false
+      persistence: {}
+      podSecurityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      envVars:
+        GRIST_DATA_DIR:
+          value: "/persist/docs"
+        GRIST_DB_URL:
+          value: "sqlite:////persist/home.db"
+        GRIST_SANDBOX_FLAVOR:
+          value: "unsandboxed"
       extraVolumes:
         - name: grist-persist
           persistentVolumeClaim:
