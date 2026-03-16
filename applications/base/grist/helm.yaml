@@ -1,0 +1,32 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: dirnum-forked
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://github.com/gpenaud/helm-charts-dirnum
+  ref:
+    branch: feature/make-loadbalancer-component-optional
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grist
+spec:
+  releaseName: grist
+  chart:
+    spec:
+      chart: grist
+      version: "0.0.5"
+      sourceRef:
+        kind: GitRepository
+        name: dirnum-forked
+        namespace: flux-system
+  interval: 5m
+  timeout: 1m
+  install:
+    remediation:
+      retries: 3
