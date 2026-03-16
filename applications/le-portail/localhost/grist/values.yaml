@@ -10,8 +10,7 @@ spec:
       enabled: false
     homeWorker:
       envVars:
-        GRIST_DB_URL:
-          value: "sqlite:////persist/home.db"
+        GRIST_DB_URL: "sqlite:////persist/home.db"
       probes:
         liveness:
           path: /status?db=1
@@ -28,12 +27,9 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
       envVars:
-        GRIST_DATA_DIR:
-          value: "/persist/docs"
-        GRIST_DB_URL:
-          value: "sqlite:////persist/home.db"
-        GRIST_SANDBOX_FLAVOR:
-          value: "unsandboxed"
+        GRIST_DATA_DIR: "/persist/docs"
+        GRIST_DB_URL: "sqlite:////persist/home.db"
+        GRIST_SANDBOX_FLAVOR: "unsandboxed"
       extraVolumes:
         - name: grist-persist
           persistentVolumeClaim:
