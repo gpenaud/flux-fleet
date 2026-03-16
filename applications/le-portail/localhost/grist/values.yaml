@@ -10,11 +10,9 @@ spec:
       enabled: false
     homeWorker:
       envVars:
-        GRIST_DOCS: "/persist/docs"
-        GRIST_DATA_DIR: "/persist/docs"
         GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
         TYPEORM_DATABASE: "/persist/home.sqlite3"
-        GRIST_SINGLE_PORT: "true"
+        GRIST_DATA_DIR: "/persist/docs"
       extraVolumes:
         - name: grist-persist
           persistentVolumeClaim:
@@ -38,9 +36,9 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
       envVars:
-        GRIST_DOCS: "/persist/docs"
-        GRIST_DATA_DIR: "/persist/docs"
         GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
+        TYPEORM_DATABASE: "/persist/home.sqlite3"
+        GRIST_DATA_DIR: "/persist/docs"
         GRIST_SANDBOX_FLAVOR: "unsandboxed"
       extraVolumes:
         - name: grist-persist
