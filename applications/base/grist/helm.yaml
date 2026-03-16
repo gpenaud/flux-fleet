@@ -3,7 +3,6 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
   name: dirnum-forked
-  namespace: flux-system
 spec:
   interval: 5m
   url: https://github.com/gpenaud/helm-charts-dirnum
@@ -24,7 +23,6 @@ spec:
       sourceRef:
         kind: GitRepository
         name: dirnum-forked
-        namespace: flux-system
   interval: 5m
   timeout: 1m
   install:
