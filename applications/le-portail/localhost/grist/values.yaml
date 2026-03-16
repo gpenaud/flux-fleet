@@ -13,6 +13,7 @@ spec:
         GRIST_DOCS: "/persist/docs"
         GRIST_DATA_DIR: "/persist/docs"
         GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
+        GRIST_SINGLE_PORT: "true"
       probes:
         liveness:
           path: /status?db=1
