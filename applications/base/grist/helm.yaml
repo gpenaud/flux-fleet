@@ -18,7 +18,7 @@ spec:
   releaseName: grist
   chart:
     spec:
-      chart: grist
+      chart: charts/grist 
       version: "0.0.5"
       sourceRef:
         kind: GitRepository
