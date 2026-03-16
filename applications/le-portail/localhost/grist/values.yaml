@@ -2,46 +2,47 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: grist
-values:
-  image:
-    tag: "1.7.11"
-  loadBalancer: 
-    enabled: false
-  homeWorker:
-    probes:
-      liveness:
-        path: /status?db=1
-        initialDelaySeconds: 10
-      startup:
-        path: /status?db=1
-        initialDelaySeconds: 10
-  docWorker:
-    replicas: 1
-    useVolume:
+spec:
+  values:
+    image:
+      tag: "1.7.11"
+    loadBalancer: 
+      enabled: false
+    homeWorker:
+      probes:
+        liveness:
+          path: /status?db=1
+          initialDelaySeconds: 10
+        startup:
+          path: /status?db=1
+          initialDelaySeconds: 10
+    docWorker:
+      replicas: 1
+      useVolume:
+        enabled: true
+        storageSize: "10Gi"
+      probes:
+        liveness:
+          path: /status?db=1&docWorkerRegistered=1
+          initialDelaySeconds: 10
+        startup:
+          path: /status?db=1&docWorkerRegistered=1
+          initialDelaySeconds: 10
+    ingress:
       enabled: true
-      storageSize: "10Gi"
-    probes:
-      liveness:
-        path: /status?db=1&docWorkerRegistered=1
-        initialDelaySeconds: 10
-      startup:
-        path: /status?db=1&docWorkerRegistered=1
-        initialDelaySeconds: 10
-  ingress:
-    enabled: true
-    className: traefik
-    annotations:
-      kubernetes.io/ingress.class: traefik
-      cert-manager.io/cluster-issuer: mkcert
-      traefik.ingress.kubernetes.io/router.middlewares: le-portail-grist-grist-basic-auth@kubernetescrd
-    hosts:
-      - host: grist.gpenaud.localhost
-        paths:
-          - path: /
-            pathType: Prefix
-    tls:
-      enabled: true
-      additional:
-        - secretName: grist.gpenaud.localhost-tls
-          hosts:
-            - grist.gpenaud.localhost
+      className: traefik
+      annotations:
+        kubernetes.io/ingress.class: traefik
+        cert-manager.io/cluster-issuer: mkcert
+        traefik.ingress.kubernetes.io/router.middlewares: le-portail-grist-grist-basic-auth@kubernetescrd
+      hosts:
+        - host: grist.gpenaud.localhost
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        enabled: true
+        additional:
+          - secretName: grist.gpenaud.localhost-tls
+            hosts:
+              - grist.gpenaud.localhost
