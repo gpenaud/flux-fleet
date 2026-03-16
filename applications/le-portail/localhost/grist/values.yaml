@@ -22,7 +22,7 @@ spec:
       #   enabled: true
       #   storageSize: "10Gi"
       persistence:
-        grist-data:             
+        doc-wk-grist-data:
           type: persistentVolumeClaim
           size: 10Gi
           mountPath: /persist
