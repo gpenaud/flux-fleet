@@ -33,7 +33,7 @@ spec:
       className: traefik
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: mkcert
+        cert-manager.io/cluster-issuer: mkcert-issuer
         traefik.ingress.kubernetes.io/router.middlewares: le-portail-grist-grist-basic-auth@kubernetescrd
       hosts:
         - host: grist.gpenaud.localhost
