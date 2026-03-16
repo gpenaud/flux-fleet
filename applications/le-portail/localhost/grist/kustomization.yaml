@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: le-portail-grist
 resources:
   - ../../../base/grist/
-  - storage.yaml
   - secrets.enc.yaml
   - backup-pod-config.yaml
 patches:
