@@ -9,6 +9,9 @@ spec:
     loadBalancer: 
       enabled: false
     homeWorker:
+      envVars:
+        GRIST_DB_URL:
+          value: "sqlite:////persist/home.db"
       probes:
         liveness:
           path: /status?db=1
