@@ -22,10 +22,13 @@ spec:
       #   enabled: true
       #   storageSize: "10Gi"
       persistence:
-        grist-data:
-          type: persistentVolumeClaim
-          size: 10Gi
-          mountPath: /persist
+      extraVolumes:
+        - name: grist-persist
+          persistentVolumeClaim:
+            claimName: grist-data
+      extraVolumeMounts:
+        - name: grist-persist
+          mountPath: /persist 
       probes:
         liveness:
           path: /status?db=1&docWorkerRegistered=1
