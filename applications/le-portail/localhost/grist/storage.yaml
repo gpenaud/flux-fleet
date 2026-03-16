@@ -1,0 +1,26 @@
+# PV hostPath — à créer manuellement
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: le-portail-grist
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /mnt/k3s/grist
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: le-portail-grist
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 5Gi

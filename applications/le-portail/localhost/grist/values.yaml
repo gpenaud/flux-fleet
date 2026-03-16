@@ -28,6 +28,9 @@ spec:
         startup:
           path: /status?db=1&docWorkerRegistered=1
           initialDelaySeconds: 10
+    persistence:
+      enabled: true
+      existingClaim: le-portail-grist
     ingress:
       enabled: true
       className: traefik
