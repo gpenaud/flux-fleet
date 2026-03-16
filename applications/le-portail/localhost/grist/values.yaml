@@ -18,9 +18,9 @@ spec:
           initialDelaySeconds: 10
     docWorker:
       replicas: 1
-      # useVolume:
-      #   enabled: true
-      #   storageSize: "10Gi"
+      useVolume:
+        enabled: true
+        storageSize: "10Gi"
       probes:
         liveness:
           path: /status?db=1&docWorkerRegistered=1
@@ -28,9 +28,6 @@ spec:
         startup:
           path: /status?db=1&docWorkerRegistered=1
           initialDelaySeconds: 10
-    persistence:
-      enabled: true
-      existingClaim: le-portail-grist
     ingress:
       enabled: true
       className: traefik
