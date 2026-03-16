@@ -18,8 +18,7 @@ spec:
   releaseName: grist
   chart:
     spec:
-      chart: charts/grist 
-      version: "0.0.5"
+      chart: charts/grist
       sourceRef:
         kind: GitRepository
         name: dirnum-forked
