@@ -23,7 +23,7 @@ spec:
         kind: GitRepository
         name: dirnum-forked
   interval: 5m
-  timeout: 1m
+  timeout: 3m
   install:
     remediation:
       retries: 3
