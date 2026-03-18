@@ -7,7 +7,6 @@ patches:
   - target: 
       kind: Secret
       name: mkcert-ca
-      namespace: kube-system
     patch: |
       - op: add
         path: /spec/metadata/annotations
