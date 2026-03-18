@@ -3,7 +3,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: traefik
-  namespace: kube-system
+  namespace: controller-traefik
 spec:
   interval: 24h
   url: oci://ghcr.io/traefik/helm/traefik
@@ -18,13 +18,14 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: traefik
-  namespace: kube-system
+  namespace: controller-traefik
 spec:
   interval: 5m
   timeout: 5m
   chartRef:
     kind: OCIRepository
     name: traefik
+    namespace: controller-traefik
   install:
     remediation:
       retries: 3
