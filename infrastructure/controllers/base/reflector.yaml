@@ -40,16 +40,3 @@ spec:
     crds: CreateReplace
   values:
     replicaCount: 1
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: ClusterRole
-              name: reflector
-            patch: |
-              - op: add
-                path: /rules/0/verbs/-
-                value: create
-              - op: add
-                path: /rules/0/verbs/-
-                value: patch
