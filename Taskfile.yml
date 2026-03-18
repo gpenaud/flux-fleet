@@ -1,0 +1,12 @@
+version: '3'
+
+includes:
+  backup:
+    taskfile: ./tasks/backup.yml
+    # dir: ./tasks
+    # optional: true
+
+  reconcile:
+    taskfile: ./tasks/reconcile.yml
+    # dir: ./tasks
+    # optional: true

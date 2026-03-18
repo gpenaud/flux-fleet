@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  source:
+    desc: Reconcile source flux-system
+    cmds:
+      - flux -n flux-system reconcile source git flux-system
+    silent: true
+
+  kustomization:applications:
+    desc: Reconcile sources, then applications
+    cmds:
+      - task reconcile:source
+      - flux -n flux-system reconcile kustomization applications
+    silent: true
