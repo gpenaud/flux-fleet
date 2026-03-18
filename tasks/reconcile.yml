@@ -7,6 +7,28 @@ tasks:
       - flux -n flux-system reconcile source git flux-system
     silent: true
 
+  kustomization:infrastructure:configurations:
+    desc: Reconcile sources, then infrastructure-configurations
+    cmds:
+      - task reconcile:source
+      - flux -n flux-system reconcile kustomization infrastructure-configurations
+    silent: true
+
+  kustomization:infrastructure:controllers:
+    desc: Reconcile sources, then infrastructure-controllers
+    cmds:
+      - task reconcile:source
+      - flux -n flux-system reconcile kustomization infrastructure-controllers
+    silent: true
+
+  kustomization:infrastructure:
+    desc: Reconcile sources, then infrastructure
+    cmds:
+      - task: source
+      - task: kustomization:infrastructure:controllers
+      - task: kustomization:infrastructure:configurations
+    silent: true
+
   kustomization:applications:
     desc: Reconcile sources, then applications
     cmds:

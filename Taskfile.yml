@@ -1,6 +1,11 @@
 version: '3'
 
 includes:
+  cluster:
+    taskfile: ./tasks/cluster.yml
+    # dir: ./tasks
+    # optional: true
+
   backup:
     taskfile: ./tasks/backup.yml
     # dir: ./tasks

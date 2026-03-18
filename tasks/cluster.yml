@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  recreate:
+    desc: Force k3s redployment with flux
+    cmds:
+      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook ${ANSIBLE_PATH}/playbooks/install-k3s-with-flux.yml'
+    silent: true
