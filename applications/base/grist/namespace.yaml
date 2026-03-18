@@ -7,3 +7,4 @@ metadata:
     alter-it.org/tenant: "${TENANT}"
     alter-it.org/app: "grist"
     alter-it.org/managed-by: "fluxcd"
+    reflector-s3-ovh: "true"

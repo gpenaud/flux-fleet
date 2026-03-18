@@ -7,3 +7,4 @@ metadata:
     alter-it.org/tenant: "le-portail"
     alter-it.org/app: "wordpress"
     alter-it.org/managed-by: "fluxcd"
+    reflector-s3-ovh: "true"
