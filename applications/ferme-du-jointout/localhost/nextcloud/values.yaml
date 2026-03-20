@@ -12,8 +12,11 @@ spec:
       host: nextcloud-mariadb.ferme-du-jointout-nextcloud.svc.cluster.local
       database: nextcloud
       user: nextcloud
-      existingSecret: nextcloud
-      existingSecretPasswordKey: mariadb-password
+      password: ""
+      existingSecret: 
+        enabled: true
+        secretName: nextcloud
+        passwordKey: mariadb-password
     mariadb:
       enabled: true
       auth:
