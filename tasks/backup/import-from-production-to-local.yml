@@ -91,6 +91,41 @@ tasks:
         root@ns381126.ip-5-196-71.eu:/home/owncloud/data/ \
         ./owncloud_data_backup/
 
+  le-portail:dolibarr:
+    desc: Backup le-portail dolibarr from production to local
+    silent: true
+    cmds:
+      - |
+          kubectl --context le-portail exec sts/dolibarr-database -c dolibarr -- \
+            sh -c 'mariadb-dump -u dolibarr -p"***REMOVED***" dolibarr --single-transaction --disable-keys --no-tablespaces > /tmp/backup.sql'
+      - |
+          kubectl --context le-portail cp -c dolibarr --retries=-1 \
+            $(kubectl --context le-portail get pods -l app=dolibarr-database -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.sql \
+            ~/work/backups/le-portail-dolibarr.sql
+      - |
+          kubectl --context le-portail exec sts/dolibarr-database -c dolibarr -- \
+            rm /tmp/backup.sql
+      - |
+          kubectl --context le-portail exec -i deploy/dolibarr -c dolibarr -- \
+            tar -czvf - -C /var/www/ documents html/custom/ html/conf/conf.php\
+            > ~/work/backups/le-portail-dolibarr.tgz
+      - |
+        sed -i '23s/^/SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";\n/' ~/work/backups/le-portail-dolibarr.sql
+        sed -i '26s/^/DROP TABLE IF EXISTS `llx_accounting_system`;\n/' ~/work/backups/le-portail-dolibarr.sql
+        sed -i '3603s/,$//' ~/work/backups/le-portail-dolibarr.sql
+        sed -i '3604d' ~/work/backups/le-portail-dolibarr.sql
+        kubectl --context local -n le-portail-dolibarr exec -i statefulsets/dolibarr-mariadb -c mariadb -- bash -c '\
+          mariadb -u ${MARIADB_USER} -p$(cat ${MARIADB_PASSWORD_FILE}) ${MARIADB_DATABASE}' < ~/work/backups/le-portail-dolibarr.sql
+      - kubectl --context local -n le-portail-dolibarr cp  ~/work/backups/le-portail-dolibarr.tgz $(kubectl --context local -n le-portail-dolibarr get pods -l  app.kubernetes.io/name=dolibarr -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.tgz
+      - |
+        kubectl --context local -n le-portail-dolibarr exec deploy/dolibarr -- sh -c '\
+          mv /var/www/html/conf/conf.php /tmp/conf.php &&
+          tar -C /var/www/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          mv /tmp/conf.php /var/www/html/conf/conf.php && 
+          rm /tmp/backup.tgz
+          rm /var/www/documents/install.lock
+        '
+
   ferme-du-jointout:owncloud:upload:
     desc: Upload owncloud from production to local
     cmds:
@@ -111,7 +146,7 @@ tasks:
           --namespace=ferme-du-jointout-nextcloud \
           --overrides='{
             "spec": {
-              "volumes": [{"name":"data","persistentVolumeClaim":{"claimName":"nextcloud-nextcloud"}}],
+              "volumes": [{"name":"data","persistentVolumeClaim":statefulsets/dolibarr-mariadb{"claimName":"nextcloud-nextcloud"}}],
               "containers": [{
                 "name": "rsync-upload",
                 "image": "instrumentisto/rsync-ssh",
@@ -125,7 +160,7 @@ tasks:
         sleep 15 # Attendre que le pod soit prêt
         for user in gaec viti youte cfppa; do
           kubectl --context local -n ferme-du-jointout-nextcloud exec rsync-upload -- mkdir -p /data/data/$user/files
-          kubectl --context local -n ferme-du-jointout-nextcloud cp ./owncloud_data_backup/$user/files/. \
+          kubectl --context local -n ferme-du-jointout-nextcloud cp ~/work/backups/owncloud_data_backup/$user/files/. \
             rsync-upload:/data/data/$user/files/
         done
         kubectl --context local -n ferme-du-jointout-nextcloud exec rsync-upload -- chown -R 33:33 /data/data/
