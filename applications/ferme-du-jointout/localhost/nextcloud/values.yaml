@@ -10,7 +10,6 @@ spec:
         database: nextcloud
         username: nextcloud
         password: ""
-        rootPassword: ""
     persistence:
       enabled: true
       storageClass: "local-path"
@@ -52,7 +51,3 @@ spec:
       name: nextcloud
       valuesKey: mariadb-password
       targetPath: mariadb.auth.password
-    - kind: Secret
-      name: nextcloud
-      valuesKey: mariadb-root-password
-      targetPath: mariadb.auth.rootPassword
