@@ -11,11 +11,12 @@ spec:
       type: mysql
       host: nextcloud-mariadb.ferme-du-jointout-nextcloud.svc.cluster.local
       database: nextcloud
-      user: nextcloud
+      user: ""
       password: ""
       existingSecret: 
         enabled: true
         secretName: nextcloud
+        usernameKey: mariadb-username
         passwordKey: mariadb-password
     mariadb:
       enabled: true
