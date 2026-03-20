@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - le-portail/sync.yaml
   - la-bergeronnette/sync.yaml
+  - ferme-du-jointout/sync.yaml
