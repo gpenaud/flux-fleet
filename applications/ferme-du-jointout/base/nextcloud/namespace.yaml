@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${TENANT}-nextcloud
+  labels:
+    alter-it.org/tenant: ${TENANT}
+    alter-it.org/app: nextcloud
+    alter-it.org/managed-by: fluxcd
+    reflector-s3-ovh: "true"
