@@ -1,0 +1,138 @@
+version: '3'
+
+vars:
+  LE_PORTAIL_PATH: applications/le-portail/localhost
+
+tasks:
+  le-portail:alterconso:
+    desc: Backup & import alterconso from production to local
+    vars:
+      MYSQL_USER:
+        sh: sops -d "{{.LE_PORTAIL_PATH}}/alterconso/secrets.enc.yaml" | yq '.stringData.MYSQL_USER'
+      MYSQL_PASSWORD:
+        sh: sops -d "{{.LE_PORTAIL_PATH}}/alterconso/secrets.enc.yaml" | yq '.stringData.MYSQL_PASSWORD'
+      MYSQL_ROOT_PASSWORD:
+        sh: sops -d "{{.LE_PORTAIL_PATH}}/alterconso/secrets.enc.yaml" | yq '.stringData.MYSQL_ROOT_PASSWORD'
+      MYSQL_DATABASE:
+        sh: sops -d "{{.LE_PORTAIL_PATH}}/alterconso/secrets.enc.yaml" | yq '.stringData.MYSQL_DATABASE'
+    cmds:
+      - |
+        kubectl --context le-portail exec statefulsets/alterconso-database -- \
+          sh -c 'mysqldump --hex-blob --no-tablespaces -u root -p"{{.MYSQL_ROOT_PASSWORD}}" {{.MYSQL_DATABASE}} \
+          > /tmp/backup.sql'
+      - kubectl --context le-portail cp --retries=-1 alterconso-database-0:/tmp/backup.sql ./alterconso-last-backup-from-production.sql
+      - |
+        kubectl --context local --namespace le-portail-alterconso exec -i statefulsets/alterconso-database -- \
+          mysql -u {{.MYSQL_USER}} -p{{.MYSQL_PASSWORD}} --binary-mode \
+          --max_allowed_packet=64M {{.MYSQL_DATABASE}} < ./alterconso-last-backup-from-production.sql
+    silent: true
+
+  .wordpress:
+    internal: true
+    silent: true
+    desc: Backup & import wordpress from production to local
+    vars:
+      SOURCE_WP_POD:
+        sh: kubectl --context le-portail get pod -l app.kubernetes.io/name={{.APPLICATION}} -o jsonpath="{.items[0].metadata.name}"
+      SOURCE_DB_POD:
+        sh: kubectl --context le-portail get pod -l app={{.APPLICATION}}-database -o jsonpath="{.items[0].metadata.name}"
+      DB_SECRET:
+        sh: kubectl --context le-portail get secret --namespace default {{.APPLICATION}}-database -o jsonpath="{.data.MARIADB_PASSWORD}" | base64 --decode
+      LOCAL_WP_POD:
+        sh: kubectl --context local --namespace {{.DEST_NAMESPACE}} get pod -l app.kubernetes.io/name=wordpress -o jsonpath="{.items[0].metadata.name}"
+    cmds:
+      - |
+        echo "Backup mysql..."
+        kubectl --context le-portail exec {{.SOURCE_DB_POD}} -- sh -c 'mariadb-dump -u wordpress -p"{{.DB_SECRET}}" wordpress > /tmp/backup.sql'
+        kubectl --context le-portail cp --retries=-1 {{.SOURCE_DB_POD}}:/tmp/backup.sql ./backup.sql
+        kubectl --context le-portail exec {{.SOURCE_DB_POD}} -- rm /tmp/backup.sql
+      - |
+        echo "Backup wordpress data..."
+        WORDPRESS_POD_NAME=$(kubectl --context le-portail get pod -l app.kubernetes.io/instance={{.APPLICATION}} -o jsonpath="{.items[0].metadata.name}")
+        kubectl --context le-portail exec -i "${WORDPRESS_POD_NAME}" -- tar -C /var/www/html/ -czvf - . > ./backups-data.tgz
+      - |
+        echo "Restore mysql..."
+        kubectl --context local --namespace {{.DEST_NAMESPACE}} exec -i statefulsets/wordpress-mariadb -c mariadb -- mariadb -u bn_wordpress -p{{.MYSQL_PASSWORD}} bitnami_wordpress < "./backup.sql"
+      - |
+        echo "Restore wordpress data..."
+        kubectl --context local --namespace {{.DEST_NAMESPACE}} cp ./backups-data.tgz {{.LOCAL_WP_POD}}:/tmp/backup.tgz -c wordpress
+      - |
+        kubectl --context local --namespace {{.DEST_NAMESPACE}} exec -i {{.LOCAL_WP_POD}} -c wordpress -- bash -c "
+          mv /bitnami/wordpress/wp-config.php /tmp/wp-config.php && 
+          tar -C /bitnami/wordpress/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          mv /tmp/wp-config.php /bitnami/wordpress/wp-config.php &&
+          rm /tmp/backup.tgz
+        "
+      - |
+        echo "Cleaning up local backup files..."
+        rm ./backup.sql ./backups-data.tgz
+
+  le-portail:ecolieu:
+    desc: Backup & import ecolieu wordpress from production to local
+    cmds:
+      - task: .wordpress
+        vars:
+          APPLICATION: wordpress-le-portail
+          DEST_NAMESPACE: le-portail-ecolieu
+          MYSQL_PASSWORD:
+            sh: sops -d "{{.LE_PORTAIL_PATH}}/ecolieu/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+
+  ferme-du-jointout:owncloud:backup:
+    desc: Upload owncloud from production to local
+    cmds:
+      - |
+        rsync -avz --progress \
+          --exclude="*/files_trashbin/" \
+          --exclude="*/files_versions/" \
+          --exclude="updater-data/" \
+          --exclude="owncloud.log" \
+          --exclude="update.log" \
+          --exclude="ppam/" \
+        root@ns381126.ip-5-196-71.eu:/home/owncloud/data/ \
+        ./owncloud_data_backup/
+
+  ferme-du-jointout:owncloud:upload:
+    desc: Upload owncloud from production to local
+    cmds:
+      - |
+        kubectl --context local --namespace ferme-du-jointout-nextcloud  exec deploy/nextcloud -- sh -c '\
+          php occ config:system:set password_policy.enforceNonCommonPassword --value=false --type=bool &&
+          php occ config:system:set password_policy.minLength --value=1 --type=integer &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="gaec" --password-from-env "gaec" &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="viti" --password-from-env "viti" &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="youte" --password-from-env "youte" &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="cfppa" --password-from-env "cfppa" &&
+          php occ config:system:set password_policy.enforceNonCommonPassword --value=true --type=bool &&
+          php occ config:system:set password_policy.minLength --value=10 --type=integer
+        '
+      - |  
+        kubectl run rsync-upload \
+          --image=instrumentisto/rsync-ssh \
+          --namespace=ferme-du-jointout-nextcloud \
+          --overrides='{
+            "spec": {
+              "volumes": [{"name":"data","persistentVolumeClaim":{"claimName":"nextcloud-nextcloud"}}],
+              "containers": [{
+                "name": "rsync-upload",
+                "image": "instrumentisto/rsync-ssh",
+                "command": ["tail","-f","/dev/null"],
+                "volumeMounts": [{"mountPath":"/data","name":"data"}]
+              }]
+            }
+          }'
+      - |
+        # Copier les fichiers de chaque utilisateur
+        sleep 15 # Attendre que le pod soit prêt
+        for user in gaec viti youte cfppa; do
+          kubectl --context local -n ferme-du-jointout-nextcloud exec rsync-upload -- mkdir -p /data/data/$user/files
+          kubectl --context local -n ferme-du-jointout-nextcloud cp ./owncloud_data_backup/$user/files/. \
+            rsync-upload:/data/data/$user/files/
+        done
+        kubectl --context local -n ferme-du-jointout-nextcloud exec rsync-upload -- chown -R 33:33 /data/data/
+      - |
+        # Supprimer le pod temporaire
+        kubectl delete pod rsync-upload -n ferme-du-jointout-nextcloud &
+      - |
+        # Scanner les fichiers
+        kubectl exec -it -n ferme-du-jointout-nextcloud deploy/nextcloud -- \
+          php occ files:scan --all
