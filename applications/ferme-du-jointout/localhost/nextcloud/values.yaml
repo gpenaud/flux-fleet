@@ -11,11 +11,6 @@ spec:
         username: nextcloud
         password: ""
         rootPassword: ""
-      primary:
-        persistence:
-          enabled: true
-          storageClass: "local-path"
-          size: 20Gi
     persistence:
       enabled: true
       storageClass: "local-path"
