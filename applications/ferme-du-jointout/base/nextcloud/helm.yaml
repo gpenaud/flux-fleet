@@ -5,7 +5,7 @@ metadata:
   name: nextcloud
 spec:
   interval: 5m
-  url: nextcloud https://nextcloud.github.io/helm/
+  url: https://nextcloud.github.io/helm/
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
