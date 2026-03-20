@@ -10,7 +10,7 @@ patches:
   - path: values.yaml
     target:
       kind: HelmRelease
-      name: ${TENANT}-nextcloud
+      name: nextcloud
   - target: 
       kind: Schedule
       name: nextcloud

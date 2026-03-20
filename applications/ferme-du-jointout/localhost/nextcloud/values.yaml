@@ -16,8 +16,6 @@ spec:
           enabled: true
           storageClass: "local-path"
           size: 20Gi
-    nextcloud:
-      datadir: /var/www/html/data
     persistence:
       enabled: true
       storageClass: "local-path"
@@ -25,6 +23,7 @@ spec:
       size: 10Gi
     nextcloud:
       host: nextcloud.gpenaud.localhost
+      datadir: /var/www/html/data
       # Important : trusted domains
       configs:
         custom.config.php: |-
