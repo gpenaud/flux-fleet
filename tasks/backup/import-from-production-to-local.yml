@@ -77,20 +77,6 @@ tasks:
           MYSQL_PASSWORD:
             sh: sops -d "{{.LE_PORTAIL_PATH}}/ecolieu/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
 
-  ferme-du-jointout:owncloud:backup:
-    desc: Upload owncloud from production to local
-    cmds:
-      - |
-        rsync -avz --progress \
-          --exclude="*/files_trashbin/" \
-          --exclude="*/files_versions/" \
-          --exclude="updater-data/" \
-          --exclude="owncloud.log" \
-          --exclude="update.log" \
-          --exclude="ppam/" \
-        root@ns381126.ip-5-196-71.eu:/home/owncloud/data/ \
-        ./owncloud_data_backup/
-
   le-portail:dolibarr:
     desc: Backup le-portail dolibarr from production to local
     silent: true
@@ -125,6 +111,67 @@ tasks:
           rm /tmp/backup.tgz
           rm /var/www/documents/install.lock
         '
+  ferme-du-jointout:dolibarr:
+    desc: Backup le-portail dolibarr from production to local
+    # silent: true
+    vars:
+      SSH_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.SSH_PASSWORD'
+      MYSQL_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.MYSQL_PASSWORD'
+    cmds:
+      # - |
+      #     sshpass -p "{{.SSH_PASSWORD}}" ssh root@ns381126.ip-5-196-71.eu \
+      #       "MYSQL_PWD='{{.MYSQL_PASSWORD}}' mysqldump -u root Dolibarr --single-transaction \
+      #         --disable-keys --no-tablespaces" > ~/work/backups/ferme-du-jointout-dolibarr.sql
+      # - |  
+      #     sshpass -p "{{.SSH_PASSWORD}}" ssh root@ns381126.ip-5-196-71.eu \
+      #       tar -czvf - -C /home/www/dolibarr documents htdocs/custom/ htdocs/conf/conf.php\
+      #       > ~/work/backups/ferme-du-jointout-dolibarr.tgz
+      - |
+        sed -i '23s/^/SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";\n/' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        sed -i '26s/^/DROP TABLE IF EXISTS `llx_accounting_system`;\n/' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        sed -i '3603s/,$//' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        sed -i '3604d' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        kubectl --context local -n ferme-du-jointout-dolibarr exec -i statefulsets/dolibarr-mariadb -c mariadb -- bash -c '\
+          mariadb -u ${MARIADB_USER} -p$(cat ${MARIADB_PASSWORD_FILE}) ${MARIADB_DATABASE}' < ~/work/backups/ferme-du-jointout-dolibarr.sql
+      # - kubectl --context local -n ferme-du-jointout-dolibarr cp  ~/work/backups/ferme-du-jointout-dolibarr.tgz $(kubectl --context local -n ferme-du-jointout-dolibarr get pods -l  app.kubernetes.io/name=dolibarr -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.tgz
+      - |
+        kubectl --context local -n ferme-du-jointout-dolibarr exec deploy/dolibarr -- sh -c '\
+          # mv /var/www/html/conf/conf.php /tmp/conf.php &&
+          # tar -C /var/www/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          # mv /tmp/conf.php /var/www/html/conf/conf.php && 
+          # rm /tmp/backup.tgz
+          rm /var/www/documents/install.lock
+        '
+
+  ferme-du-jointout:wordpress:update_user:
+    desc: Backup le-portail dolibarr from production to local
+    # silent: true
+    vars:
+      GAEC_WORDPRESS_USERNAME:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.GAEC_WORDPRESS_USERNAME'
+      GAEC_WORDPRESS_MD5_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.GAEC_WORDPRESS_MD5_PASSWORD'
+    cmds:
+      - |
+        kubectl --context local --namespace ferme-du-jointout-wordpress exec deploy/wordpress -- sh -c '\
+          php wp-cli.phar user update {{.GAEC_WORDPRESS_USERNAME}} --user_pass="test" --skip-email --allow-root
+        '
+
+  ferme-du-jointout:owncloud:backup:
+    desc: Upload owncloud from production to local
+    cmds:
+      - |
+        rsync -avz --progress \
+          --exclude="*/files_trashbin/" \
+          --exclude="*/files_versions/" \
+          --exclude="updater-data/" \
+          --exclude="owncloud.log" \
+          --exclude="update.log" \
+          --exclude="ppam/" \
+        root@ns381126.ip-5-196-71.eu:/home/owncloud/data/ \
+        ./owncloud_data_backup/
 
   ferme-du-jointout:owncloud:upload:
     desc: Upload owncloud from production to local

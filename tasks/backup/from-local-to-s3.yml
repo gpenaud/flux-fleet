@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  alterconso:
+    desc: Backup alterconso to S3
+    cmds:
+      - echo "TO_IMPLEMENT"
+    silent: true

@@ -10,3 +10,8 @@
 **/secrets.yaml
 **/secrets/*.yaml
 !**/secrets/*.enc.yaml
+
+# backup files
+# ------------------------------------------------------------------------------
+
+owncloud*

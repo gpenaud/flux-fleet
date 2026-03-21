@@ -1,0 +1,21 @@
+version: '3'
+
+vars:
+  HOSTNAME: "srv521992.hstgr.cloud"
+
+tasks:
+  vps:snapshot:
+    desc: Create a VPS snapshot
+    cmds:
+      - |
+        echo "⚠️ Cette opération va écraser le snapshot existant."
+        echo "Tapez exactement 'je confirme' pour continuer :"
+        read CONFIRMATION
+        if [ "$CONFIRMATION" != "je confirme" ]; then
+          echo "❌ Confirmation incorrecte. Opération annulée."
+          exit 1
+        fi
+        echo "✅ Confirmation acceptée. Création du snapshot..."
+        VM_ID=$(hapi vps vm list --format json | jq -r '.[] | select(.hostname == "{{.HOSTNAME}}") | .id')
+        hapi vps snapshots create ${VM_ID}
+    silent: true

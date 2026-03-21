@@ -8,3 +8,6 @@ creation_rules:
   - path_regex: infrastructure/secrets/.*\.yaml$
     encrypted_regex: ^(data|stringData)$
     age: age126qcg2kflqz4tdw3humcl6a0ddp8e685lqst6pattugtrwj57ehqma5dnu
+
+  - path_regex: tasks/.*\.yaml$
+    age: age126qcg2kflqz4tdw3humcl6a0ddp8e685lqst6pattugtrwj57ehqma5dnu
