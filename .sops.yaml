@@ -1,13 +1,21 @@
 # .sops.yaml
 creation_rules:
   # Règle spécifique par environnement
-  - path_regex: applications/.*/localhost/.*/.*\.yaml$
+  - path_regex: .*localhost.*/secrets\.yaml$
     encrypted_regex: ^(data|stringData)$
     age: age126qcg2kflqz4tdw3humcl6a0ddp8e685lqst6pattugtrwj57ehqma5dnu
 
-  - path_regex: infrastructure/secrets/.*\.yaml$
+  - path_regex: .*production.*/secrets\.yaml$
     encrypted_regex: ^(data|stringData)$
-    age: age126qcg2kflqz4tdw3humcl6a0ddp8e685lqst6pattugtrwj57ehqma5dnu
+    age: age1jhryunagv39ar3p9x4zcssh26qnyeqsfurjrjnn59y0g949sc9ms34ljlp
+
+  - path_regex: .*base.*/secrets/.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    key_groups:
+      - age:
+          - age126qcg2kflqz4tdw3humcl6a0ddp8e685lqst6pattugtrwj57ehqma5dnu
+          - age1jhryunagv39ar3p9x4zcssh26qnyeqsfurjrjnn59y0g949sc9ms34ljlp
 
   - path_regex: tasks/.*\.yaml$
     age: age126qcg2kflqz4tdw3humcl6a0ddp8e685lqst6pattugtrwj57ehqma5dnu
+
