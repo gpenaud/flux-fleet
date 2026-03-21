@@ -1,7 +1,7 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: le-portail-gaec
+namespace: ferme-du-jointout-gaec
 resources:
   - ../../../base/wordpress/
   - secrets.enc.yaml
@@ -13,21 +13,21 @@ patches:
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-gaec
+        value: ferme-du-jointout-gaec
   - target:
       kind: HelmRelease
-      name: le-portail-gaec
+      name: ferme-du-jointout-gaec
     path: values.yaml
   - target:
       kind: Namespace
-      name: le-portail-wordpress
+      name: ferme-du-jointout-wordpress
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-gaec
+        value: ferme-du-jointout-gaec
   - target:
       kind: Schedule
-      name: le-portail
+      name: ferme-du-jointout
     patch: |
       - op: replace
         path: /metadata/name

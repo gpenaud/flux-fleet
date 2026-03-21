@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: le-portail-gaec
+  name: ferme-du-jointout-gaec
 spec:
   values:
     wordpressUsername: ""
@@ -12,10 +12,10 @@ spec:
       auth:
         existingSecret: gaec-mariadb
     externalDatabase:
-      host: wordpress-mariadb-0.le-portail-gaec.svc.cluster.local
+      host: wordpress-mariadb-0.ferme-du-jointout-gaec.svc.cluster.local
       port: 3306
-      user: le-portail
-      database: le-portail
+      user: ferme-du-jointout
+      database: ferme-du-jointout
       existingSecret: gaec-wordpress
       existingSecretPasswordKey: WORDPRESS_DATABASE_PASSWORD
     wordpressPlugins: []
@@ -24,14 +24,14 @@ spec:
     ingress:
       enabled: true
       ingressClassName: traefik
-      hostname: le-portail.gpenaud.localhost
+      hostname: ferme-du-jointout.gpenaud.localhost
       annotations:
         kubernetes.io/ingress.class: traefik
         cert-manager.io/cluster-issuer: mkcert-issuer
       extraTls:
         - hosts:
-            - le-portail.gpenaud.localhost
-          secretName: le-portail.gpenaud.localhost-tls
+            - ferme-du-jointout.gpenaud.localhost
+          secretName: ferme-du-jointout.gpenaud.localhost-tls
   valuesFrom:
     - kind: Secret
       name: gaec
