@@ -26,3 +26,6 @@ spec:
     groupName: acme.alter-it.org
     certManager:
       namespace: controller-cert-manager
+      serviceAccountName: cert-manager
+    rbac:
+      roleType: ClusterRole
