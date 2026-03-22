@@ -9,7 +9,7 @@ spec:
         version: 1.0.6 # {"$imagepolicy": "alterconso:alterconso:tag"}
       ingress:
         annotations:
-          cert-manager.io/cluster-issuer: "mkcert-issuer"
+          cert-manager.io/cluster-issuer: "letsencrypt-staging"
         hosts:
           - name: alterconso.gpenaud.localhost
             path: /
@@ -20,17 +20,9 @@ spec:
         k8up.io/backupcommand: mysqldump --hex-blob --no-tablespaces -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
         k8up.io/file-extension: .sql
       persistentVolume:
-        backup: true
-        local:
-          path: /mnt/k3s/alterconso
-        nodeAffinity:
-          required:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - work
+        storageClass: longhorn
+        capacity:
+          storage: 2Gi
   valuesFrom:
     - kind: Secret
       name: alterconso
