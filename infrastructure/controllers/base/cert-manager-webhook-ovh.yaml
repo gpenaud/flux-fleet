@@ -26,3 +26,40 @@ spec:
     groupName: acme.alter-it.org
     certManager:
       namespace: controller-cert-manager
+    issuers:
+      - name: letsencrypt-staging
+        create: true
+        kind: ClusterIssuer
+        namespace: default
+        cnameStrategy: None
+        acmeServerUrl: https://acme-staging-v02.api.letsencrypt.org/directory
+        email: ops.gpenaud@gmail.com
+        ovhEndpointName: ovh-eu
+        ovhAuthenticationRef:
+          applicationKeyRef:
+            name: dns-ovh
+            key: applicationKey
+          applicationSecretRef:
+            name: dns-ovh
+            key: applicationSecret
+          consumerKeyRef:
+            name: dns-ovh
+            key: consumerKey
+      - name: letsencrypt-production
+        create: true
+        kind: ClusterIssuer
+        namespace: default
+        cnameStrategy: None
+        acmeServerUrl: https://acme-v02.api.letsencrypt.org/directory
+        email: ops.gpenaud@gmail.com
+        ovhEndpointName: ovh-eu
+        ovhAuthenticationRef:
+          applicationKeyRef:
+            name: dns-ovh
+            key: applicationKey
+          applicationSecretRef:
+            name: dns-ovh
+            key: applicationSecret
+          consumerKeyRef:
+            name: dns-ovh
+            key: consumerKey
