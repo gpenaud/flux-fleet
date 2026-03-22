@@ -14,8 +14,8 @@ spec:
     externalDatabase:
       host: wordpress-mariadb-0.le-portail-wordpress-ecolieu.svc.cluster.local
       port: 3306
-      user: le-portail
-      database: le-portail
+      user: bn_wordpress
+      database: bitnami_wordpress
       existingSecret: wordpress-ecolieu-wordpress
       existingSecretPasswordKey: WORDPRESS_DATABASE_PASSWORD
     wordpressPlugins: []
