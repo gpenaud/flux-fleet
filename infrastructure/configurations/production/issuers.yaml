@@ -23,15 +23,16 @@ spec:
             solverName: ovh
             config:
               endpoint: ovh-eu
+              ovhAuthenticationMethod: application
               applicationKeyRef:
                 name: dns-ovh
                 key: applicationKey
               applicationSecretRef:
                 name: dns-ovh
                 key: applicationSecret
-              consumerKeyRef:
+              applicationConsumerKeyRef:
                 name: dns-ovh
-                key: consumerKey
+                key: applicationConsumerKey
         selector:
           dnsZones:
             - "leportail.org"
@@ -67,15 +68,16 @@ spec:
             solverName: ovh
             config:
               endpoint: ovh-eu
+              ovhAuthenticationMethod: application
               applicationKeyRef:
                 name: dns-ovh
                 key: applicationKey
               applicationSecretRef:
                 name: dns-ovh
                 key: applicationSecret
-              consumerKeyRef:
+              applicationConsumerKeyRef:
                 name: dns-ovh
-                key: consumerKey
+                key: applicationConsumerKey
         selector:
           dnsZones:
             - "leportail.org"
