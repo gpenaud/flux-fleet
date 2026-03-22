@@ -10,6 +10,7 @@
 **/secrets.yaml
 **/secrets/*.yaml
 !**/secrets/*.enc.yaml
+!**/secrets/kustomization.yaml
 
 # backup files
 # ------------------------------------------------------------------------------
