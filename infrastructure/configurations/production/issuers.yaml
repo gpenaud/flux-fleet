@@ -23,7 +23,6 @@ spec:
             solverName: ovh
             config:
               endpoint: ovh-eu
-              authMethod: application
               applicationKeyRef:
                 name: dns-ovh
                 key: applicationKey
@@ -68,7 +67,6 @@ spec:
             solverName: ovh
             config:
               endpoint: ovh-eu
-              authMethod: application
               applicationKeyRef:
                 name: dns-ovh
                 key: applicationKey
