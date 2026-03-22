@@ -39,7 +39,8 @@ spec:
       disableScheduledBackup: true
     persistence:
       defaultClass: true
-      defaultClassReplicaCount: 1       
+      defaultClassReplicaCount: 1
+      defaultFsType: xfs      
     ingress:
       enabled: true
       ingressClassName: traefik
