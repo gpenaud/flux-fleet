@@ -25,13 +25,13 @@ spec:
               endpoint: ovh-eu
               authMethod: application
               applicationKeyRef:
-                name: ovh-credentials
+                name: dns-ovh
                 key: applicationKey
               applicationSecretRef:
-                name: ovh-credentials
+                name: dns-ovh
                 key: applicationSecret
               consumerKeyRef:
-                name: ovh-credentials
+                name: dns-ovh
                 key: consumerKey
         selector:
           dnsZones:
@@ -70,13 +70,13 @@ spec:
               endpoint: ovh-eu
               authMethod: application
               applicationKeyRef:
-                name: ovh-credentials
+                name: dns-ovh
                 key: applicationKey
               applicationSecretRef:
-                name: ovh-credentials
+                name: dns-ovh
                 key: applicationSecret
               consumerKeyRef:
-                name: ovh-credentials
+                name: dns-ovh
                 key: consumerKey
         selector:
           dnsZones:
