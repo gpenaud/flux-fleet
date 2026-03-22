@@ -4,6 +4,7 @@ includes:
   infrastructure: ./tasks/infrastructure.yml
   cluster:   ./tasks/cluster.yml
   reconcile: ./tasks/reconcile.yml
-  backup:import-from-production-to-local: ./tasks/backup/import-from-production-to-local.yml
+  backup:import-from-le-portail-to-local: ./tasks/backup/import-from-le-portail-to-local.yml
+  backup:import-from-le-portail-to-production: ./tasks/backup/import-from-le-portail-to-production.yml
   backup:from-local-to-s3: ./tasks/backup/from-local-to-s3.yml
 

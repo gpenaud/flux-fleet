@@ -4,21 +4,23 @@ tasks:
   source:
     desc: Reconcile source flux-system
     cmds:
-      - flux -n flux-system reconcile source git flux-system
+      - flux --context production -n flux-system reconcile source git flux-system
     silent: true
 
   kustomization:infrastructure:configurations:
     desc: Reconcile sources, then infrastructure-configurations
     cmds:
       - task reconcile:source
-      - flux -n flux-system reconcile kustomization infrastructure-configurations
+      - flux -n flux-system suspend kustomization infrastructure-configurations
+      - flux -n flux-system resume kustomization infrastructure-configurations
     silent: true
 
   kustomization:infrastructure:controllers:
     desc: Reconcile sources, then infrastructure-controllers
     cmds:
       - task reconcile:source
-      - flux -n flux-system reconcile kustomization infrastructure-controllers
+      - flux -n flux-system suspend kustomization infrastructure-controllers
+      - flux -n flux-system resume kustomization infrastructure-controllers
     silent: true
 
   kustomization:infrastructure:
@@ -33,5 +35,48 @@ tasks:
     desc: Reconcile sources, then applications
     cmds:
       - task reconcile:source
-      - flux -n flux-system reconcile kustomization applications
+      - flux --context production -n flux-system reconcile kustomization applications
+    silent: true
+
+  helmrelease:controllers:cert-manager:
+    desc: Reconcile sources, then controller cert-manager
+    cmds:
+      - task reconcile:source
+      - flux suspend helmrelease cert-manager -n controller-cert-manager
+      - flux resume helmrelease cert-manager -n controller-cert-manager
+    silent: true
+
+  helmrelease:controllers:cert-manager-webhook-ovh:
+    desc: Reconcile sources, then controller cert-manager-webhook-ovh
+    cmds:
+      - task reconcile:source
+      # HelmRepositorys
+      - flux suspend source helm cert-manager-webhook-ovh -n controller-cert-manager
+      - flux resume source helm cert-manager-webhook-ovh -n controller-cert-manager
+      # HelmRelease
+      - flux suspend helmrelease cert-manager-webhook-ovh -n controller-cert-manager
+      # - kubectl delete secret -n controller-cert-manager -l owner=helm,name=cert-manager-webhook-ovh
+      - flux resume helmrelease cert-manager-webhook-ovh -n controller-cert-manager
+    silent: true
+
+  remove-challenges:
+    desc: Remove cert-manager challenges
+    cmds:
+      - |
+        #!/bin/bash
+        kubectl get challenges -n ferme-du-jointout-nextcloud -o json | \
+          jq -r '.items[] | select(.status.state == "pending") | .metadata.name' | \
+          while read name; do
+            echo "Suppression du challenge : $name"
+            kubectl delete challenge $name -n ferme-du-jointout-nextcloud &
+            kubectl patch challenge $name -n ferme-du-jointout-nextcloud \
+              -p '{"metadata":{"finalizers":[]}}' --type=merge
+          done
+  
+  helmrelease:applications:le-portail:alterconso:
+    desc: Reconcile sources, then application alterconso
+    cmds:
+      - task reconcile:source
+      - flux suspend helmrelease alterconso -n le-portail-alterconso
+      - flux resume helmrelease alterconso -n le-portail-alterconso
     silent: true

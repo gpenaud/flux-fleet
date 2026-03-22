@@ -1,10 +1,22 @@
 version: '3'
 
-vars:
-  HOSTNAME: "srv521992.hstgr.cloud"
-
 tasks:
   vps:snapshot:
+    desc: Create a VPS snapshot
+    cmds:
+      - task: .snapshot-vps
+        vars:
+          HOSTNAME: "srv1515851.hstgr.cloud"
+
+  vps:snapshot:old-vm:
+    desc: Create a VPS snapshot
+    cmds:
+      - task: .snapshot-vps
+        vars:
+          HOSTNAME: "srv521992.hstgr.cloud"
+
+  .snapshot-vps:
+    internal: true
     desc: Create a VPS snapshot
     cmds:
       - |
@@ -17,5 +29,6 @@ tasks:
         fi
         echo "✅ Confirmation acceptée. Création du snapshot..."
         VM_ID=$(hapi vps vm list --format json | jq -r '.[] | select(.hostname == "{{.HOSTNAME}}") | .id')
+        echo ${VM_ID}
         hapi vps snapshots create ${VM_ID}
     silent: true
