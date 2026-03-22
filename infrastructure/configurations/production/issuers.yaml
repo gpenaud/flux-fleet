@@ -17,9 +17,32 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
+      - dns01:
+          webhook:
+            groupName: acme.leportail.org
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              applicationKeyRef:
+                name: ovh-credentials
+                key: applicationKey
+              applicationSecretRef:
+                name: ovh-credentials
+                key: applicationSecret
+              consumerKeyRef:
+                name: ovh-credentials
+                key: consumerKey
+        selector:
+          dnsZones:
+            - "leportail.org"
+            - "labergeronnette.org"
       - http01:
           ingress:
             class: traefik
+        selector:
+            dnsZones:
+              - "fermedujointout.fr"
+            
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -38,6 +61,28 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-production
     solvers:
+      - dns01:
+          webhook:
+            groupName: acme.leportail.org
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              applicationKeyRef:
+                name: ovh-credentials
+                key: applicationKey
+              applicationSecretRef:
+                name: ovh-credentials
+                key: applicationSecret
+              consumerKeyRef:
+                name: ovh-credentials
+                key: consumerKey
+        selector:
+          dnsZones:
+            - "leportail.org"
+            - "labergeronnette.org"
       - http01:
           ingress:
             class: traefik
+        selector:
+            dnsZones:
+              - "fermedujointout.fr"
