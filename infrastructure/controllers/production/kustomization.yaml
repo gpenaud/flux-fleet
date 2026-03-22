@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - ../base
   - ../base/secrets
+  - traefik.yaml
   - longhorn.yaml
