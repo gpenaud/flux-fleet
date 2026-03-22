@@ -43,8 +43,8 @@ spec:
     ingress:
       enabled: true
       ingressClassName: traefik
-      host: longhorn.gpenaud.localhost
+      host: longhorn.leportail.org
       tls: true
-      tlsSecret: longhorn.gpenaud.localhost-tls
+      tlsSecret: longhorn.leportail.org-tls
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-staging

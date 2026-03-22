@@ -11,10 +11,10 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-staging"
         hosts:
-          - name: alterconso.gpenaud.localhost
+          - name: alterconso.leportail.org
             path: /
             tls: true
-      vhost: alterconso.gpenaud.localhost
+      vhost: alterconso.leportail.org
     database:
       annotations:
         k8up.io/backupcommand: mysqldump --hex-blob --no-tablespaces -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
