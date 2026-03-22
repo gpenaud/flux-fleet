@@ -4,6 +4,7 @@ metadata:
   name: cert-manager-webhook-ovh
   namespace: controller-cert-manager
 spec:
+  interval: 24h
   url: https://aureq.github.io/cert-manager-webhook-ovh
 
 ---
