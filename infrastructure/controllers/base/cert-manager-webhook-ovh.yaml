@@ -37,7 +37,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    resourceNames: ["dns-ovh"]
+    resourceNames: ["dns-ovh", "dns-ovh-ferme-du-jointout"]
     verbs: ["get", "list", "watch"]
 
 ---
