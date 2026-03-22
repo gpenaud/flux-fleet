@@ -9,7 +9,7 @@ spec:
         version: 1.0.6 # {"$imagepolicy": "alterconso:alterconso:tag"}
       ingress:
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-staging"
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
         hosts:
           - name: alterconso.leportail.org
             path: /

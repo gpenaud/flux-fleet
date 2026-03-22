@@ -59,7 +59,7 @@ spec:
       className: traefik
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: letsencrypt-staging
+        cert-manager.io/cluster-issuer: letsencrypt-production
         traefik.ingress.kubernetes.io/router.middlewares: le-portail-grist-grist-basic-auth@kubernetescrd
       hosts:
         - host: grist.leportail.org

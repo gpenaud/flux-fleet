@@ -50,7 +50,7 @@ spec:
       enabled: true
       className: traefik
       annotations:
-        cert-manager.io/cluster-issuer: "letsencrypt-staging"
+        cert-manager.io/cluster-issuer: "letsencrypt-production"
       hosts:
         - host: owncloud.fermedujointout.fr
           paths:
