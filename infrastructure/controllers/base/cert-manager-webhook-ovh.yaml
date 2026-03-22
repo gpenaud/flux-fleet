@@ -22,4 +22,3 @@ spec:
         namespace: controller-cert-manager
   values:
     groupName: acme.leportail.org
-    solverName: ovh
