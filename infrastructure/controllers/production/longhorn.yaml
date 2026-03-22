@@ -4,8 +4,7 @@ kind: Namespace
 metadata:
   name: controller-longhorn
 
----
-apiVersion: source.toolkit.fluxcd.io/v1
+---apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: longhorn
@@ -33,6 +32,13 @@ spec:
   values:
     defaultSettings:
       defaultDataPath: /var/lib/longhorn
+      backupTarget: ""
+      snapshotDataIntegrity: disabled
+      autoCleanupSystemGeneratedSnapshot: true
+      disableScheduledBackup: true
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 1       
     ingress:
       enabled: true
       ingressClassName: traefik
