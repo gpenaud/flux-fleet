@@ -27,7 +27,7 @@ spec:
       hostname: www.leportail.org
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: letyncrypt-production
+        cert-manager.io/cluster-issuer: letsencrypt-production
       extraTls:
         - hosts:
             - www.leportail.org
