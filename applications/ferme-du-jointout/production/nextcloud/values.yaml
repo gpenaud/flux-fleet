@@ -1,0 +1,67 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nextcloud
+spec:
+  values:
+    internalDatabase:
+      enabled: false
+    externalDatabase:
+      enabled: true
+      type: mysql
+      host: nextcloud-mariadb.ferme-du-jointout-nextcloud.svc.cluster.local
+      database: nextcloud
+      user: ""
+      password: ""
+      existingSecret: 
+        enabled: true
+        secretName: nextcloud
+        usernameKey: mariadb-username
+        passwordKey: mariadb-password
+    mariadb:
+      enabled: true
+      auth:
+        database: nextcloud
+        username: nextcloud
+        password: ""
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 30Gi
+    nextcloud:
+      host: owncloud.fermedujointout.fr
+      datadir: /var/www/html/data
+      # Important : trusted domains
+      configs:
+        custom.config.php: |-
+          <?php
+          $CONFIG = array(
+            'trusted_domains' => ['owncloud.fermedujointout.fr'],
+            'overwrite.cli.url' => 'https://owncloud.fermedujointout.fr',
+            'overwriteprotocol' => 'https',
+          );
+      existingSecret:
+        enabled: true
+        secretName: nextcloud
+        usernameKey: nextcloud-username
+        passwordKey: nextcloud-password
+    ingress:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-staging"
+      hosts:
+        - host: owncloud.fermedujointout.fr
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: owncloud.fermedujointout.fr
+          hosts:
+            - owncloud.fermedujointout.fr
+  valuesFrom:
+    - kind: Secret
+      name: nextcloud
+      valuesKey: mariadb-password
+      targetPath: mariadb.auth.password
