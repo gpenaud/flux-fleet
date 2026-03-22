@@ -6,7 +6,7 @@ spec:
   values:
     wordpressUsername: ""
     wordpressPassword: ""
-    wordpressEmail: dugrainamoudre@gmail.com
+    wordpressEmail: fermedujointout@gmail.com
     mariadb:
       enabled: true
       auth:
