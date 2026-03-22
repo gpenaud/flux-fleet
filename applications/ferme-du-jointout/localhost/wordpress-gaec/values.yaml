@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: ferme-du-jointout-gaec
+  name: ferme-du-jointout-wordpress-gaec
 spec:
   values:
     wordpressUsername: ""
@@ -10,13 +10,13 @@ spec:
     mariadb:
       enabled: true
       auth:
-        existingSecret: gaec-mariadb
+        existingSecret: wordpress-gaec-mariadb
     externalDatabase:
-      host: wordpress-mariadb-0.ferme-du-jointout-gaec.svc.cluster.local
+      host: wordpress-mariadb-0.ferme-du-jointout-wordpress-gaec.svc.cluster.local
       port: 3306
       user: ferme-du-jointout
       database: ferme-du-jointout
-      existingSecret: gaec-wordpress
+      existingSecret: wordpress-gaec-wordpress
       existingSecretPasswordKey: WORDPRESS_DATABASE_PASSWORD
     wordpressPlugins: []
     service:
@@ -34,10 +34,10 @@ spec:
           secretName: gaec.ferme-du-jointout.localhost-tls
   valuesFrom:
     - kind: Secret
-      name: gaec
+      name: wordpress-gaec
       valuesKey: WORDPRESS_USERNAME
       targetPath: wordpressUsername
     - kind: Secret
-      name: gaec
+      name: wordpress-gaec
       valuesKey: WORDPRESS_PASSWORD
       targetPath: wordpressPassword

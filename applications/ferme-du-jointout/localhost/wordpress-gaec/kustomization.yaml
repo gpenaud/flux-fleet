@@ -1,7 +1,7 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: ferme-du-jointout-gaec
+namespace: ferme-du-jointout-wordpress-gaec
 resources:
   - ../../../base/wordpress/
   - secrets.enc.yaml
@@ -13,10 +13,10 @@ patches:
     patch: |
       - op: replace
         path: /metadata/name
-        value: ferme-du-jointout-gaec
+        value: ferme-du-jointout-wordpress-gaec
   - target:
       kind: HelmRelease
-      name: ferme-du-jointout-gaec
+      name: ferme-du-jointout-wordpress-gaec
     path: values.yaml
   - target:
       kind: Namespace
@@ -24,7 +24,7 @@ patches:
     patch: |
       - op: replace
         path: /metadata/name
-        value: ferme-du-jointout-gaec
+        value: ferme-du-jointout-wordpress-gaec
   - target:
       kind: Schedule
       name: ferme-du-jointout
@@ -32,9 +32,9 @@ patches:
       - op: replace
         path: /metadata/name
         value:
-          name: gaec
+          name: wordpress-gaec
       - op: add
         path: /spec
         value:
           podConfigRef:
-            name: gaec
+            name: wordpress-gaec
