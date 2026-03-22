@@ -1,0 +1,50 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ferme-du-jointout-dolibarr
+spec:
+  values:
+    replicaCount: 1
+    image:
+      tag: 23.0.1
+    cron:
+      enabled: false
+    pdb:
+      create: false
+      minAvailable: 1
+      maxUnavailable:
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      pathType: Prefix
+      annotations:
+        kubernetes.io/ingress.class: traefik
+        cert-manager.io/cluster-issuer: letsencrypt-staging
+      hosts:
+        - host: compta.fermedujointout.fr
+          paths:
+            - /
+      tls:
+        - secretName: compta.fermedujointout.fr-tls
+          hosts:
+            - compta.fermedujointout.fr
+    persistence:
+      enabled: true
+      size: 5Gi
+    dolibarr:
+      admin:
+        username: ferme-du-jointout
+        password: "REPLACED"
+      externalUrl: https://compta.fermedujointout.fr
+      cron:
+        enabled: false
+
+    existingSecret: dolibarr-credentials
+    existingSecretKeyAdminPassword: dolibarr-admin-password
+    existingSecretKeyCronSecurityKey: dolibarr-cron-security-key
+    
+    mariadb:
+      auth:
+        database: ferme-du-jointout
+        username: ferme-du-jointout
+        existingSecret: dolibarr-mariadb
