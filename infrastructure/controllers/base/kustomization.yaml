@@ -4,4 +4,5 @@ resources:
   - capsule.yaml
   - reflector.yaml
   - cert-manager.yaml
+  - cert-manager-webhook-ovh.yaml
   - k8up.yaml
