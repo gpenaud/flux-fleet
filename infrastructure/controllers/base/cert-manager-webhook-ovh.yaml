@@ -24,3 +24,5 @@ spec:
         namespace: controller-cert-manager
   values:
     groupName: acme.alter-it.org
+    certManager:
+      namespace: controller-cert-manager
