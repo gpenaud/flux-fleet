@@ -19,7 +19,7 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: acme.leportail.org
+            groupName: acme.alter-it.org
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -63,7 +63,7 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: acme.leportail.org
+            groupName: acme.alter-it.org
             solverName: ovh
             config:
               endpoint: ovh-eu
