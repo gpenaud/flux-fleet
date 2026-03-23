@@ -7,14 +7,6 @@ spec:
     wordpressUsername: epilibres
     wordpressExistingSecret: wordpress
     wordpressEmail: epilibres.leportail.org
-    resourcesPreset: "none"
-    resources:
-      requests:
-        memory: 1Gi
-        cpu: 100m
-      limits:
-        memory: 2Gi
-        cpu: 1000m
     mariadb:
       enabled: false
     externalDatabase:
@@ -41,4 +33,23 @@ spec:
         - hosts:
             - epilibres.leportail.org
           secretName: epilibres.leportail.org-tls
+    resourcesPreset: "none"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+      limits:
+        cpu: 1500m
+        memory: 3Gi
+    initContainers: []
+    volumePermissions:
+      enabled: false
+      resourcesPreset: "none"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
 
