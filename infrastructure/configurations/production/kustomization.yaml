@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - cluster-issuers/letsencrypt-staging.yaml
   - cluster-issuers/letsencrypt-production.yaml
+  - mysql-servers/8_0.yaml
