@@ -14,7 +14,7 @@ spec:
       port: 3306
       user: ""
       database: ""
-      existingSecret: mariadb
+      existingSecret: wordpress
       existingSecretPasswordKey: mariadb-password
     wordpressPlugins: []
     service:
@@ -32,18 +32,22 @@ spec:
           secretName: www.leportail.org-tls
   valuesFrom:
     - kind: Secret
-      name: user
-      valuesKey: WORDPRESS_USERNAME
+      name: wordpress
+      valuesKey: wordpress-user
       targetPath: wordpressUsername
     - kind: Secret
-      name: user
-      valuesKey: WORDPRESS_PASSWORD
+      name: wordpress
+      valuesKey: wordpress-password
       targetPath: wordpressPassword
     - kind: Secret
-      name: mariadb
+      name: wordpress-ecolieu
       valuesKey: mariadb-user
       targetPath: externalDatabase.user
     - kind: Secret
-      name: mariadb
+      name: wordpress-ecolieu
       valuesKey: mariadb-password
       targetPath: externalDatabase.password
+    - kind: Secret
+      name: wordpress-ecolieu
+      valuesKey: mariadb-database
+      targetPath: externalDatabase.database
