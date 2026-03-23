@@ -37,6 +37,7 @@ spec:
                   name: mariadb
                   key: mariadb-database
           command:
+            - env
             - sh
             - -c
             - |
