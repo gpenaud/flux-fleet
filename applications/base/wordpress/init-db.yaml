@@ -40,13 +40,12 @@ spec:
             - sh
             - -c
             - |
-              env
-              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root \
-                -e "CREATE DATABASE IF NOT EXISTS \`${WORDPRESS_MYSQL_DATABASE}\`;"
-              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root \
+              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root -p"${MYSQL_PWD}" \
+                -e "CREATE DATABASE IF NOT EXISTS ${WORDPRESS_MYSQL_DATABASE};"
+              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root -p"${MYSQL_PWD}" \
                 -e "CREATE USER IF NOT EXISTS '${WORDPRESS_MYSQL_USER}'@'%' IDENTIFIED BY '${WORDPRESS_MYSQL_PASSWORD}';"
-              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root \
-                -e "GRANT ALL ON \`${WORDPRESS_MYSQL_DATABASE}\`.* TO '${WORDPRESS_MYSQL_USER}'@'%';"
-              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root \
+              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root -p"${MYSQL_PWD}" \
+                -e "GRANT ALL ON ${WORDPRESS_MYSQL_DATABASE}.* TO '${WORDPRESS_MYSQL_USER}'@'%';"
+              mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root -p"${MYSQL_PWD}" \
                 -e "FLUSH PRIVILEGES;"
       restartPolicy: OnFailure
