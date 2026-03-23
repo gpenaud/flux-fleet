@@ -1,0 +1,14 @@
+
+apiVersion: mysql.oracle.com/v2
+kind: InnoDBCluster
+metadata:
+  name: mysql-wordpress
+  namespace: controller-mysql-operator
+spec:
+  secretName: mysql-operator
+  instances: 1
+  tlsUseSelfSigned: true
+  version: "8.0"
+  edition: community
+  router:
+    instances: 1
