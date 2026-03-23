@@ -22,11 +22,15 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: bitnami
-  timeout: 30m
-  interval: 1m    # ← retente toutes les minutes
+  interval: 1m
   install:
     remediation:
-      retries: 10  # ← nombre de tentatives
+      retries: -1       # ← retente indéfiniment
   upgrade:
     remediation:
-      retries: 10
+      retries: -1
+      remediateLastFailure: true
+  rollback:
+    cleanupOnFail: true
+  uninstall:
+    keepHistory: false
