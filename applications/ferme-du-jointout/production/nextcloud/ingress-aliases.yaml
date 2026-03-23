@@ -10,20 +10,24 @@ spec:
   rules:
     - host: cloud.fermedujointout.fr
       http:
-          paths:
-          - backend:
-              service:
-                name: nextcloud
-                port:
-                  number: 8080
+        paths:
+        - backend:
+            service:
+              name: nextcloud
+              port:
+                number: 8080
+        path: /
+        pathType: Prefix
     - host: nextcloud.fermedujointout.fr
       http:
-          paths:
-          - backend:
-              service:
-                name: nextcloud
-                port:
-                  number: 8080
+        paths:
+        - backend:
+            service:
+              name: nextcloud
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
   tls:
     - secretName: nextcloud.fermedujointout.fr
       hosts:
