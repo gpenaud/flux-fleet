@@ -8,6 +8,8 @@ metadata:
 spec:
   template:
     spec:
+      ttlSecondsAfterFinished: 30
+      activeDeadlineSeconds: 90
       containers:
         - name: mysql-init
           image: mysql:8.4.3
