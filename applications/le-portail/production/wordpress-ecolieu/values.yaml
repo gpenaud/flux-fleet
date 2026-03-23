@@ -8,30 +8,28 @@ spec:
     wordpressPassword: ""
     wordpressEmail: dugrainamoudre@gmail.com
     mariadb:
-      enabled: true
-      auth:
-        existingSecret: mariadb
+      enabled: false
     externalDatabase:
       host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
       port: 3306
-      user: le-portail
-      database: le-portail
-      existingSecret: wordpress
-      existingSecretPasswordKey: WORDPRESS_DATABASE_PASSWORD
+      user: ""
+      database: ""
+      existingSecret: mariadb
+      existingSecretPasswordKey: mariadb-password
     wordpressPlugins: []
     service:
       type: ClusterIP
     ingress:
       enabled: true
       ingressClassName: traefik
-      hostname: le-portail.gpenaud.localhost
+      hostname: www.leportail.org
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: mkcert-issuer
+        cert-manager.io/cluster-issuer: letsencrypt-staging
       extraTls:
         - hosts:
-            - le-portail.gpenaud.localhost
-          secretName: le-portail.gpenaud.localhost-tls
+            - www.leportail.org
+          secretName: www.leportail.org-tls
   valuesFrom:
     - kind: Secret
       name: user
@@ -41,3 +39,11 @@ spec:
       name: user
       valuesKey: WORDPRESS_PASSWORD
       targetPath: wordpressPassword
+    - kind: Secret
+      name: mariadb
+      valuesKey: mariadb-user
+      targetPath: externalDatabase.user
+    - kind: Secret
+      name: mariadb
+      valuesKey: mariadb-password
+      targetPath: externalDatabase.password
