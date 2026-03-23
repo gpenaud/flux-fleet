@@ -5,7 +5,7 @@ metadata:
   name: controller-mysql-operator
 
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: mysql-operator
@@ -15,7 +15,7 @@ spec:
   url: https://mysql.github.io/mysql-operator/
 
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: mysql-operator
