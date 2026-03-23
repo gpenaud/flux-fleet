@@ -37,11 +37,7 @@ spec:
         custom.config.php: |-
           <?php
           $CONFIG = array(
-            'trusted_domains' => [
-              'owncloud.fermedujointout.fr',
-              'nextcloud.fermedujointout.fr',
-              'cloud.fermedujointout.fr',
-            ],
+            'trusted_domains' => ['owncloud.fermedujointout.fr'],
             'overwrite.cli.url' => 'https://owncloud.fermedujointout.fr',
             'overwriteprotocol' => 'https',
           );
@@ -56,24 +52,14 @@ spec:
       annotations:
         cert-manager.io/cluster-issuer: "letsencrypt-production"
       hosts:
-        - host: nextcloud.fermedujointout.fr
-          paths:
-            - path: /
-              pathType: Prefix
         - host: owncloud.fermedujointout.fr
           paths:
             - path: /
               pathType: Prefix
-        - host: cloud.fermedujointout.fr
-          paths:
-            - path: /
-              pathType: Prefix
       tls:
-        - secretName: nextcloud.fermedujointout.fr
+        - secretName: owncloud.fermedujointout.fr
           hosts:
-            - nextcloud.fermedujointout.fr
             - owncloud.fermedujointout.fr
-            - cloud.fermedujointout.fr
   valuesFrom:
     - kind: Secret
       name: nextcloud

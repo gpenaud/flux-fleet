@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: ${TENANT}-nextcloud
 resources:
   - ../../base/nextcloud/
+  - ingress-aliases.yaml
   - secrets.enc.yaml
   - backup-pod-config.yaml
 patches:
