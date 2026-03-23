@@ -25,3 +25,10 @@ patches:
       - op: replace
         path: /metadata/name
         value: le-portail-wordpress-ecolieu
+  - target:
+      kind: Secret
+      name: wordpress
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: wordpress-ecolieu

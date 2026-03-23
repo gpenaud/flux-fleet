@@ -31,22 +31,22 @@ spec:
           secretName: epilibres.leportail.org-tls
   valuesFrom:
     - kind: Secret
-      name: wordpress
+      name: wordpress-epilibres
       valuesKey: wordpress-user
       targetPath: wordpressUsername
     - kind: Secret
-      name: wordpress
+      name: wordpress-epilibres
       valuesKey: wordpress-password
       targetPath: wordpressPassword
     - kind: Secret
-      name: wordpress
+      name: wordpress-epilibres
       valuesKey: mariadb-user
       targetPath: externalDatabase.user
     - kind: Secret
-      name: wordpress
+      name: wordpress-epilibres
       valuesKey: mariadb-password
       targetPath: externalDatabase.password
     - kind: Secret
-      name: wordpress
+      name: wordpress-epilibres
       valuesKey: mariadb-database
       targetPath: externalDatabase.database

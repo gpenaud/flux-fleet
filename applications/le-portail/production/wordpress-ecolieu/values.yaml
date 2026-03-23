@@ -14,7 +14,7 @@ spec:
       port: 3306
       user: "placeholder"
       database: "placeholder"
-      password: "placeholder"
+      password: "placeholder"    # ← écrasé par valuesFrom
     wordpressPlugins: []
     service:
       type: ClusterIP
@@ -31,22 +31,22 @@ spec:
           secretName: www.leportail.org-tls
   valuesFrom:
     - kind: Secret
-      name: wordpress
+      name: wordpress-ecolieu
       valuesKey: wordpress-user
       targetPath: wordpressUsername
     - kind: Secret
-      name: wordpress
+      name: wordpress-ecolieu
       valuesKey: wordpress-password
       targetPath: wordpressPassword
     - kind: Secret
-      name: wordpress
+      name: wordpress-ecolieu
       valuesKey: mariadb-user
       targetPath: externalDatabase.user
     - kind: Secret
-      name: wordpress
+      name: wordpress-ecolieu
       valuesKey: mariadb-password
       targetPath: externalDatabase.password
     - kind: Secret
-      name: wordpress
+      name: wordpress-ecolieu
       valuesKey: mariadb-database
       targetPath: externalDatabase.database
