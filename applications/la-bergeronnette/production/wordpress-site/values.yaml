@@ -6,7 +6,7 @@ spec:
   values:
     wordpressUsername: epilibres
     wordpressExistingSecret: wordpress
-    wordpressEmail: epilibres@leportail.org
+    wordpressEmail: team@labergeronnette.org
     mariadb:
       enabled: false
     externalDatabase:
