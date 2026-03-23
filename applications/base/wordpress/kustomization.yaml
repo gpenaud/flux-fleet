@@ -5,3 +5,4 @@ resources:
   - namespace.yaml
   - helm.yaml
   - backup.yaml
+  - init-db.yaml
