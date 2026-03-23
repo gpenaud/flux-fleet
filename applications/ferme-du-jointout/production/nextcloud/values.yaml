@@ -37,7 +37,11 @@ spec:
         custom.config.php: |-
           <?php
           $CONFIG = array(
-            'trusted_domains' => ['owncloud.fermedujointout.fr'],
+            'trusted_domains' => [
+              'owncloud.fermedujointout.fr',
+              'nextcloud.fermedujointout.fr',
+              'cloud.fermedujointout.fr'
+            ],
             'overwrite.cli.url' => 'https://owncloud.fermedujointout.fr',
             'overwriteprotocol' => 'https',
           );
