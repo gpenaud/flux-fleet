@@ -59,4 +59,5 @@ provisioner: driver.longhorn.io
 parameters:
   numberOfReplicas: "2"
   fsType: ext4
+  allowVolumeExpansion: true
 reclaimPolicy: Retain
