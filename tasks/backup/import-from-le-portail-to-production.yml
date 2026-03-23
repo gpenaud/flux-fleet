@@ -153,7 +153,7 @@ tasks:
       DB_SECRET:
         sh: kubectl --context le-portail get secret --namespace default {{.APPLICATION}}-database -o jsonpath="{.data.MARIADB_PASSWORD}" | base64 --decode
       LOCAL_WP_POD:
-        sh: kubectl --context local --namespace {{.DEST_NAMESPACE}} get pod -l app.kubernetes.io/name=wordpress -o jsonpath="{.items[0].metadata.name}"
+        sh: kubectl --context production --namespace {{.DEST_NAMESPACE}} get pod -l app.kubernetes.io/name=wordpress -o jsonpath="{.items[0].metadata.name}"
     cmds:
       - |
         echo "Backup mysql..."
@@ -166,12 +166,13 @@ tasks:
         kubectl --context le-portail exec -i "${WORDPRESS_POD_NAME}" -- tar -C /var/www/html/ -czvf - . > ./backups-data.tgz
       - |
         echo "Restore mysql..."
-        kubectl --context local --namespace {{.DEST_NAMESPACE}} exec -i statefulsets/wordpress-mariadb -c mariadb -- mariadb -u bn_wordpress -p{{.MYSQL_PASSWORD}} bitnami_wordpress < "./backup.sql"
+        kubectl --context production --namespace {{.DEST_NAMESPACE}} exec -i statefulsets/wordpress-mariadb -c mariadb -- bash -c '\
+          mariadb -u ${MARIADB_USER} -p$(cat ${MARIADB_PASSWORD_FILE}) ${MARIADB_DATABASE}' < "./backup.sql"
       - |
         echo "Restore wordpress data..."
-        kubectl --context local --namespace {{.DEST_NAMESPACE}} cp ./backups-data.tgz {{.LOCAL_WP_POD}}:/tmp/backup.tgz -c wordpress
+        kubectl --context production --namespace {{.DEST_NAMESPACE}} cp --retries=-1 ./backups-data.tgz {{.LOCAL_WP_POD}}:/tmp/backup.tgz -c wordpress
       - |
-        kubectl --context local --namespace {{.DEST_NAMESPACE}} exec -i {{.LOCAL_WP_POD}} -c wordpress -- bash -c "
+        kubectl --context production --namespace {{.DEST_NAMESPACE}} exec -i {{.LOCAL_WP_POD}} -c wordpress -- bash -c "
           mv /bitnami/wordpress/wp-config.php /tmp/wp-config.php && 
           tar -C /bitnami/wordpress/ -xzvf /tmp/backup.tgz --strip-components=1 &&
           mv /tmp/wp-config.php /bitnami/wordpress/wp-config.php &&
@@ -181,12 +182,12 @@ tasks:
         echo "Cleaning up local backup files..."
         rm ./backup.sql ./backups-data.tgz
 
-  le-portail:ecolieu:
+  le-portail:wordpress-ecolieu:
     desc: Backup & import ecolieu wordpress from production to local
     cmds:
       - task: .wordpress
         vars:
           APPLICATION: wordpress-le-portail
-          DEST_NAMESPACE: le-portail-ecolieu
+          DEST_NAMESPACE: le-portail-wordpress-ecolieu
           MYSQL_PASSWORD:
-            sh: sops -d "{{.LE_PORTAIL_PATH}}/ecolieu/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+            sh: sops -d "applications/le-portail/production/wordpress-ecolieu/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
