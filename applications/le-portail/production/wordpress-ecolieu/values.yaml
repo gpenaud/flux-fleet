@@ -40,14 +40,14 @@ spec:
       valuesKey: wordpress-password
       targetPath: wordpressPassword
     - kind: Secret
-      name: wordpress-ecolieu
+      name: wordpress
       valuesKey: mariadb-user
       targetPath: externalDatabase.user
     - kind: Secret
-      name: wordpress-ecolieu
+      name: wordpress
       valuesKey: mariadb-password
       targetPath: externalDatabase.password
     - kind: Secret
-      name: wordpress-ecolieu
+      name: wordpress
       valuesKey: mariadb-database
       targetPath: externalDatabase.database
