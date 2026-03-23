@@ -12,10 +12,6 @@ spec:
     externalDatabase:
       host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
       port: 3306
-      user: ""
-      database: ""
-      existingSecret: wordpress
-      existingSecretPasswordKey: mariadb-password
     wordpressPlugins: []
     service:
       type: ClusterIP
