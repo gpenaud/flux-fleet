@@ -33,3 +33,10 @@ spec:
         - hosts:
             - epilibres.leportail.org
           secretName: epilibres.leportail.org-tls
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1000m

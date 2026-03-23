@@ -27,16 +27,3 @@ spec:
     timeout: 30m
     remediation:
       retries: -1
-  values:
-    resources:
-      requests:
-        memory: 512Mi
-        cpu: 250m
-      limits:
-        memory: 1Gi
-        cpu: 500m
-    livenessProbe:
-      initialDelaySeconds: 300
-    readinessProbe:
-      initialDelaySeconds: 300
-      failureThreshold: 20
