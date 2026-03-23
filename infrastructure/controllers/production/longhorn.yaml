@@ -58,5 +58,5 @@ metadata:
 provisioner: driver.longhorn.io
 parameters:
   numberOfReplicas: "2"
-  fsType: ext4       # ← ext4 au lieu de xfs
+  fsType: ext4
 reclaimPolicy: Retain
