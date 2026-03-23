@@ -22,8 +22,10 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: bitnami
-  interval: 5m
-  timeout: 3m
+  interval: 1m    # ← retente toutes les minutes
   install:
     remediation:
-      retries: 3
+      retries: 10  # ← nombre de tentatives
+  upgrade:
+    remediation:
+      retries: 10
