@@ -18,6 +18,10 @@ spec:
     wordpressPlugins: []
     service:
       type: ClusterIP
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 3Gi
     ingress:
       enabled: true
       ingressClassName: traefik
