@@ -37,10 +37,10 @@ spec:
                   name: mariadb
                   key: mariadb-database
           command:
-            - env
             - sh
             - -c
             - |
+              env
               mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root \
                 -e "CREATE DATABASE IF NOT EXISTS \`${WORDPRESS_MYSQL_DATABASE}\`;"
               mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root \
