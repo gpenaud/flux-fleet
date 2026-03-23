@@ -6,7 +6,7 @@ spec:
   values:
     wordpressUsername: ""
     wordpressPassword: ""
-    wordpressEmail: dugrainamoudre@gmail.com
+    wordpressEmail: epilibres.leportail.org
     mariadb:
       enabled: false
     externalDatabase:
@@ -50,3 +50,4 @@ spec:
       name: wordpress
       valuesKey: mariadb-database
       targetPath: externalDatabase.database
+
