@@ -12,6 +12,9 @@ spec:
     externalDatabase:
       host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
       port: 3306
+      user: "placeholder"
+      database: "placeholder"
+      password: "placeholder"
     wordpressPlugins: []
     service:
       type: ClusterIP
