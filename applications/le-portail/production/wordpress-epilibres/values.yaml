@@ -4,17 +4,17 @@ metadata:
   name: le-portail-epilibres
 spec:
   values:
-    wordpressUsername: ""
-    wordpressPassword: ""
+    wordpressUsername: epilibres
+    wordpressExistingSecret: wordpress
     wordpressEmail: epilibres.leportail.org
     mariadb:
       enabled: false
     externalDatabase:
       host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
       port: 3306
-      user: "placeholder"
-      database: "placeholder"
-      password: "placeholder"
+      user: epilibres
+      database: epilibres
+      existingSecret: wordpress
     wordpressPlugins: []
     service:
       type: ClusterIP
@@ -29,24 +29,3 @@ spec:
         - hosts:
             - epilibres.leportail.org
           secretName: epilibres.leportail.org-tls
-  valuesFrom:
-    - kind: Secret
-      name: wordpress-epilibres
-      valuesKey: wordpress-user
-      targetPath: wordpressUsername
-    - kind: Secret
-      name: wordpress-epilibres
-      valuesKey: wordpress-password
-      targetPath: wordpressPassword
-    - kind: Secret
-      name: wordpress-epilibres
-      valuesKey: mariadb-user
-      targetPath: externalDatabase.user
-    - kind: Secret
-      name: wordpress-epilibres
-      valuesKey: mariadb-password
-      targetPath: externalDatabase.password
-    - kind: Secret
-      name: wordpress-epilibres
-      valuesKey: mariadb-database
-      targetPath: externalDatabase.database
