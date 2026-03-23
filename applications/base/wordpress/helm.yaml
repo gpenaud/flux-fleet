@@ -23,6 +23,7 @@ spec:
         kind: HelmRepository
         name: bitnami
   timeout: 30m
+  interval: 5m
   install:
     timeout: 30m
     remediation:
