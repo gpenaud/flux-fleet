@@ -22,15 +22,21 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: bitnami
-  interval: 1m
+  timeout: 30m
   install:
+    timeout: 30m
     remediation:
       retries: -1
-  upgrade:
-    remediation:
-      retries: -1
-      remediateLastFailure: true
-  rollback:
-    cleanupOnFail: true
-  uninstall:
-    keepHistory: false
+  values:
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 500m
+    livenessProbe:
+      initialDelaySeconds: 300
+    readinessProbe:
+      initialDelaySeconds: 300
+      failureThreshold: 20
