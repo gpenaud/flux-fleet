@@ -2,7 +2,7 @@
 apiVersion: mysql.oracle.com/v2
 kind: InnoDBCluster
 metadata:
-  name: mysql-wordpress
+  name: mysql-version-8-lts
   namespace: controller-mysql-operator
 spec:
   secretName: mysql-operator
