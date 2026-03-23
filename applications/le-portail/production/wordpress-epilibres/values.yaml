@@ -7,7 +7,6 @@ spec:
     wordpressUsername: epilibres
     wordpressExistingSecret: wordpress
     wordpressEmail: epilibres.leportail.org
-    
     mariadb:
       enabled: false
     externalDatabase:
