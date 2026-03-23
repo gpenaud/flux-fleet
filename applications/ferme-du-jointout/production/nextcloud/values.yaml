@@ -52,14 +52,24 @@ spec:
       annotations:
         cert-manager.io/cluster-issuer: "letsencrypt-production"
       hosts:
+        - host: nextcloud.fermedujointout.fr
+          paths:
+            - path: /
+              pathType: Prefix
         - host: owncloud.fermedujointout.fr
           paths:
             - path: /
               pathType: Prefix
+        - host: cloud.fermedujointout.fr
+          paths:
+            - path: /
+              pathType: Prefix
       tls:
-        - secretName: owncloud.fermedujointout.fr
+        - secretName: nextcloud.fermedujointout.fr
           hosts:
+            - nextcloud.fermedujointout.fr
             - owncloud.fermedujointout.fr
+            - cloud.fermedujointout.fr
   valuesFrom:
     - kind: Secret
       name: nextcloud
