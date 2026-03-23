@@ -3,25 +3,25 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: le-portail-ecolieu
 resources:
-  - ../../../base/wordpress-ecolieu-ecolieu/
+  - ../../../base/wordpress/
   - secrets.enc.yaml
   - backup-pod-config.yaml
 patches:
   - target:
       kind: HelmRelease
-      name: wordpress-ecolieu-ecolieu
+      name: wordpress
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-ecolieu
+        value: le-portail-wordpress-ecolieu
   - target:
       kind: HelmRelease
-      name: le-portail-ecolieu
+      name: le-portail-wordpress-ecolieu
     path: values.yaml
   - target:
       kind: Namespace
-      name: le-portail-wordpress-ecolieu-ecolieu
+      name: wordpress
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-ecolieu
+        value: le-portail-wordpress-ecolieu

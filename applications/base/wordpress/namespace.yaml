@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: le-portail-wordpress
+  name: ${TENANT}-wordpress
   labels:
-    alter-it.org/tenant: "le-portail"
+    alter-it.org/tenant: "${TENANT}"
     alter-it.org/app: "wordpress"
     alter-it.org/managed-by: "fluxcd"
     reflector-s3-ovh: "true"
