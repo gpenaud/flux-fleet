@@ -49,3 +49,14 @@ spec:
       tlsSecret: longhorn.leportail.org-tls
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-staging
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-ext4
+provisioner: driver.longhorn.io
+parameters:
+  numberOfReplicas: "2"
+  fsType: ext4       # ← ext4 au lieu de xfs
+reclaimPolicy: Retain
