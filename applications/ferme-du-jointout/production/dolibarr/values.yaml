@@ -48,6 +48,6 @@ spec:
       host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
       port: 3306
       database: fdj-dolibarr
-      user: ferme-du-jointout
+      username: ferme-du-jointout
       existingSecret: dolibarr
       existingSecretKeyPassword: mariadb-password
