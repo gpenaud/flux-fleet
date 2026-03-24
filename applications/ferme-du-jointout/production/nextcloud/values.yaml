@@ -6,24 +6,18 @@ spec:
   values:
     internalDatabase:
       enabled: false
+    mariadb:
+      enabled: false
     externalDatabase:
       enabled: true
       type: mysql
-      host: nextcloud-mariadb.ferme-du-jointout-nextcloud.svc.cluster.local
-      database: nextcloud
-      user: ""
-      password: ""
-      existingSecret: 
+      host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local:6446
+      database: fdj-nextcloud
+      existingSecret:
         enabled: true
         secretName: nextcloud
         usernameKey: mariadb-username
         passwordKey: mariadb-password
-    mariadb:
-      enabled: true
-      auth:
-        database: nextcloud
-        username: nextcloud
-        password: ""
     persistence:
       enabled: true
       storageClass: longhorn
