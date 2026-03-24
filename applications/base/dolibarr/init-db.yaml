@@ -19,8 +19,8 @@ spec:
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
-                  name: dolibarr
-                  key: mariadb-root-password
+                  name: mysql-operator
+                  key: rootPassword
             - name: DOLIBARR_MYSQL_USER
               valueFrom:
                 secretKeyRef:
