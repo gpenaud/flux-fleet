@@ -28,7 +28,7 @@ spec:
       hostname: www.labergeronnette.org
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: letsencrypt-staging
+        cert-manager.io/cluster-issuer: letsencrypt-production
       extraTls:
         - hosts:
             - www.labergeronnette.org
