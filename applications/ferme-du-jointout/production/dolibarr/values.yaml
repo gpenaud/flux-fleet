@@ -19,7 +19,7 @@ spec:
       pathType: Prefix
       annotations:
         kubernetes.io/ingress.class: traefik
-        cert-manager.io/cluster-issuer: letsencrypt-production
+        cert-manager.io/cluster-issuer: letsencrypt-staging
       hosts:
         - host: compta.fermedujointout.fr
           paths:
@@ -38,13 +38,15 @@ spec:
       externalUrl: https://compta.fermedujointout.fr
       cron:
         enabled: false
-
-    existingSecret: dolibarr-credentials
+    existingSecret: dolibarr
     existingSecretKeyAdminPassword: dolibarr-admin-password
     existingSecretKeyCronSecurityKey: dolibarr-cron-security-key
-    
     mariadb:
-      auth:
-        database: ferme-du-jointout
-        username: ferme-du-jointout
-        existingSecret: dolibarr-mariadb
+      enabled: false
+    externalDatabase:
+      host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
+      port: 3306
+      database: fdj-dolibarr
+      user: ferme-du-jointout
+      existingSecret: dolibarr
+      existingSecretKeyPassword: mariadb-password
