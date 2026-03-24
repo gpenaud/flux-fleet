@@ -19,31 +19,33 @@ spec:
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-operator
-                  key: rootPassword
-            - name: WORDPRESS_MYSQL_USER
+                  name: dolibarr
+                  key: mariadb-root-password
+            - name: DOLIBARR_MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: wordpress
+                  name: dolibarr
                   key: mariadb-user
-            - name: WORDPRESS_MYSQL_PASSWORD
+            - name: DOLIBARR_MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: wordpress
+                  name: dolibarr
                   key: mariadb-password
-            - name: WORDPRESS_MYSQL_DATABASE
+            - name: DOLIBARR_MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: wordpress
+                  name: dolibarr
                   key: mariadb-database
           command:
             - sh
             - -c
             - |
               mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u root <<EOF
-              CREATE DATABASE IF NOT EXISTS \`$(WORDPRESS_MYSQL_DATABASE)\`;
-              CREATE USER IF NOT EXISTS \`$(WORDPRESS_MYSQL_USER)\`@'%' IDENTIFIED BY '$(WORDPRESS_MYSQL_PASSWORD)';
-              GRANT ALL ON \`$(WORDPRESS_MYSQL_DATABASE)\`.* TO \`$(WORDPRESS_MYSQL_USER)\`@'%';
+              CREATE DATABASE IF NOT EXISTS \`$(DOLIBARR_MYSQL_DATABASE)\`;
+              CREATE USER IF NOT EXISTS \`$(DOLIBARR_MYSQL_USER)\`@'%' IDENTIFIED BY '$(DOLIBARR_MYSQL_PASSWORD)';
+              GRANT ALL ON \`$(DOLIBARR_MYSQL_DATABASE)\`.* TO \`$(DOLIBARR_MYSQL_USER)\`@'%';
               FLUSH PRIVILEGES;
               EOF
       restartPolicy: OnFailure
+
+      
