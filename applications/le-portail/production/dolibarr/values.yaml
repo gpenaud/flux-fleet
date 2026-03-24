@@ -1,0 +1,53 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: le-portail-dolibarr
+spec:
+  values:
+    replicaCount: 1
+    image:
+      tag: 23.0.0
+    cron:
+      enabled: false
+    pdb:
+      create: false
+      minAvailable: 1
+      maxUnavailable:
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      pathType: Prefix
+      annotations:
+        kubernetes.io/ingress.class: traefik
+        cert-manager.io/cluster-issuer: letsencrypt-production
+      hosts:
+        - host: dolibarr.leportail.org
+          paths:
+            - /
+      tls:
+        - secretName: dolibarr.leportail.org-tls
+          hosts:
+            - dolibarr.leportail.org
+    persistence:
+      enabled: true
+      size: 5Gi
+    dolibarr:
+      admin:
+        username: le-portail
+        password: "REPLACED"
+      externalUrl: https://dolibarr.leportail.org
+      cron:
+        enabled: false
+    existingSecret: dolibarr
+    existingSecretKeyAdminPassword: dolibarr-admin-password
+    existingSecretKeyCronSecurityKey: dolibarr-cron-security-key
+    mariadb:
+      enabled: false
+    externalMariadb:
+      enabled: true
+      host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
+      port: 3306
+      database: fdj-dolibarr
+      username: le-portail
+      existingSecret: dolibarr
+      existingSecretKeyPassword: mariadb-password
