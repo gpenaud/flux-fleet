@@ -58,8 +58,3 @@ spec:
         - secretName: owncloud.fermedujointout.fr
           hosts:
             - owncloud.fermedujointout.fr
-  valuesFrom:
-    - kind: Secret
-      name: nextcloud
-      valuesKey: mariadb-password
-      targetPath: mariadb.auth.password
