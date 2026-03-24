@@ -8,7 +8,7 @@ spec:
   secretName: mysql-operator
   instances: 1
   tlsUseSelfSigned: true
-  version: "5.7"
+  version: "5.7.0"
   edition: community
   router:
     instances: 1
