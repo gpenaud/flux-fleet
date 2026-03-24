@@ -4,9 +4,9 @@ metadata:
   name: ferme-du-jointout-wordpress-site
 spec:
   values:
-    wordpressUsername: site
+    wordpressUsername: admin
     wordpressExistingSecret: wordpress
-    wordpressEmail: site@leportail.org
+    wordpressEmail: contact@fermedujointout.fr
     mariadb:
       enabled: false
     externalDatabase:
