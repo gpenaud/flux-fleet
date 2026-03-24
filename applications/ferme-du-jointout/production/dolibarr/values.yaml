@@ -43,7 +43,8 @@ spec:
     existingSecretKeyCronSecurityKey: dolibarr-cron-security-key
     mariadb:
       enabled: false
-    externalDatabase:
+    externalMariadb:
+      enabled: true
       host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
       port: 3306
       database: fdj-dolibarr
