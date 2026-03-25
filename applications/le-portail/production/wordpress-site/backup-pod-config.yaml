@@ -2,7 +2,7 @@
 apiVersion: k8up.io/v1
 kind: PodConfig
 metadata:
-  name: 
+  name: wordpress-site
 spec:
   template:
     spec:
