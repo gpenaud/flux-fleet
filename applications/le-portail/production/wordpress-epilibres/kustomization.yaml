@@ -31,7 +31,7 @@ patches:
   # Add the k8up backup annotation to the PVC
   - target:
       kind: PersistentVolumeClaim
-      namespace: le-portail-wordpress-site
+      namespace: le-portail-wordpress-epilibres
     patch: |-
       - op: add
         path: /metadata/annotations/k8up.io~1backup
