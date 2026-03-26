@@ -5,8 +5,8 @@ namespace: la-bergeronnette-wordpress-site
 resources:
   - ../../../base/wordpress/
   - secrets.enc.yaml
-  - backup-pod-config.yaml
 patches:
+  # Rename the helm release
   - target:
       kind: HelmRelease
       name: wordpress
@@ -14,10 +14,12 @@ patches:
       - op: replace
         path: /metadata/name
         value: la-bergeronnette-wordpress-site
+  # Overrides the helm release values.yaml
   - target:
       kind: HelmRelease
       name: la-bergeronnette-wordpress-site
     path: values.yaml
+  # Overrides the namespace name
   - target:
       kind: Namespace
       name: la-bergeronnette-wordpress
@@ -25,3 +27,11 @@ patches:
       - op: replace
         path: /metadata/name
         value: la-bergeronnette-wordpress-site
+  # Overrides the k8up bucket values with subPath
+  - target:
+      kind: Schedule
+      name: wordpress
+    patch: |-
+      - op: replace
+        path: /spec/backend/s3/bucket
+        value: "backup-srv1515851-la-bergeronnette-wordpress-site"
