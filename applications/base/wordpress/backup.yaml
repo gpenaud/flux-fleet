@@ -38,20 +38,17 @@ metadata:
   annotations:
     k8up.io/backup: "true"
 spec:
-  backupCommand: |-
-    sh -c 'mysqldump \
-      -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local \
-      -u $WORDPRESS_MYSQL_USER \
-      -p"$WORDPRESS_MYSQL_PASSWORD" \
-      $WORDPRESS_MYSQL_DATABASE\
-    '
+  backupCommand: sh -c 'mysqldump -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u $WORDPRESS_MYSQL_USER -p"$WORDPRESS_MYSQL_PASSWORD" $WORDPRESS_MYSQL_DATABASE'
   fileExtension: .sql
   pod:
     spec:
       containers:
         - name: wordpress-db-dump
-          image: bitnami/mysql:8.0
+          image: mysql:8.4.3
+          command: ["sleep", "infinity"]
           env:
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
