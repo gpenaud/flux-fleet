@@ -1,29 +1,75 @@
+# apiVersion: k8up.io/v1
+# kind: Schedule
+# metadata:
+#   name: wordpress
+# spec:
+#   backend:
+#     repoPasswordSecretRef:
+#       name: s3-ovh
+#       key: RESTIC_PASSWORD
+#     s3:
+#       endpoint: https://s3.sbg.io.cloud.ovh.net 
+#       bucket: ""
+#       accessKeyIDSecretRef:
+#         name: s3-ovh
+#         key: AWS_ACCESS_KEY_ID
+#       secretAccessKeySecretRef:
+#         name: s3-ovh
+#         key: AWS_SECRET_ACCESS_KEY
+#   backup:
+#     schedule: '0 21 1,15 * *'   # 1er et 15 de chaque mois à 21h
+#     failedJobsHistoryLimit: 2
+#     successfulJobsHistoryLimit: 3
+#   check:
+#     schedule: '30 21 1,15 * *'  # vérification 30min après
+#   prune:
+#     schedule: '0 22 1,15 * *'   # nettoyage 1h après
+#     retention:
+#       keepWeekly: 8              # ~4 mois de rétention
+#       keepMonthly: 6
+
+---
 apiVersion: k8up.io/v1
-kind: Schedule
+kind: PreBackupPod
 metadata:
   name: wordpress
+  labels:
+    reflector/mysql-operator: "true"
+  annotations:
+    k8up.io/backup: "true"
 spec:
-  backend:
-    repoPasswordSecretRef:
-      name: s3-ovh
-      key: RESTIC_PASSWORD
-    s3:
-      endpoint: https://s3.sbg.io.cloud.ovh.net 
-      bucket: le-portail-alterconso-backups
-      accessKeyIDSecretRef:
-        name: s3-ovh
-        key: AWS_ACCESS_KEY_ID
-      secretAccessKeySecretRef:
-        name: s3-ovh
-        key: AWS_SECRET_ACCESS_KEY
-  backup:
-    schedule: '0 21 1,15 * *'   # 1er et 15 de chaque mois à 21h
-    failedJobsHistoryLimit: 2
-    successfulJobsHistoryLimit: 3
-  check:
-    schedule: '30 21 1,15 * *'  # vérification 30min après
-  prune:
-    schedule: '0 22 1,15 * *'   # nettoyage 1h après
-    retention:
-      keepWeekly: 8              # ~4 mois de rétention
-      keepMonthly: 6
+  backupCommand: |-
+    sh -c 'mysqldump \
+      -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local \
+      -u $WORDPRESS_MYSQL_USER \
+      -p"$WORDPRESS_MYSQL_PASSWORD" \
+      $WORDPRESS_MYSQL_DATABASE\
+    '
+  fileExtension: .sql
+  pod:
+    spec:
+      containers:
+        - name: wordpress-db-dump
+          image: mysql:8.0
+          env:
+          - name: MYSQL_PWD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-operator
+                key: rootPassword
+          - name: WORDPRESS_MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: wordpress
+                key: mariadb-user
+          - name: WORDPRESS_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: wordpress
+                key: mariadb-password
+          - name: WORDPRESS_MYSQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: wordpress
+                key: mariadb-database
+
