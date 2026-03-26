@@ -1,10 +1,10 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: la-bergeronnette-epilibres
+  name: la-bergeronnette-wordpress-site
 spec:
   values:
-    wordpressUsername: epilibres
+    wordpressUsername: la-bergeronnette
     wordpressExistingSecret: wordpress
     wordpressEmail: team@labergeronnette.org
     mariadb:
