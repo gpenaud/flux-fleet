@@ -34,4 +34,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "srv1515851-backups/le-portail/wordpress-epilibres"
+        value: "backup-srv1515851-le-portail-wordpress-epilibres"
