@@ -38,7 +38,7 @@ metadata:
   annotations:
     k8up.io/backup: "true"
 spec:
-  backupCommand: sh -c 'mysqldump --no-tablespaces --skip-set-charset --skip-gtids --single-transaction -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u $WORDPRESS_MYSQL_USER -p"$WORDPRESS_MYSQL_PASSWORD" $WORDPRESS_MYSQL_DATABASE'
+  backupCommand: sh -c 'mysqldump --no-tablespaces --skip-set-charset --set-gtid-purged=OFF --single-transaction -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local -u $WORDPRESS_MYSQL_USER -p"$WORDPRESS_MYSQL_PASSWORD" $WORDPRESS_MYSQL_DATABASE'
   fileExtension: .sql
   pod:
     spec:
