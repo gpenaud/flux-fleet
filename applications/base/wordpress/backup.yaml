@@ -50,11 +50,8 @@ spec:
     spec:
       containers:
         - name: wordpress-db-dump
-          image: mysql:8.4.3
-          command: ["sleep", "infinity"]
+          image: bitnami/mysql:8.0
           env:
-            - name: MYSQL_ALLOW_EMPTY_PASSWORD
-              value: "true"
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
