@@ -6,11 +6,14 @@ metadata:
   labels:
     reflector/mysql-operator: "true"
   annotations:
-    kustomize.toolkit.fluxcd.io/force: "enabled"
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
     spec:
       ttlSecondsAfterFinished: 30
+      ttlSecondsAfterFinished: 0
+
       activeDeadlineSeconds: 90
       containers:
         - name: mysql-init
