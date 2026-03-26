@@ -32,7 +32,7 @@
 apiVersion: k8up.io/v1
 kind: PreBackupPod
 metadata:
-  name: wordpress-pre-backup
+  name: pre-backup
   labels:
     reflector/mysql-operator: "true"
   annotations:
