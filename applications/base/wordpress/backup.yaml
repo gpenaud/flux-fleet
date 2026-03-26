@@ -32,7 +32,7 @@
 apiVersion: k8up.io/v1
 kind: PreBackupPod
 metadata:
-  name: wordpress
+  name: wordpress-pre-backup
   labels:
     reflector/mysql-operator: "true"
   annotations:
@@ -52,24 +52,26 @@ spec:
         - name: wordpress-db-dump
           image: mysql:8.0
           env:
-          - name: MYSQL_PWD
-            valueFrom:
-              secretKeyRef:
-                name: mysql-operator
-                key: rootPassword
-          - name: WORDPRESS_MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                name: wordpress
-                key: mariadb-user
-          - name: WORDPRESS_MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: wordpress
-                key: mariadb-password
-          - name: WORDPRESS_MYSQL_DATABASE
-            valueFrom:
-              secretKeyRef:
-                name: wordpress
-                key: mariadb-database
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-operator
+                  key: rootPassword
+            - name: WORDPRESS_MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress
+                  key: mariadb-user
+            - name: WORDPRESS_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress
+                  key: mariadb-password
+            - name: WORDPRESS_MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress
+                  key: mariadb-database
 
