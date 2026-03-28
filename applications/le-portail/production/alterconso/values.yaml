@@ -16,9 +16,6 @@ spec:
             tls: true
       vhost: alterconso.leportail.org
     database:
-      annotations:
-        k8up.io/backupcommand: mysqldump --hex-blob --no-tablespaces -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
-        k8up.io/file-extension: .sql
       persistentVolume:
         enabled: true
         storageClass: longhorn
