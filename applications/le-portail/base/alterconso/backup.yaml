@@ -41,7 +41,7 @@ metadata:
   annotations:
     k8up.io/backup: "true"
 spec:
-  backupCommand: sh -c 'mysqldump --add-drop-table --set-gtid-purged=OFF --no-tablespaces --single-transaction --hex-blob -h alterconso-database.le-portail-alterconso.svc.cluster.local -u $ALTERCONSO_MYSQL_USER -p"$ALTERCONSO_MYSQL_PASSWORD" $ALTERCONSO_MYSQL_DATABASE'
+  backupCommand: sh -c 'mysqldump --no-tablespaces --single-transaction --hex-blob -h alterconso-database.le-portail-alterconso.svc.cluster.local -u $ALTERCONSO_MYSQL_USER -p"$ALTERCONSO_MYSQL_PASSWORD" $ALTERCONSO_MYSQL_DATABASE'
   fileExtension: .sql
   pod:
     spec:
