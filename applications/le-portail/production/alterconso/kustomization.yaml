@@ -17,12 +17,19 @@ patches:
       - op: replace
         path: /spec/update/path
         value: ./applications/le-portail/localhost
-  - target: 
+  # Add the k8up backup annotation to the PVC
+  - target:
+      kind: PersistentVolumeClaim
+      namespace: le-portail-alterconso
+    patch: |-
+      - op: add
+        path: /metadata/annotations/k8up.io~1backup
+        value: "true"
+  # Overrides the k8up bucket values with subPath
+  - target:
       kind: Schedule
       name: alterconso
-    patch: |
-      - op: add
-        path: /spec
-        value:
-          podConfigRef:
-            name: alterconso
+    patch: |-
+      - op: replace
+        path: /spec/backend/s3/bucket
+        value: "backup-srv1515851-le-portail-alterconso"
