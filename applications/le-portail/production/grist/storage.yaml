@@ -6,9 +6,10 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
     helm.sh/resource-policy: keep
+    k8up.io/backup: "true"
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: longhorn
   resources:
     requests:
-      storage: 5Gi
+      storage: 10Gi
