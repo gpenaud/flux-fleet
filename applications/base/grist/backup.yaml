@@ -33,7 +33,7 @@ spec:
 apiVersion: k8up.io/v1
 kind: PreBackupPod
 metadata:
-  name: grist-pre-backup
+  name: pre-backup
   annotations:
     k8up.io/backup: "true"
 spec:
