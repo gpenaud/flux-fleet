@@ -24,7 +24,7 @@ spec:
       accessMode: ReadWriteOnce
       size: 30Gi
     nextcloud:
-      host: owncloud.fermedujointout.fr
+      host: nextcloud.fermedujointout.fr
       datadir: /var/www/html/data
       # Important : trusted domains
       configs:
