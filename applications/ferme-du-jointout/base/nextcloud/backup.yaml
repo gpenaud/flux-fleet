@@ -60,4 +60,7 @@ spec:
                   name: nextcloud
                   key: mariadb-password
             - name: NEXTCLOUD_MYSQL_DATABASE
-              value: fdj-nextcloud
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud
+                  key: mariadb-database
