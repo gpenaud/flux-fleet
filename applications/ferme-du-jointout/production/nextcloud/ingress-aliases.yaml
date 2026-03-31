@@ -8,16 +8,6 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: nextcloud.fermedujointout.fr
-      http:
-        paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: nextcloud
-              port:
-                number: 8080
     - host: cloud.fermedujointout.fr
       http:
         paths:
@@ -29,7 +19,6 @@ spec:
               port:
                 number: 8080
   tls:
-    - secretName: nextcloud.fermedujointout.fr
+    - secretName: cloud.fermedujointout.fr-tls
       hosts:
         - cloud.fermedujointout.fr
-        - nextcloud.fermedujointout.fr

@@ -6,18 +6,24 @@ resources:
   - ../../base/nextcloud/
   - ingress-aliases.yaml
   - secrets.enc.yaml
-  - backup-pod-config.yaml
 patches:
   - path: values.yaml
     target:
       kind: HelmRelease
       name: nextcloud
-  - target: 
+  # Add the k8up backup annotation to the PVC
+  - target:
+      kind: PersistentVolumeClaim
+      namespace: ferme-du-jointout-nextcloud
+    patch: |-
+      - op: add
+        path: /metadata/annotations/k8up.io~1backup
+        value: "true"
+  # Overrides the k8up bucket values with subPath
+  - target:
       kind: Schedule
       name: nextcloud
-    patch: |
-      - op: add
-        path: /spec
-        value:
-          podConfigRef:
-            name: nextcloud
+    patch: |-
+      - op: replace
+        path: /spec/backend/s3/bucket
+        value: "backup-srv1515851-ferme-du-jointout-nextcloud"
