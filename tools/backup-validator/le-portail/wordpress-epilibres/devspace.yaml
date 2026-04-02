@@ -1,0 +1,10 @@
+version: v2beta1
+
+vars:
+  TENANT: le-portail
+  SERVICE: wordpress-epilibres
+  VHOST: epi-libres
+
+imports:
+  - path: ./../../_common/wordpress/devspace.yaml
+    enabled: true

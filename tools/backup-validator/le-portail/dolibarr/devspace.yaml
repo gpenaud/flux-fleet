@@ -1,0 +1,10 @@
+version: v2beta1
+
+vars:
+  TENANT: le-portail
+  SERVICE: dolibarr
+  VHOST: dolibarr
+
+imports:
+  - path: ./../../_common/dolibarr/devspace.yaml
+    enabled: true

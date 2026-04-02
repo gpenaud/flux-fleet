@@ -1,0 +1,10 @@
+version: v2beta1
+
+vars:
+  TENANT: la-bergeronnette
+  SERVICE: wordpress-site
+  VHOST: la-bergeronnette
+
+imports:
+  - path: ./../../_common/wordpress/devspace.yaml
+    enabled: true

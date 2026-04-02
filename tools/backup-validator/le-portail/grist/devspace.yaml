@@ -1,0 +1,10 @@
+version: v2beta1
+
+vars:
+  TENANT: le-portail
+  SERVICE: grist
+  VHOST: grist
+
+imports:
+  - path: ./../../_common/grist/devspace.yaml
+    enabled: true

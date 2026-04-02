@@ -1,0 +1,108 @@
+version: v2beta1
+
+vars:
+  DOCKER_CONFIG_CONTENT: $(cat ~/.docker/config.json | tr -d '\t' | jq -c '.') 
+  PENULTIMATE_SNAPSHOT:
+    command: set -a && source ~/.config/restic/restic.env && set +a && restic -r "s3:https://s3.sbg.io.cloud.ovh.net/backup-${SERVER}-${TENANT}-${SERVICE}" snapshots --json | jq -r '.[-2].id'
+
+pipelines:
+  deploy: |-
+    create_deployments regcred
+    create_deployments ${SERVICE}
+  restore: |-
+    kubectl --context local delete restore ${TENANT}-${SERVICE} --ignore-not-found || /bin/true
+    create_deployments restore
+    download_sql_dump
+    restore_mysql_dump
+  purge: |-
+    purge_deployments --all
+    remove_pvcs --all
+
+deployments:
+  alterconso:
+    helm:
+      releaseName: ${TENANT}-${SERVICE}
+      chart:
+        repo: https://raw.githubusercontent.com/gpenaud/helm-charts/master
+        name: ${SERVICE}
+        version: 0.0.5
+      upgradeArgs:
+        - "--wait"
+        - "--timeout=5m"
+      values:
+        webapp:
+          image:
+            version: 1.0.6
+          ingress:
+            annotations:
+              cert-manager.io/cluster-issuer: mkcert
+            hosts:
+              - name: ${SERVICE}.${TENANT}.localhost
+                path: /
+                tls: true
+          vhost: ${SERVICE}.${TENANT}.localhost
+        mysql:
+          user: ${SERVICE}
+          password: ${SERVICE}
+          database: ${SERVICE}
+          rootPassword: ${SERVICE}
+
+  restore:
+    kubectl:
+      inlineManifest: |-
+        apiVersion: k8up.io/v1
+        kind: Restore
+        metadata:
+          name: ${TENANT}-${SERVICE}
+        spec:
+          snapshot: ${PENULTIMATE_SNAPSHOT}
+          podSecurityContext:
+            runAsUser: 0
+            fsGroup: 0
+            fsGroupChangePolicy: OnRootMismatch
+          restoreMethod:
+            folder:
+              claimName: ${TENANT}-${SERVICE}
+          backend:
+            repoPasswordSecretRef:
+              name: s3-ovh
+              key: RESTIC_PASSWORD
+            s3:
+              endpoint: https://s3.sbg.io.cloud.ovh.net
+              bucket: backup-${SERVER}-${TENANT}-${SERVICE}
+              accessKeyIDSecretRef:
+                name: s3-ovh
+                key: AWS_ACCESS_KEY_ID
+              secretAccessKeySecretRef:
+                name: s3-ovh
+                key: AWS_SECRET_ACCESS_KEY
+
+  regcred:
+    kubectl:
+      inlineManifest: |-
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: regcred
+        type: kubernetes.io/dockerconfigjson
+        stringData:
+          .dockerconfigjson: |
+            ${DOCKER_CONFIG_CONTENT}
+
+functions:
+  download_sql_dump: |-
+    set -a && source ~/.config/restic/restic.env && set +a && \
+    restic -r "s3:https://s3.sbg.io.cloud.ovh.net/backup-${SERVER}-${TENANT}-${SERVICE}" \
+      restore latest \
+      --target /tmp/restore \
+      --include "*.sql"
+
+  restore_mysql_dump: |-
+    FILE_PATH=/tmp/restore/${TENANT}-${SERVICE}-db-dump.sql
+    kubectl exec -i ${TENANT}-${SERVICE}-database-0 -c ${SERVICE} -- \
+      sh -c "mysql -u ${SERVICE} -p${SERVICE} ${SERVICE}" < ${FILE_PATH}
+    rm -rf ${FILE_PATH}
+
+  remove_pvcs: |-
+    kubectl --context local delete pvc ${TENANT}-${SERVICE}-database 2>/dev/null || true
+    sudo rm -rf /mnt/k3s/${SERVICE}/* /mnt/k3s/${SERVICE}/.*

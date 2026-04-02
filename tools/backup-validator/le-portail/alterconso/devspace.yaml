@@ -1,0 +1,10 @@
+version: v2beta1
+
+vars:
+  TENANT: le-portail
+  SERVICE: alterconso
+  VHOST: alterconso
+
+imports:
+  - path: ./../../_common/alterconso/devspace.yaml
+    enabled: true

@@ -1,0 +1,160 @@
+version: v2beta1
+logLevel: warn
+
+vars:
+  PENULTIMATE_SNAPSHOT:
+    command: set -a && source ~/.config/restic/restic.env && set +a && restic -r "s3:https://s3.sbg.io.cloud.ovh.net/backup-${SERVER}-${TENANT}-${SERVICE}" snapshots --json | jq -r '.[-2].id'
+
+pipelines:
+  deploy: |-
+    create_deployments storage
+    create_deployments ${SERVICE}
+  restore: |-
+    kubectl --context local delete restore ${TENANT}-${SERVICE} --ignore-not-found || /bin/true
+    create_deployments restore
+    download_sqlite3_dump
+    restore_sqlite3_dump
+  purge: |-
+    purge_deployments --all
+
+deployments:
+  grist:
+    helm:
+      releaseName: ${TENANT}-${SERVICE}
+      chart:
+        git: https://github.com/gpenaud/helm-charts-dirnum
+        subPath: charts/grist
+        branch: feature/make-loadbalancer-component-optional
+      upgradeArgs:
+        - "--wait"
+        - "--timeout=5m"
+      values:
+        image:
+          tag: "1.7.11"
+        loadBalancer: 
+          enabled: false
+        homeWorker:
+          envVars:
+            GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
+            TYPEORM_DATABASE: "/persist/home.sqlite3"
+            GRIST_DATA_DIR: "/persist/docs"
+          extraVolumes:
+            - name: ${SERVICE}-persist
+              persistentVolumeClaim:
+                claimName: ${TENANT}-${SERVICE}-data
+          extraVolumeMounts:
+            - name: ${SERVICE}-persist
+              mountPath: /persist
+          probes:
+            liveness:
+              path: /status?db=1
+              initialDelaySeconds: 10
+            startup:
+              path: /status?db=1
+              initialDelaySeconds: 10
+        docWorker:
+          replicas: 1
+          useVolume:
+            enabled: false
+          persistence: {}
+          podSecurityContext:
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+          envVars:
+            GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
+            TYPEORM_DATABASE: "/persist/home.sqlite3"
+            GRIST_DATA_DIR: "/persist/docs"
+            GRIST_SANDBOX_FLAVOR: "unsandboxed"
+          extraVolumes:
+            - name: ${SERVICE}-persist
+              persistentVolumeClaim:
+                claimName: ${TENANT}-${SERVICE}-data
+          extraVolumeMounts:
+            - name: ${SERVICE}-persist
+              mountPath: /persist 
+          probes:
+            liveness:
+              path: /status?db=1&docWorkerRegistered=1
+              initialDelaySeconds: 10
+            startup:
+              path: /status?db=1&docWorkerRegistered=1
+              initialDelaySeconds: 10
+        ingress:
+          enabled: true
+          className: traefik
+          annotations:
+            kubernetes.io/ingress.class: traefik
+            cert-manager.io/cluster-issuer: mkcert
+          hosts:
+            - host: ${VHOST}.${TENANT}.localhost
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            enabled: true
+            additional:
+              - secretName: ${VHOST}.${TENANT}.localhost-tls
+                hosts:
+                  - ${VHOST}.${TENANT}.localhost
+
+  storage:
+    kubectl:
+      inlineManifest: |-
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: ${TENANT}-${SERVICE}-data
+          annotations:
+            kustomize.toolkit.fluxcd.io/prune: disabled
+            helm.sh/resource-policy: keep
+        spec:
+          accessModes: [ReadWriteOnce]
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 2Gi
+
+  restore:
+    kubectl:
+      inlineManifest: |-
+        apiVersion: k8up.io/v1
+        kind: Restore
+        metadata:
+          name: ${TENANT}-${SERVICE}
+        spec:
+          snapshot: ${PENULTIMATE_SNAPSHOT}
+          podSecurityContext:
+            runAsUser: 1001
+            fsGroup: 1001
+            fsGroupChangePolicy: OnRootMismatch
+          restoreMethod:
+            folder:
+              claimName: ${TENANT}-${SERVICE}-data
+          backend:
+            repoPasswordSecretRef:
+              name: s3-ovh
+              key: RESTIC_PASSWORD
+            s3:
+              endpoint: https://s3.sbg.io.cloud.ovh.net
+              bucket: backup-${SERVER}-${TENANT}-${SERVICE}
+              accessKeyIDSecretRef:
+                name: s3-ovh
+                key: AWS_ACCESS_KEY_ID
+              secretAccessKeySecretRef:
+                name: s3-ovh
+                key: AWS_SECRET_ACCESS_KEY
+
+functions:
+  download_sqlite3_dump: |-
+    set -a && source ~/.config/restic/restic.env && set +a && \
+    restic -r "s3:https://s3.sbg.io.cloud.ovh.net/backup-${SERVER}-${TENANT}-${SERVICE}" \
+      restore latest \
+      --target /tmp/restore \
+      --include "*.sqlite3"
+
+  restore_sqlite3_dump: |-
+    FILE_PATH=/tmp/restore/${TENANT}-${SERVICE}-${SERVICE}-grist-db-dump.sql
+    HOME_WORKER=$(kubectl --context local get pods -l app.kubernetes.io/instance=${TENANT}-${SERVICE},app.kubernetes.io/component=home-worker -o jsonpath='{.items[0].metadata.name}')
+    
+    kubectl --context local cp /tmp/restore/le-portail-grist-grist-dump.sqlite3 ${HOME_WORKER}:/persist/home.sqlite3
+    rm -rf ${FILE_PATH}

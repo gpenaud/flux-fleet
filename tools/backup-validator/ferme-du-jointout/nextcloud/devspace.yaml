@@ -1,0 +1,10 @@
+version: v2beta1
+
+vars:
+  TENANT: ferme-du-jointout
+  SERVICE: nextcloud
+  VHOST: nextcloud
+
+imports:
+  - path: ./../../_common/nextcloud/devspace.yaml
+    enabled: true

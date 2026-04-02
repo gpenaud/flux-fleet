@@ -1,0 +1,151 @@
+version: v2beta1
+logLevel: warn
+
+vars:
+  PENULTIMATE_SNAPSHOT:
+    command: set -a && source ~/.config/restic/restic.env && set +a && restic -r "s3:https://s3.sbg.io.cloud.ovh.net/backup-${SERVER}-${TENANT}-${SERVICE}" snapshots --json | jq -r '.[-2].id'
+
+pipelines:
+  deploy: |-
+    create_deployments nextcloud
+  restore: |-
+    kubectl --context local scale deployment ${TENANT}-${SERVICE} --replicas=0
+    kubectl --context local delete restore ${TENANT}-${SERVICE} --ignore-not-found || /bin/true
+    create_deployments restore
+    kubectl --context local wait restore/${TENANT}-${SERVICE} --for=condition=Completed --timeout=60m
+    download_sql_dump
+    restore_sql_dump
+    kubectl --context local scale deployment ${TENANT}-${SERVICE} --replicas=1
+
+  purge: |-
+    purge_deployments --all
+    remove_pvcs --all
+
+deployments:
+  nextcloud:
+    helm:
+      releaseName: ${TENANT}-${SERVICE}
+      chart:
+        repo: https://nextcloud.github.io/helm/
+        name: nextcloud
+      upgradeArgs:
+        - "--wait"
+        - "--timeout=5m"
+      values:
+        internalDatabase:
+          enabled: false
+        mariadb:
+          enabled: true
+          auth:
+            database: ${SERVICE}
+            username: ${SERVICE}
+            password: ${SERVICE}
+        persistence:
+          enabled: true
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 15Gi
+        nextcloud:
+          username: ${SERVICE}
+          password: ${SERVICE} 
+          host: ${VHOST}.${TENANT}.localhost
+          datadir: /var/www/html/data
+          # Important : trusted domains
+          configs:
+            custom.config.php: |-
+              <?php
+              $CONFIG = array(
+                'trusted_domains' => [
+                  '${VHOST}.${TENANT}.localhost'
+                ],
+                'overwrite.cli.url' => 'https://${VHOST}.${TENANT}.localhost',
+                'overwriteprotocol' => 'https',
+              );
+          extraInitContainers:
+            - name: patch-config
+              image: busybox
+              command:
+                - sh
+                - -c
+                - |
+                  cat > /var/www/html/config/local.config.php << 'EOF'
+                  <?php
+                  $CONFIG = array(
+                    'overwrite.cli.url' => 'https://${VHOST}.${TENANT}.localhost',
+                    'overwriteprotocol' => 'https',
+                    'trusted_domains' => ['${VHOST}.${TENANT}.localhost'],
+                    'dbhost' => '${TENANT}-${SERVICE}-mariadb',
+                    'dbname' => '${SERVICE}',
+                    'dbuser' => '${SERVICE}',
+                    'dbpassword' => '${SERVICE}',
+                  );
+                  EOF
+              volumeMounts:
+                - name: nextcloud-main
+                  mountPath: /var/www/html
+        ingress:
+          enabled: true
+          className: traefik
+          annotations:
+            cert-manager.io/cluster-issuer: mkcert
+          hosts:
+            - host: ${VHOST}.${TENANT}.localhost
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: ${VHOST}.${TENANT}.localhost-tls
+              hosts:
+                - ${VHOST}.${TENANT}.localhost
+
+  restore:
+    kubectl:
+      inlineManifest: |-
+        apiVersion: k8up.io/v1
+        kind: Restore
+        metadata:
+          name: ${TENANT}-${SERVICE}
+        spec:
+          snapshot: ${PENULTIMATE_SNAPSHOT}
+          podSecurityContext:
+            runAsUser: 33
+            fsGroup: 33
+            fsGroupChangePolicy: OnRootMismatch
+          restoreMethod:
+            folder:
+              claimName: ${TENANT}-${SERVICE}-${SERVICE}
+          backend:
+            repoPasswordSecretRef:
+              name: s3-ovh
+              key: RESTIC_PASSWORD
+            s3:
+              endpoint: https://s3.sbg.io.cloud.ovh.net
+              bucket: backup-${SERVER}-${TENANT}-${SERVICE}
+              accessKeyIDSecretRef:
+                name: s3-ovh
+                key: AWS_ACCESS_KEY_ID
+              secretAccessKeySecretRef:
+                name: s3-ovh
+                key: AWS_SECRET_ACCESS_KEY
+
+functions:
+  download_sql_dump: |-
+    set -a && source ~/.config/restic/restic.env && set +a && \
+    restic -r "s3:https://s3.sbg.io.cloud.ovh.net/backup-${SERVER}-${TENANT}-${SERVICE}" \
+      restore latest \
+      --target /tmp/restore \
+      --include "*.sql"
+
+  restore_sql_dump: |-
+    FILE_PATH=/tmp/restore/${TENANT}-${SERVICE}-nextcloud-db-dump.sql
+    kubectl exec -i ${TENANT}-${SERVICE}-mariadb-0 -c mariadb -- \
+      sh -c 'mariadb -u nextcloud -p"nextcloud" nextcloud' < ${FILE_PATH}
+    # rm -rf ${FILE_PATH}
+
+  remove_pvcs: |-
+    kubectl --context local delete pvc \
+      $(kubectl --context local get pvc -l app.kubernetes.io/instance=${TENANT}-${SERVICE},app.kubernetes.io/name=wordpress) \
+      $PVC_NAME 2>/dev/null || true
+    kubectl --context local delete pvc \
+      $(kubectl --context local get pvc -l app.kubernetes.io/instance=${TENANT}-${SERVICE},app.kubernetes.io/name=mariadb) \
+      $PVC_NAME 2>/dev/null || true

@@ -1,0 +1,87 @@
+version: v2beta1
+
+vars:
+  NAMESPACE: default
+  DEVSPACE_CONTEXT:
+    default: local
+  SERVER: srv1515851
+  BASE_DIR: ${DEVSPACE_USER_HOME}/work
+  S3_SECRET_PATH: ${BASE_DIR}/flux-fleet/infrastructure/controllers/base/secrets/s3-ovh.enc.yaml
+
+imports:
+  - path: ./le-portail/wordpress-epilibres/devspace.yaml
+    enabled: true
+  - path: ./le-portail/wordpress-site/devspace.yaml
+    enabled: true
+  - path: ./le-portail/dolibarr/devspace.yaml
+    enabled: true
+  - path: ./le-portail/alterconso/devspace.yaml
+    enabled: true
+  - path: ./ferme-du-jointout/wordpress-site/devspace.yaml
+    enabled: true
+  - path: ./ferme-du-jointout/dolibarr/devspace.yaml
+    enabled: true
+  - path: ./la-bergeronnette/wordpress-site/devspace.yaml
+    enabled: true
+
+pipelines:
+  deploy: run_pipelines deploy-all
+  purge: run_pipelines purge-all
+  restore: run_pipelines restore-all
+  deploy-all: |-
+    create_deployments k8up
+    devspace run-pipeline deploy --config le-portail/wordpress-epilibres/devspace.yaml &
+    devspace run-pipeline deploy --config le-portail/wordpress-site/devspace.yaml &
+    wait
+    # devspace run-pipeline deploy --config le-portail/dolibarr/devspace.yaml
+    # devspace run-pipeline deploy --config le-portail/alterconso/devspace.yaml
+    # devspace run-pipeline deploy --config le-portail/grist/devspace.yaml
+    # devspace run-pipeline deploy --config ferme-du-jointout/wordpress-site/devspace.yaml
+    # devspace run-pipeline deploy --config ferme-du-jointout/dolibarr/devspace.yaml
+    # devspace run-pipeline deploy --config ferme-du-jointout/nextcloud/devspace.yaml
+    # devspace run-pipeline deploy --config la-bergeronnette/wordpress-site/devspace.yaml
+  restore-all: |-
+    devspace run-pipeline restore --config le-portail/wordpress-epilibres/devspace.yaml
+    devspace run-pipeline restore --config le-portail/wordpress-site/devspace.yaml
+    devspace run-pipeline restore --config le-portail/dolibarr/devspace.yaml
+    devspace run-pipeline restore --config le-portail/alterconso/devspace.yaml
+    devspace run-pipeline restore --config le-portail/grist/devspace.yaml
+    devspace run-pipeline restore --config ferme-du-jointout/wordpress-site/devspace.yaml
+    devspace run-pipeline restore --config ferme-du-jointout/dolibarr/devspace.yaml
+    devspace run-pipeline restore --config ferme-du-jointout/nextcloud/devspace.yaml
+    devspace run-pipeline restore --config la-bergeronnette/wordpress-site/devspace.yaml
+  purge-all: |-
+    devspace run-pipeline purge --config le-portail/wordpress-epilibres/devspace.yaml &
+    devspace run-pipeline purge --config le-portail/wordpress-site/devspace.yaml &
+    wait
+    # devspace run-pipeline purge --config le-portail/dolibarr/devspace.yaml
+    # devspace run-pipeline purge --config le-portail/alterconso/devspace.yaml
+    # devspace run-pipeline purge --config le-portail/grist/devspace.yaml
+    # devspace run-pipeline purge --config ferme-du-jointout/wordpress-site/devspace.yaml
+    # devspace run-pipeline purge --config ferme-du-jointout/dolibarr/devspace.yaml
+    # devspace run-pipeline purge --config ferme-du-jointout/nextcloud/devspace.yaml
+    # devspace run-pipeline purge --config la-bergeronnette/wordpress-site/devspace.yaml
+
+  test-deploy: |-
+    create_deployments k8up
+    
+  test-restore: |-
+    devspace run-pipeline restore --config ferme-du-jointout/nextcloud/devspace.yaml
+  test-purge: |-
+    devspace run-pipeline purge --config ferme-du-jointout/nextcloud/devspace.yaml
+
+hooks:
+  - command: sops --decrypt ${S3_SECRET_PATH} | yq '.metadata.namespace = "${NAMESPACE}"' | kubectl apply -f -
+    events: ["before:deploy:k8up"]
+    silent: true
+
+deployments:
+  k8up:
+    helm:
+      chart:
+        repo: https://k8up-io.github.io/k8up
+        name: k8up
+        version: 4.8.6
+      values:
+        k8up:
+          skipWithoutAnnotation: true
