@@ -7,6 +7,7 @@ resources:
   - secrets.enc.yaml
   - backup-pod-config.yaml
 patches:
+  # Rename the helm release
   - target:
       kind: HelmRelease
       name: wordpress
@@ -14,10 +15,12 @@ patches:
       - op: replace
         path: /metadata/name
         value: le-portail-wordpress-site
+  # Overrides the helm release values.yaml
   - target:
       kind: HelmRelease
       name: le-portail-wordpress-site
     path: values.yaml
+  # Overrides the namespace name
   - target:
       kind: Namespace
       name: le-portail-wordpress
@@ -25,3 +28,19 @@ patches:
       - op: replace
         path: /metadata/name
         value: le-portail-wordpress-site
+  # Add the k8up backup annotation to the PVC
+  - target:
+      kind: PersistentVolumeClaim
+      namespace: le-portail-wordpress-site
+    patch: |-
+      - op: add
+        path: /metadata/annotations/k8up.io~1backup
+        value: "true"
+  # Overrides the k8up bucket values with subPath
+  - target:
+      kind: Schedule
+      name: wordpress
+    patch: |-
+      - op: replace
+        path: /spec/backend/s3/bucket
+        value: "backup-srv1515851-le-portail-wordpress-site"
