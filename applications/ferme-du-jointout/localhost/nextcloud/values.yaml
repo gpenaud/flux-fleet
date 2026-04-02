@@ -5,63 +5,42 @@ metadata:
 spec:
   values:
     internalDatabase:
-      enabled: false
-    externalDatabase:
       enabled: true
-      type: mysql
-      host: nextcloud-mariadb.ferme-du-jointout-nextcloud.svc.cluster.local
-      database: nextcloud
-      user: ""
-      password: ""
-      existingSecret: 
-        enabled: true
-        secretName: nextcloud
-        usernameKey: mariadb-username
-        passwordKey: mariadb-password
     mariadb:
       enabled: true
       auth:
         database: nextcloud
         username: nextcloud
-        password: ""
+        password: nextcloud
     persistence:
       enabled: true
       storageClass: "local-path"
       accessMode: ReadWriteOnce
-      size: 10Gi
+      size: 15Gi
     nextcloud:
-      host: nextcloud.gpenaud.localhost
+      username: nextcloud
+      password: nextcloud
+      host: nextcloud.ferme-du-jointout.localhost
       datadir: /var/www/html/data
-      # Important : trusted domains
       configs:
         custom.config.php: |-
           <?php
           $CONFIG = array(
-            'trusted_domains' => ['nextcloud.gpenaud.localhost'],
-            'overwrite.cli.url' => 'https://nextcloud.gpenaud.localhost',
+            'trusted_domains' => ['nextcloud.ferme-du-jointout.localhost'],
+            'overwrite.cli.url' => 'https://nextcloud.ferme-du-jointout.localhost',
             'overwriteprotocol' => 'https',
           );
-      existingSecret:
-        enabled: true
-        secretName: nextcloud
-        usernameKey: nextcloud-username
-        passwordKey: nextcloud-password
     ingress:
       enabled: true
       className: traefik
       annotations:
-        cert-manager.io/cluster-issuer: "mkcert-issuer"
+        cert-manager.io/cluster-issuer: mkcert
       hosts:
-        - host: nextcloud.gpenaud.localhost
+        - host: nextcloud.ferme-du-jointout.localhost
           paths:
             - path: /
               pathType: Prefix
       tls:
-        - secretName: nextcloud.gpenaud.localhost
+        - secretName: nextcloud.ferme-du-jointout.localhost
           hosts:
-            - nextcloud.gpenaud.localhost
-  valuesFrom:
-    - kind: Secret
-      name: nextcloud
-      valuesKey: mariadb-password
-      targetPath: mariadb.auth.password
+            - nextcloud.ferme-du-jointout.localhost

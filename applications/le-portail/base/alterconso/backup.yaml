@@ -9,7 +9,7 @@ spec:
       key: RESTIC_PASSWORD
     s3:
       endpoint: https://s3.sbg.io.cloud.ovh.net 
-      bucket: le-portail-alterconso-backups
+      bucket: ""
       accessKeyIDSecretRef:
         name: s3-ovh
         key: AWS_ACCESS_KEY_ID
