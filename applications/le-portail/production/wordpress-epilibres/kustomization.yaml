@@ -27,6 +27,14 @@ patches:
       - op: replace
         path: /metadata/name
         value: le-portail-wordpress-epilibres
+  # Add the k8up backup annotation to the PVC
+  - target:
+      kind: PersistentVolumeClaim
+      namespace: le-portail-wordpress-epilibres
+    patch: |-
+      - op: add
+        path: /metadata/annotations/k8up.io~1backup
+        value: "true"
   # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
