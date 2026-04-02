@@ -21,10 +21,10 @@ tasks:
           sh -c 'mysqldump --hex-blob --no-tablespaces -u root -p"{{.MYSQL_ROOT_PASSWORD}}" {{.MYSQL_DATABASE}} \
           > /tmp/backup.sql'
       - kubectl --context le-portail cp --retries=-1 alterconso-database-0:/tmp/backup.sql ./alterconso-last-backup-from-production.sql
-      - |
-        kubectl --context local --namespace le-portail-alterconso exec -i statefulsets/alterconso-database -- \
-          mysql -u {{.MYSQL_USER}} -p{{.MYSQL_PASSWORD}} --binary-mode \
-          --max_allowed_packet=64M {{.MYSQL_DATABASE}} < ./alterconso-last-backup-from-production.sql
+      # - |
+      #   kubectl --context local --namespace le-portail-alterconso exec -i statefulsets/alterconso-database -- \
+      #     mysql -u {{.MYSQL_USER}} -p{{.MYSQL_PASSWORD}} --binary-mode \
+      #     --max_allowed_packet=64M {{.MYSQL_DATABASE}} < ./alterconso-last-backup-from-production.sql
     silent: true
 
   .wordpress:

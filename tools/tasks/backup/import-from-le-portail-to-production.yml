@@ -1,0 +1,301 @@
+version: '3'
+
+vars:
+  LE_PORTAIL_PATH: applications/le-portail/production
+  BASE_PATH: ~/work/flux-feet/applications
+
+tasks:
+  le-portail:alterconso:
+    desc: Backup & import alterconso from production to production
+    cmds:
+      # - |
+      #   echo "Decrypting secrets..."
+      #   _secrets=$(sops --decrypt --ignore-mac "applications/le-portail/production/alterconso/secrets.enc.yaml")
+      #   MYSQL_USER=$(echo "$_secrets" | yq -r '.stringData.MYSQL_USER')
+      #   MYSQL_PASSWORD=$(echo "$_secrets" | yq -r '.stringData.MYSQL_PASSWORD')
+      #   MYSQL_ROOT_PASSWORD=$(echo "$_secrets" | yq -r '.stringData.MYSQL_ROOT_PASSWORD')
+      #   MYSQL_DATABASE=$(echo "$_secrets" | yq -r '.stringData.MYSQL_DATABASE')
+
+      #   kubectl --context le-portail exec statefulsets/alterconso-database -- \
+      #     sh -c 'mysqldump --hex-blob --no-tablespaces -u root -p"${MYSQL_ROOT_PASSWORD}" "${MYSQL_DATABASE}" \
+      #     > /tmp/backup.sql'
+      # - kubectl --context le-portail cp --retries=-1 alterconso-database-0:/tmp/backup.sql ~/work/backups/le-portail-alterconso.sql
+      - |
+        echo "Decrypting secrets..."
+        _secrets=$(sops --decrypt --ignore-mac "applications/le-portail/production/alterconso/secrets.enc.yaml")
+        MYSQL_USER=$(echo "$_secrets" | yq -r '.stringData.MYSQL_USER')
+        MYSQL_PASSWORD=$(echo "$_secrets" | yq -r '.stringData.MYSQL_PASSWORD')
+        MYSQL_ROOT_PASSWORD=$(echo "$_secrets" | yq -r '.stringData.MYSQL_ROOT_PASSWORD')
+        MYSQL_DATABASE=$(echo "$_secrets" | yq -r '.stringData.MYSQL_DATABASE')
+
+        kubectl --context production --namespace le-portail-alterconso exec -i statefulsets/alterconso-database -- \
+          mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --binary-mode \
+          --max_allowed_packet=64M "$MYSQL_DATABASE" < ~/work/backups/le-portail-alterconso.sql
+    silent: true
+
+  ferme-du-jointout:owncloud:upload:
+    desc: Upload owncloud from production to production
+    cmds:
+      - |
+        kubectl --context production --namespace ferme-du-jointout-nextcloud  exec deploy/nextcloud -- sh -c '\
+          php occ config:system:set password_policy.enforceNonCommonPassword --value=false --type=bool &&
+          php occ config:system:set password_policy.minLength --value=1 --type=integer &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="gaec" --password-from-env "gaec" &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="viti" --password-from-env "viti" &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="youte" --password-from-env "youte" &&
+          OC_PASS="Jointout2018$" php occ user:add --display-name="cfppa" --password-from-env "cfppa" &&
+          php occ config:system:set password_policy.enforceNonCommonPassword --value=true --type=bool &&
+          php occ config:system:set password_policy.minLength --value=10 --type=integer
+        '
+      - |  
+        kubectl run rsync-upload \
+          --image=instrumentisto/rsync-ssh \
+          --namespace=ferme-du-jointout-nextcloud \
+          --overrides='{
+            "spec": {
+              "volumes": [{"name":"data","persistentVolumeClaim": {"claimName":"nextcloud-nextcloud"}}],
+              "containers": [{
+                "name": "rsync-upload",
+                "image": "instrumentisto/rsync-ssh",
+                "command": ["tail","-f","/dev/null"],
+                "volumeMounts": [{"mountPath":"/data","name":"data"}]
+              }]
+            }
+          }'
+      - |
+        # Copier les fichiers de chaque utilisateur
+        sleep 15 # Attendre que le pod soit prêt
+        for user in gaec viti youte cfppa; do
+          kubectl --context production -n ferme-du-jointout-nextcloud exec rsync-upload -- mkdir -p /data/data/$user/files
+          kubectl --context production -n ferme-du-jointout-nextcloud cp ~/work/backups/owncloud_data_backup/$user/files/. \
+            rsync-upload:/data/data/$user/files/
+        done
+        kubectl --context production -n ferme-du-jointout-nextcloud exec rsync-upload -- chown -R 33:33 /data/data/
+      - |
+        # Supprimer le pod temporaire
+        kubectl --context production delete pod rsync-upload -n ferme-du-jointout-nextcloud &
+      - |
+        # Scanner les fichiers
+        kubectl --context production -n ferme-du-jointout-nextcloud exec -it deploy/nextcloud -- \
+          php occ files:scan --all
+
+  ferme-du-jointout:dolibarr:
+    desc: Backup le-portail dolibarr from production to production
+    # silent: true
+    vars:
+      SSH_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.SSH_PASSWORD'
+      MYSQL_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.MYSQL_PASSWORD'
+    cmds:
+      - |
+          sshpass -p "{{.SSH_PASSWORD}}" ssh root@ns381126.ip-5-196-71.eu \
+            "MYSQL_PWD='{{.MYSQL_PASSWORD}}' mysqldump -u root Dolibarr --single-transaction \
+              --disable-keys --no-tablespaces" > ~/work/backups/ferme-du-jointout-dolibarr.sql
+      - |  
+          sshpass -p "{{.SSH_PASSWORD}}" ssh root@ns381126.ip-5-196-71.eu \
+            tar -czvf - -C /home/www/dolibarr documents htdocs\
+            > ~/work/backups/ferme-du-jointout-dolibarr.tgz} -p$(cat ${MARIADB_PASSWORD_FILE}) ${MARIADB_DATABASE}' < ~/work/backups/ferme-du-jointout-dolibarr.sql
+      - |
+        echo "Updates backup..."
+        sed -i '23s/^/SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";\n/' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        sed -i '26s/^/DROP TABLE IF EXISTS `llx_accounting_system`;\n/' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        sed -i '3603s/,$//' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        sed -i '3604d' ~/work/backups/ferme-du-jointout-dolibarr.sql
+        
+        echo "Decrypting secrets..."
+        _secrets=$(sops --decrypt --ignore-mac "applications/ferme-du-jointout/production/dolibarr/secrets.enc.yaml")
+        MYSQL_USER=$(echo "$_secrets" | yq -r '.stringData["mariadb-user"]')
+        MYSQL_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-password"]')
+        MYSQL_ROOT_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-root-password"]')
+        MYSQL_DATABASE=$(echo "$_secrets" | yq -r '.stringData["mariadb-database"]')
+        
+        echo "Restore mysql..."
+        echo $MYSQL_USER
+        kubectl --context production --namespace controller-mysql-operator exec -i mysql-version-8-lts-0 -c mysql -- \
+          mysql -u root -p"***REMOVED***" ${MYSQL_DATABASE} < ~/work/backups/ferme-du-jointout-dolibarr.sql
+      - kubectl --context production -n ferme-du-jointout-dolibarr cp  ~/work/backups/ferme-du-jointout-dolibarr.tgz $(kubectl --context production -n ferme-du-jointout-dolibarr get pods -l  app.kubernetes.io/name=dolibarr -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.tgz
+      - |
+        kubectl --context production -n ferme-du-jointout-dolibarr exec deploy/dolibarr -- sh -c '\
+          # mv /var/www/html/conf/conf.php /tmp/conf.php &&
+          # tar -C /var/www/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          # mv /tmp/conf.php /var/www/html/conf/conf.php && 
+          # rm /tmp/backup.tgz
+          rm /var/www/documents/install.lock
+        '
+
+  ferme-du-jointout:wordpress-site:
+    desc: Backup le-portail wordpress from le-portail to production
+    silent: true
+    cmds:
+      # - |
+      #   sshpass -p "{{.SSH_PASSWORD}}" ssh root@ns381126.ip-5-196-71.eu \
+      #     "MYSQL_PWD='{{.MYSQL_PASSWORD}}' mysqldump -u root gaec --single-transaction \
+      #       --disable-keys --no-tablespaces" > ~/work/backups/ferme-du-jointout-wordpress-gaec.sql
+      # - |  
+      #     sshpass -p "{{.SSH_PASSWORD}}" ssh root@ns381126.ip-5-196-71.eu \
+      #       tar -czvf - -C /home/gaec .\
+      #       > ~/work/backups/ferme-du-jointout-wordpress-gaec.tgz
+      - |
+        echo "Decrypting secrets..."
+        _secrets=$(sops --decrypt --ignore-mac "applications/ferme-du-jointout/production/wordpress-site/secrets.enc.yaml")
+        MYSQL_USER=$(echo "$_secrets" | yq -r '.stringData["mariadb-user"]')
+        MYSQL_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-password"]')
+        MYSQL_ROOT_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-root-password"]')
+        MYSQL_DATABASE=$(echo "$_secrets" | yq -r '.stringData["mariadb-database"]')
+        
+        echo "Restore mysql..."
+        echo $MYSQL_USER
+        kubectl --context production --namespace controller-mysql-operator exec -i mysql-version-8-lts-0 -c mysql -- \
+          mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} < ~/work/backups/ferme-du-jointout-wordpress-gaec.sql
+      - |
+        echo "Restore wordpress data..."
+        kubectl --context production --namespace ferme-du-jointout-wordpress-site cp ~/work/backups/ferme-du-jointout-wordpress-gaec.tgz {{.LOCAL_WP_POD}}:/tmp/backup.tgz -c wordpress
+      - |
+        kubectl --context production --namespace ferme-du-jointout-wordpress-site exec -i {{.LOCAL_WP_POD}} -c wordpress -- bash -c "
+          mv /bitnami/wordpress/wp-config.php /tmp/wp-config.php && 
+          tar -C /bitnami/wordpress/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          mv /tmp/wp-config.php /bitnami/wordpress/wp-config.php &&
+          rm /tmp/backup.tgz
+        "
+    vars:
+      SSH_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.SSH_PASSWORD'
+      MYSQL_PASSWORD:
+        sh: sops -d tasks/backup/secrets.enc.yaml | yq -r '.MYSQL_PASSWORD'
+      LOCAL_WP_POD:
+        sh: kubectl --context production --namespace ferme-du-jointout-wordpress-site get pod -l app.kubernetes.io/name=wordpress -o jsonpath="{.items[0].metadata.name}"
+  
+  .wordpress:
+    internal: true
+    silent: true
+    desc: Backup & import wordpress from production to local
+    vars:
+      # SOURCE_WP_POD:
+      #   sh: kubectl --context le-portail get pod -l app.kubernetes.io/name={{.APPLICATION}} -o jsonpath="{.items[0].metadata.name}"
+      # SOURCE_DB_POD:
+      #   sh: kubectl --context le-portail get pod -l app={{.APPLICATION}}-database -o jsonpath="{.items[0].metadata.name}"
+      # DB_SECRET:
+      #   sh: kubectl --context le-portail get secret --namespace default {{.APPLICATION}}-database -o jsonpath="{.data.MARIADB_PASSWORD}" | base64 --decode
+      LOCAL_WP_POD:
+        sh: kubectl --context production --namespace {{.TENANT}}-{{.SERVICE}} get pod -l app.kubernetes.io/name=wordpress -o jsonpath="{.items[0].metadata.name}"
+    cmds:
+      # - |
+      #   echo "Backup mysql..."
+      #   kubectl --context le-portail exec {{.SOURCE_DB_POD}} -- sh -c 'mariadb-dump -u wordpress -p"{{.DB_SECRET}}" wordpress > /tmp/backup.sql'
+      #   kubectl --context le-portail cp --retries=-1 {{.SOURCE_DB_POD}}:/tmp/backup.sql ./backup.sql
+      #   kubectl --context le-portail exec {{.SOURCE_DB_POD}} -- rm /tmp/backup.sql
+      # - |
+      #   echo "Backup wordpress data..."
+      #   WORDPRESS_POD_NAME=$(kubectl --context le-portail get pod -l app.kubernetes.io/instance={{.APPLICATION}} -o jsonpath="{.items[0].metadata.name}")
+      #   kubectl --context le-portail exec -i "${WORDPRESS_POD_NAME}" -- tar -C /var/www/html/ -czvf - . > ./backups-data.tgz
+      - |
+        echo "Decrypting secrets..."
+        _secrets=$(sops --decrypt --ignore-mac "applications/{{.TENANT}}/production/{{.SERVICE}}/secrets.enc.yaml")
+        MYSQL_USER=$(echo "$_secrets" | yq -r '.stringData["mariadb-user"]')
+        MYSQL_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-password"]')
+        MYSQL_ROOT_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-root-password"]')
+        MYSQL_DATABASE=$(echo "$_secrets" | yq -r '.stringData["mariadb-database"]')
+        
+        echo "Restore mysql..."
+        kubectl --context production --namespace controller-mysql-operator exec -i mysql-version-8-lts-0 -c mysql -- \
+          mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} < ~/work/backups/{{ .TENANT }}-{{ .SERVICE }}.sql
+      # - |
+      #   kubectl -n controller-mysql-operator delete pods mysql-client || /bin/true
+      #   kubectl run mysql-client --rm -i \
+      #     --image=mysql:8.4.3 \
+      #     --namespace=controller-mysql-operator \
+      #     --restart=Never \
+      #     -- mysql -h mysql-version-8-lts.controller-mysql-operator.svc.cluster.local \
+      #       -u le-portail -p'***REMOVED***' le-portail < ./backup.sql
+      - |
+        echo "Restore wordpress data..."
+        kubectl --context production --namespace {{.TENANT}}-{{.SERVICE}} cp --retries=-1 ~/work/backups/{{ .TENANT }}-{{ .SERVICE }}.tgz {{.LOCAL_WP_POD}}:/tmp/backup.tgz -c wordpress
+      - |
+        kubectl --context production --namespace {{.TENANT}}-{{.SERVICE}} exec -i {{.LOCAL_WP_POD}} -c wordpress -- bash -c "
+          mv /bitnami/wordpress/wp-config.php /tmp/wp-config.php && 
+          tar -C /bitnami/wordpress/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          mv /tmp/wp-config.php /bitnami/wordpress/wp-config.php &&
+          rm /tmp/backup.tgz
+        "
+      # - |
+      #   echo "Cleaning up local backup files..."
+      #   rm ./backup.sql ./backups-data.tgz
+
+  le-portail:wordpress-site:
+    desc: Backup & import le portail wordpress site from production to local
+    cmds:
+      - task: .wordpress
+        vars:
+          TENANT: le-portail
+          SERVICE: wordpress-site
+          MYSQL_PASSWORD:
+            sh: sops -d "applications/le-portail/production/wordpress-site/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+
+  le-portail:wordpress-epilibres:
+    desc: Backup & import epilibres wordpress from production to local
+    cmds:
+      - task: .wordpress
+        vars:
+          TENANT: le-portail
+          SERVICE: wordpress-epilibres
+          MYSQL_PASSWORD:
+            sh: sops -d "applications/le-portail/production/wordpress-epilibres/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+
+
+  la-bergeronnette:wordpress-site:
+    desc: Backup & import la-bergeronnette wordpress from production to local
+    cmds:
+      - task: .wordpress
+        vars:
+          TENANT: la-bergeronnette
+          SERVICE: wordpress-site
+          MYSQL_PASSWORD:
+            sh: sops -d "applications/la-bergeronnette/production/wordpress-site/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+
+  le-portail:dolibarr:
+    desc: Backup le-portail dolibarr from production to production
+    # silent: true
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/le-portail/production/dolibarr/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    cmds:
+      - |
+        kubectl --context le-portail exec sts/dolibarr-database -c dolibarr -- \
+          sh -c 'mariadb-dump -u dolibarr -p"{{.MYSQL_PASSWORD}}" dolibarr --single-transaction --disable-keys --no-tablespaces > /tmp/backup.sql'
+      - |
+        kubectl --context le-portail cp -c dolibarr --retries=-1 \
+          $(kubectl --context le-portail get pods -l app=dolibarr-database -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.sql \
+          ~/work/backups/le-portail-dolibarr.sql
+      - |
+          kubectl --context le-portail exec -i deploy/dolibarr -c dolibarr -- \
+            tar -czvf - -C /var/www/ documents html/custom/ html/conf/conf.php\
+            > ~/work/backups/le-portail-dolibarr.tgz
+      - |
+        # echo "Updates backup..."
+        # sed -i '23s/^/SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";\n/' ~/work/backups/le-portail-dolibarr.sql
+        # sed -i '26s/^/DROP TABLE IF EXISTS `llx_accounting_system`;\n/' ~/work/backups/le-portail-dolibarr.sql
+        # sed -i '3603s/,$//' ~/work/backups/le-portail-dolibarr.sql
+        # sed -i '3604d' ~/work/backups/le-portail-dolibarr.sql
+        sed -i '1{/999999/d}' ~/work/backups/le-portail-dolibarr.sql
+
+        
+        echo "Decrypting secrets..."
+        _secrets=$(sops --decrypt --ignore-mac "applications/le-portail/production/dolibarr/secrets.enc.yaml")
+        MYSQL_USER=$(echo "$_secrets" | yq -r '.stringData["mariadb-user"]')
+        MYSQL_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-password"]')
+        MYSQL_ROOT_PASSWORD=$(echo "$_secrets" | yq -r '.stringData["mariadb-root-password"]')
+        MYSQL_DATABASE=$(echo "$_secrets" | yq -r '.stringData["mariadb-database"]')
+
+        echo "Restore mysql..."
+        kubectl --context production --namespace controller-mysql-operator exec -i mysql-version-8-lts-0 -c mysql -- \
+          mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} < ~/work/backups/le-portail-dolibarr.sql   
+      - kubectl --context production -n le-portail-dolibarr cp  ~/work/backups/le-portail-dolibarr.tgz $(kubectl --context production -n le-portail-dolibarr get pods -l  app.kubernetes.io/name=dolibarr -o jsonpath='{.items[0].metadata.name}'):/tmp/backup.tgz
+      - |
+        kubectl --context production -n le-portail-dolibarr exec deploy/dolibarr -- sh -c '\
+          mv /var/www/html/conf/conf.php /tmp/conf.php &&
+          tar -C /var/www/ -xzvf /tmp/backup.tgz --strip-components=1 &&
+          mv /tmp/conf.php /var/www/html/conf/conf.php && 
+          rm /tmp/backup.tgz
+          rm /var/www/documents/install.lock
+        '

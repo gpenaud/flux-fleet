@@ -1,0 +1,92 @@
+version: '3'
+
+tasks:
+  connect:as-root:
+    desc: Connect to database as root user
+    cmds:
+      - |
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -c mysql -- \
+          mysqlsh root:{{.MYSQL_PASSWORD}}@localhost --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "infrastructure/controllers/base/secrets/mysql-operator.enc.yaml" | yq '.stringData["rootPassword"] | select(. != null)'
+    silent: true
+
+
+  connect:le-portail:wordpress-site:
+    desc: Connect to le-portail wordpress-site database
+    cmds:
+      - |
+        echo {{.MYSQL_PASSWORD}}
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -- \
+          mysqlsh le-portail:{{.MYSQL_PASSWORD}}@localhost/lp-wp-site --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/le-portail/production/wordpress-site/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    silent: true
+      
+  connect:ferme-du-jointout:nextcloud:
+    desc: Connect to nextcloud database
+    cmds:
+      - |
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -- \
+          mysqlsh nextcloud:'{{.MYSQL_PASSWORD}}'@localhost/fdj-nextcloud --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/ferme-du-jointout/production/nextcloud/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    silent: true
+
+  connect:ferme-du-jointout:wordpress-site:
+    desc: Connect to ferme-du-jointout wordpress-site database
+    cmds:
+      - |
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -- \
+          mysqlsh ferme-du-jointout:{{.MYSQL_PASSWORD}}@localhost/fdj-wp-site --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/ferme-du-jointout/production/wordpress-site/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    silent: true
+
+  connect:ferme-du-jointout:dolibarr:
+    desc: Connect to ferme-du-jointout dolibarr database
+    cmds:
+      - |
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -- \
+          mysqlsh ferme-du-jointout:{{.MYSQL_PASSWORD}}@localhost/fdj-dolibarr --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/ferme-du-jointout/production/dolibarr/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    silent: true
+  
+  connect:le-portail:dolibarr:
+    desc: Connect to le-portail dolibarr database
+    cmds:
+      - |
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -- \
+          mysqlsh le-portail:{{.MYSQL_PASSWORD}}@localhost/lp-dolibarr --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/le-portail/production/dolibarr/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    silent: true
+
+  connect:la-bergeronnette:wordpress-site:
+    desc: Connect to la-bergeronnette wordpress-site database
+    cmds:
+      - |
+        kubectl exec -it mysql-version-8-lts-0 -n controller-mysql-operator -- \
+          mysqlsh la-bergeronnette:{{.MYSQL_PASSWORD}}@localhost/lb-wp-site --sql
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/la-bergeronnette/production/wordpress-site/secrets.enc.yaml" | yq '.stringData["mariadb-password"] | select(. != null)'
+    silent: true
+
+  connect:le-portail:alterconso:
+    desc: Connect to le-portail alterconso database
+    cmds:
+      - |
+        kubectl --context production exec -it alterconso-database-0 -n le-portail-alterconso -- \
+          mysql -u alterconso -p"{{.MYSQL_PASSWORD}}" -h localhost alterconso
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops -d "applications/le-portail/production/alterconso/secrets.enc.yaml" | yq '.stringData["MYSQL_PASSWORD"] | select(. != null)'
+    silent: true

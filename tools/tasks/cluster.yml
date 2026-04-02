@@ -1,10 +1,16 @@
 version: '3'
 
 tasks:
-  recreate:
-    desc: Force k3s redployment with flux
+  recreate:flux:
+    desc: Force k3s local redeployment with flux
     cmds:
-      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook ${ANSIBLE_PATH}/playbooks/install-k3s-with-flux.yml'
+      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook -i ${ANSIBLE_PATH}/inventories/localhost/hosts.yml ${ANSIBLE_PATH}/playbooks/install-k3s-with-flux.yml --tags flux'
+    silent: true
+
+  recreate:lab:
+    desc: Force k3s local redeployment for lab
+    cmds:
+      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook -i ${ANSIBLE_PATH}/inventories/localhost/hosts.yml ${ANSIBLE_PATH}/playbooks/install-k3s-lab.yml'
     silent: true
 
   encrypt:
