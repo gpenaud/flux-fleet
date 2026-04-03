@@ -1,0 +1,92 @@
+site_name: Flux Fleet
+site_description: Infrastructure GitOps multi-tenant Kubernetes
+docs_dir: docs
+
+theme:
+  name: material
+  language: fr
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Mode sombre
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Mode clair
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search:
+      lang: fr
+  - mermaid2
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - tables
+
+nav:
+  - Accueil: index.md
+  - Démarrage: getting-started.md
+  - Architecture:
+    - Vue d'ensemble: architecture/overview.md
+    - Flux GitOps: architecture/gitops-flow.md
+    - Gestion des secrets: architecture/secrets.md
+  - Clusters:
+    - Localhost: clusters/localhost.md
+    - Production: clusters/production.md
+  - Infrastructure:
+    - Contrôleurs: infrastructure/controllers.md
+    - Configurations: infrastructure/configurations.md
+    - Stockage (Longhorn): infrastructure/storage.md
+    - Ingress (Traefik): infrastructure/ingress.md
+  - Tenants:
+    - Multi-tenancy: tenants/overview.md
+    - ferme-du-jointout: tenants/ferme-du-jointout.md
+    - la-bergeronnette: tenants/la-bergeronnette.md
+    - le-portail: tenants/le-portail.md
+  - Applications:
+    - Patterns & Overlays: applications/overview.md
+    - Dolibarr: applications/dolibarr.md
+    - WordPress: applications/wordpress.md
+    - Nextcloud: applications/nextcloud.md
+    - Grist: applications/grist.md
+    - Alterconso: applications/alterconso.md
+  - Sauvegardes:
+    - Stratégie: backups/overview.md
+    - Planifications: backups/schedules.md
+    - Restauration: backups/restore.md
+  - Opérations:
+    - Taskfile: operations/taskfile.md
+    - Réconciliation: operations/reconcile.md
+    - Troubleshooting: operations/troubleshooting.md
+  - Référence:
+    - Sources Helm: reference/helm-sources.md
+    - Environnements: reference/environments.md
