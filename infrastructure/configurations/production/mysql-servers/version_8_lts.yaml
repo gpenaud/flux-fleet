@@ -10,5 +10,18 @@ spec:
   tlsUseSelfSigned: true
   version: "8.4.3"
   edition: community
+  mycnf: |
+    [mysqld]
+    performance_schema=OFF
+    innodb_buffer_pool_size=256M
+    tmp_table_size=32M
+    max_heap_table_size=32M
+    max_connections=50
+  podSpec:
+    resources:
+      requests:
+        memory: "512Mi"
+      limits:
+        memory: "1Gi"
   router:
     instances: 1
