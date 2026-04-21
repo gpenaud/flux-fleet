@@ -25,13 +25,20 @@ spec:
     ingress:
       enabled: true
       ingressClassName: traefik
-      hostname: epi-libres.leportail.org
+      hostname: epilibres.leportail.org
+      extraHosts:
+        - name: epi-libres.leportail.org
+          path: /
+        - name: epis-libres.leportail.org
+          path: /
       annotations:
         kubernetes.io/ingress.class: traefik
         cert-manager.io/cluster-issuer: letsencrypt-production
       extraTls:
         - hosts:
+            - epilibres.leportail.org
             - epi-libres.leportail.org
+            - epis-libres.leportail.org
           secretName: epi-libres.leportail.org-tls
     resourcesPreset: "none"
     resources:
