@@ -6,7 +6,7 @@ spec:
   values:
     replicaCount: 1
     image:
-      tag: 23.0.0
+      tag: 23.0.1
     cron:
       enabled: false
     pdb:
