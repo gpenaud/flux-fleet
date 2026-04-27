@@ -104,7 +104,7 @@ tasks:
           name: {{.TENANT}}-{{.SERVICE}}
           namespace: {{.TENANT}}-{{.SERVICE}}
           labels:
-            reflector-s3-ovh: "true"
+            reflector/s3-ovh: "true"
         spec:
           podSecurityContext:
             runAsUser: {{.USER_ID}}
