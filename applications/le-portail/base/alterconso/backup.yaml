@@ -3,6 +3,8 @@ kind: Schedule
 metadata:
   name: alterconso
 spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   backend:
     repoPasswordSecretRef:
       name: s3-ovh
@@ -19,8 +21,6 @@ spec:
   backup:
     # 4 fois par semaine : lundi, mardi, mercredi, jeudi à 02h00
     schedule: '0 2 * * 1,2,3,4'
-    failedJobsHistoryLimit: 1
-    successfulJobsHistoryLimit: 1
   check:
     schedule: '0 3 * * 4' # vérification chaque jeudi
   prune:
