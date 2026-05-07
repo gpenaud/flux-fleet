@@ -18,8 +18,8 @@ spec:
         key: AWS_SECRET_ACCESS_KEY
   backup:
     schedule: '0 21 1,15 * *'  # 1er et 15 de chaque mois à 21h
-    failedJobsHistoryLimit: 2
-    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 1
   check:
     schedule: '30 21 1,15 * *' # vérification 30min après
   prune:
