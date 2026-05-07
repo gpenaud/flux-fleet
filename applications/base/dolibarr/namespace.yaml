@@ -8,3 +8,4 @@ metadata:
     alter-it.org/app: "dolibarr"
     alter-it.org/managed-by: "fluxcd"
     reflector/s3-ovh: "true"
+    reflector/mysql-operator: "true"

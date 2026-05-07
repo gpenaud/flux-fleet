@@ -8,4 +8,5 @@ metadata:
     alter-it.org/app: "alterconso"
     alter-it.org/managed-by: "fluxcd"
     reflector/s3-ovh: "true"
+    reflector/mysql-operator: "true"
     reflector-regcred: "true"
