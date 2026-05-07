@@ -4,9 +4,9 @@ kind: Schedule
 metadata:
   name: dolibarr
 spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   backend:
-    successfulJobsHistoryLimit: 0
-    failedJobsHistoryLimit: 1
     repoPasswordSecretRef:
       name: s3-ovh
       key: RESTIC_PASSWORD
