@@ -23,8 +23,6 @@ spec:
       storageClass: longhorn
       accessMode: ReadWriteOnce
       size: 30Gi
-      annotations:
-        k8up.io/backup: true
     nextcloud:
       host: nextcloud.fermedujointout.fr
       datadir: /var/www/html/data
