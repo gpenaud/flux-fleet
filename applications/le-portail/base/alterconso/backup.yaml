@@ -20,7 +20,7 @@ spec:
         key: AWS_SECRET_ACCESS_KEY
   backup:
     # 4 fois par semaine : lundi, mardi, mercredi, jeudi à 02h00
-    schedule: '0 2 * * 1,2,3,4'
+    schedule: '0 2 * * 2,3,4,5'
   check:
     schedule: '0 3 * * 4' # vérification chaque jeudi
   prune:
