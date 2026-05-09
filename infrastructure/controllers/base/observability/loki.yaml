@@ -74,6 +74,14 @@ spec:
       # Pas de multi-tenant : un seul "user" virtuel dans ton cluster
       auth_enabled: false
 
+      commonConfig:
+        replication_factor: 1
+        path_prefix: /var/loki
+        ring:
+          kvstore:
+            store: inmemory
+        instance_addr: 127.0.0.1
+
       # Schéma v13 = le plus récent et le plus efficace en stockage
       schemaConfig:
         configs:
