@@ -40,28 +40,28 @@ spec:
         # En pratique, un vrai backup Restic prend au moins 30s-1min même sur un PVC vide
         # (init du repo, snapshot list, prune marker, etc.).
         # Cette alerte aurait flag ton bug Nextcloud (job en 19.95s).
-        - alert: K8upBackupTooFast
-          expr: |
-            (
-              kube_job_status_completion_time
-              -
-              kube_job_status_start_time
-            ) < 30
-            and on(namespace, job_name)
-            kube_job_status_succeeded == 1
-            and on(namespace, job_name)
-            kube_job_owner{owner_kind="Backup"} == 1
-          for: 5m
-          labels:
-            severity: warning
-            team: infra
-          annotations:
-            summary: "Backup suspectement court : {{ $labels.namespace }}/{{ $labels.job_name }}"
-            description: |
-              Le job {{ $labels.job_name }} dans {{ $labels.namespace }} s'est terminé
-              en moins de 30s avec un statut succeeded. C'est anormalement court pour
-              un vrai backup et peut indiquer un échec silencieux Restic.
-              Vérifier les logs : kubectl -n {{ $labels.namespace }} logs job/{{ $labels.job_name }} | grep -i error
+        # - alert: K8upBackupTooFast
+        #   expr: |
+        #     (
+        #       kube_job_status_completion_time
+        #       -
+        #       kube_job_status_start_time
+        #     ) < 30
+        #     and on(namespace, job_name)
+        #     kube_job_status_succeeded == 1
+        #     and on(namespace, job_name)
+        #     kube_job_owner{owner_kind="Backup"} == 1
+        #   for: 5m
+        #   labels:
+        #     severity: warning
+        #     team: infra
+        #   annotations:
+        #     summary: "Backup suspectement court : {{ $labels.namespace }}/{{ $labels.job_name }}"
+        #     description: |
+        #       Le job {{ $labels.job_name }} dans {{ $labels.namespace }} s'est terminé
+        #       en moins de 30s avec un statut succeeded. C'est anormalement court pour
+        #       un vrai backup et peut indiquer un échec silencieux Restic.
+        #       Vérifier les logs : kubectl -n {{ $labels.namespace }} logs job/{{ $labels.job_name }} | grep -i error
 
     # ====== Groupe 2 : Pods en erreur ======
     - name: pods
