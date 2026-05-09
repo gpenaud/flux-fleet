@@ -22,6 +22,12 @@ spec:
     # === DaemonSet : un Alloy par nœud ===
     controller:
       type: daemonset
+      # === Tolerations pour tourner sur tous les nœuds ===
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
 
     # === Configuration Alloy ===
     # On l'écrit en River/Alloy DSL directement.
@@ -122,14 +128,6 @@ spec:
         memory: 64Mi
       limits:
         memory: 128Mi
-
-    # === Tolerations pour tourner sur tous les nœuds ===
-    controller:
-      tolerations:
-        - effect: NoSchedule
-          operator: Exists
-        - effect: NoExecute
-          operator: Exists
 
     # === ServiceMonitor pour scraper les métriques Alloy ===
     # (alloy expose ses propres métriques sur :12345)
