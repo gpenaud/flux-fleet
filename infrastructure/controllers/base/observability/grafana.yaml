@@ -74,6 +74,17 @@ spec:
             isDefault: true
             jsonData:
               timeInterval: 60s
+          - name: Loki
+            type: loki
+            uid: loki
+            access: proxy
+            url: http://loki.controller-observability.svc.cluster.local:3100
+            isDefault: false
+            jsonData:
+              # Limite le nombre de lignes retournées par requête (défaut 1000)
+              maxLines: 5000
+              # Timeout des requêtes (utile sur queries longues)
+              timeout: 60
 
     sidecar:
       dashboards:
