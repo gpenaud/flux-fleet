@@ -6,3 +6,5 @@ resources:
   - middleware-auth.yaml
   - middleware-redirect-root.yaml
   - ingressroute.yaml
+  - servicemonitor-k8up.yaml
+  - prometheusrule-alerts.yaml
