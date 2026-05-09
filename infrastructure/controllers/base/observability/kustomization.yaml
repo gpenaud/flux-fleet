@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - prometheus.yaml
   - grafana.yaml
+  - secrets/kustomization.yaml
 
   
 
