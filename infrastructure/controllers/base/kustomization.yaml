@@ -6,3 +6,4 @@ resources:
   - cert-manager.yaml
   - cert-manager-webhook-ovh.yaml
   - k8up.yaml
+  - observability
