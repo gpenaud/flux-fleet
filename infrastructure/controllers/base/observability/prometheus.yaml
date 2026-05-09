@@ -48,6 +48,14 @@ spec:
         selfMonitor: true
       admissionWebhooks:
         enabled: false
+        admissionWebhooks:
+          enabled: false
+          patch:
+            enabled:
+          certManager:
+            enabled: false
+        tls:
+          enabled: false
         certManager:
           enabled: false
 
