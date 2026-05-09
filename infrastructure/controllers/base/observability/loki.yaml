@@ -1,0 +1,156 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+  namespace: controller-observability
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: loki
+      version: "6.x"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+      interval: 24h
+  install:
+    timeout: 10m
+  upgrade:
+    timeout: 10m
+  values:
+    # === Mode SingleBinary ===
+    # Pour un cluster single-node, tout-en-un dans un seul pod.
+    # Pas la peine de partir en microservices (distributor, ingester, querier...
+    # séparés) — c'est la complexité d'un cluster prod multi-zones.
+    deploymentMode: SingleBinary
+
+    # Ce qui suit désactive tous les composants microservices au cas où une
+    # version par défaut les activerait.
+    backend:
+      replicas: 0
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    ingester:
+      replicas: 0
+    querier:
+      replicas: 0
+    queryFrontend:
+      replicas: 0
+    queryScheduler:
+      replicas: 0
+    distributor:
+      replicas: 0
+    compactor:
+      replicas: 0
+    indexGateway:
+      replicas: 0
+    bloomCompactor:
+      replicas: 0
+    bloomGateway:
+      replicas: 0
+
+    # === Le pod Loki lui-même ===
+    singleBinary:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+      persistence:
+        enabled: true
+        storageClass: longhorn
+        size: 10Gi
+        accessModes:
+          - ReadWriteOnce
+
+    # === Configuration Loki ===
+    loki:
+      # Pas de multi-tenant : un seul "user" virtuel dans ton cluster
+      auth_enabled: false
+
+      # Schéma v13 = le plus récent et le plus efficace en stockage
+      schemaConfig:
+        configs:
+          - from: "2024-01-01"
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+
+      # Stockage filesystem (le PVC Longhorn ci-dessus)
+      storage:
+        type: filesystem
+        bucketNames:
+          chunks: chunks
+          ruler: ruler
+          admin: admin
+
+      # === Limits et rétention ===
+      limits_config:
+        retention_period: 360h        # 15 jours = 15 * 24h
+        # Limite du nombre de séries actives par tenant — protection contre cardinalité
+        max_global_streams_per_user: 5000
+        # Rate limit ingestion : 10 MB/s, soit largement plus qu'un cluster perso
+        ingestion_rate_mb: 10
+        ingestion_burst_size_mb: 20
+        # Refuse les logs trop vieux (évite réinjections accidentelles)
+        reject_old_samples: true
+        reject_old_samples_max_age: 168h
+
+      # === Compactor : nécessaire pour la rétention ===
+      # Sans compactor activé, retention_period est ignoré et le PVC grossit indéfiniment
+      compactor:
+        working_directory: /var/loki/compactor
+        retention_enabled: true
+        retention_delete_delay: 2h
+        retention_delete_worker_count: 150
+        delete_request_store: filesystem
+
+      # === Ruler : pour les alertes LogQL (étape suivante) ===
+      ruler:
+        enable_api: true
+        enable_alertmanager_v2: true
+        # On enverra les alertes au même Alertmanager que Prometheus
+        alertmanager_url: http://kube-prometheus-stack-alertmanager.controller-observability.svc.cluster.local:9093/alertmanager
+        # Les rules seront stockées dans une ConfigMap (vide pour l'instant)
+        storage:
+          type: local
+          local:
+            directory: /var/loki/rules
+        rule_path: /var/loki/rules-temp
+        ring:
+          kvstore:
+            store: inmemory
+
+    # === Désactivations ===
+    # Pas de Grafana embedded, on a déjà le nôtre
+    monitoring:
+      lokiCanary:
+        enabled: false
+      selfMonitoring:
+        enabled: false
+        grafanaAgent:
+          installOperator: false
+
+    # Pas de chunkache externe, single-binary embarque le sien
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+
+    # Test pod (pour CI Helm), pas utile chez nous
+    test:
+      enabled: false
+
+    # Gateway nginx devant Loki — pas utile pour notre usage
+    # (Grafana et Alloy parlent directement au service Loki)
+    gateway:
+      enabled: false

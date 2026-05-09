@@ -8,3 +8,5 @@ resources:
   - secrets/monitoring-basic-auth.enc.yaml
   - prometheus.yaml
   - grafana.yaml
+  - loki.yaml
+  - alloy.yaml
