@@ -1,0 +1,14 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: monitoring-auth
+  namespace: controller-observability
+spec:
+  basicAuth:
+    secret: monitoring-basic-auth
+    # Nom du header WWW-Authenticate dans le challenge
+    realm: "Monitoring leportail.org"
+    # Strip le header Authorization avant de transmettre au backend
+    # (sinon Prometheus/AM verraient les credentials qu'ils n'utilisent pas)
+    removeHeader: true

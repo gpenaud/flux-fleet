@@ -1,0 +1,55 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: monitoring
+  namespace: controller-observability
+spec:
+  entryPoints:
+    - websecure
+  
+  routes:
+    # === Route 1 : Racine → redirect vers /grafana ===
+    - match: Host(`monitoring.leportail.org`) && Path(`/`)
+      kind: Rule
+      middlewares:
+        - name: monitoring-redirect-root
+          namespace: controller-observability
+      services:
+        # Service "factice" requis par Traefik même quand seul le middleware compte
+        # (le middleware répond avec un 302 avant que le backend soit appelé)
+        - name: grafana
+          port: 80
+    
+    # === Route 2 : Grafana ===
+    - match: Host(`monitoring.leportail.org`) && PathPrefix(`/grafana`)
+      kind: Rule
+      services:
+        - name: grafana
+          port: 80
+      # Pas de middleware d'auth : Grafana gère sa propre login
+    
+    # === Route 3 : Prometheus ===
+    - match: Host(`monitoring.leportail.org`) && PathPrefix(`/prometheus`)
+      kind: Rule
+      services:
+        - name: prometheus-operated
+          port: 9090
+      middlewares:
+        - name: monitoring-auth
+          namespace: controller-observability
+    
+    # === Route 4 : Alertmanager ===
+    - match: Host(`monitoring.leportail.org`) && PathPrefix(`/alertmanager`)
+      kind: Rule
+      services:
+        - name: alertmanager-operated
+          port: 9093
+      middlewares:
+        - name: monitoring-auth
+          namespace: controller-observability
+  
+  tls:
+    secretName: monitoring-leportail-org-tls
+    domains:
+      - main: monitoring.leportail.org

@@ -1,0 +1,13 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: monitoring-redirect-root
+  namespace: controller-observability
+spec:
+  redirectRegex:
+    # Quand on tape exactement https://monitoring.leportail.org (avec ou sans / final)
+    # → redirect 302 vers /grafana
+    regex: "^https?://monitoring\\.leportail\\.org/?$"
+    replacement: "https://monitoring.leportail.org/grafana"
+    permanent: false
