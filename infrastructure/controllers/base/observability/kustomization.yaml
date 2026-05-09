@@ -3,9 +3,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
+  - secrets/alertmanager-config.enc.yaml
+  - secrets/grafana-admin.enc.yaml
+  - secrets/monitoring-basic-auth.enc.yaml
   - prometheus.yaml
   - grafana.yaml
-  - secrets/kustomization.yaml
-
-  
-

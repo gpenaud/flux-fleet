@@ -4,3 +4,4 @@ resources:
   - cluster-issuers/letsencrypt-staging.yaml
   - cluster-issuers/letsencrypt-production.yaml
   - mysql-servers/version_8_lts.yaml
+  - observability/certificate.yaml
