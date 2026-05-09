@@ -5,6 +5,9 @@ metadata:
 spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
+  podSecurityContext:
+    fsGroup: 33
+    fsGroupChangePolicy: "OnRootMismatch"
   backend:
     repoPasswordSecretRef:
       name: s3-ovh
