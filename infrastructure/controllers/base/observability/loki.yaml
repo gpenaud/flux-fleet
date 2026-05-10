@@ -53,7 +53,6 @@ spec:
     bloomGateway:
       replicas: 0
 
-    # === Le pod Loki lui-même ===
     singleBinary:
       replicas: 1
       resources:
@@ -68,6 +67,15 @@ spec:
         size: 10Gi
         accessModes:
           - ReadWriteOnce
+      # Monter le ConfigMap des rules
+      extraVolumes:
+        - name: loki-rules
+          configMap:
+            name: loki-rules
+      extraVolumeMounts:
+        - name: loki-rules
+          mountPath: /var/loki/rules/fake
+          readOnly: true
 
     # === Configuration Loki ===
     loki:
@@ -137,6 +145,12 @@ spec:
         ring:
           kvstore:
             store: inmemory
+
+    # === Rules Loki via ConfigMap ===
+    # Le chart monte ce ConfigMap dans /var/loki/rules/fake/
+    # ("fake" est le tenant ID par défaut quand auth_enabled=false)
+    rbac:
+      pspEnabled: false
 
     # === Désactivations ===
     # Pas de Grafana embedded, on a déjà le nôtre

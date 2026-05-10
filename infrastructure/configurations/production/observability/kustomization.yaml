@@ -8,3 +8,4 @@ resources:
   - ingressroute.yaml
   - servicemonitor-k8up.yaml
   - prometheusrule-alerts.yaml
+  - loki-rules.yaml
