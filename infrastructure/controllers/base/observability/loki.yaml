@@ -67,15 +67,6 @@ spec:
         size: 10Gi
         accessModes:
           - ReadWriteOnce
-      # Monter le ConfigMap des rules
-      extraVolumes:
-        - name: loki-rules
-          configMap:
-            name: loki-rules
-      extraVolumeMounts:
-        - name: loki-rules
-          mountPath: /var/loki/rules/fake
-          readOnly: true
 
     # === Configuration Loki ===
     loki:
