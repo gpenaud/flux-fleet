@@ -7,4 +7,5 @@ resources:
   - middleware-redirect-root.yaml
   - ingressroute.yaml
   - servicemonitor-k8up.yaml
-  - prometheusrule-alerts.yaml
+  - rules/loki-alerts.yaml
+  - rules/prometheus-alerts.yaml

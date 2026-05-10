@@ -123,8 +123,24 @@ spec:
             
             forward_to = [loki.write.default.receiver]
           }
+
+          // 6.
+          // ============================================================
+          // LOKI RULES PUSH — depuis PrometheusRule labellisées
+          // ============================================================
+
+          loki.rules.kubernetes "lokirules" {
+            address = "http://loki.controller-observability.svc.cluster.local:3100"
+            
+            // Ne push que les PrometheusRule avec label loki_rule=true
+            rule_selector {
+              match_labels = {
+                loki_rule = "true",
+              }
+            }
+          }
           
-          // 6. Push vers Loki
+          // 7. Push vers Loki
           loki.write "default" {
             endpoint {
               url = "http://loki.controller-observability.svc.cluster.local:3100/loki/api/v1/push"

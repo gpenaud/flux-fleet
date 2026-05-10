@@ -88,6 +88,10 @@ spec:
         probeSelectorNilUsesHelmValues: false
         scrapeConfigSelectorNilUsesHelmValues: false
         walCompression: true
+        ruleSelector:
+          matchExpressions:
+            - key: loki_rule
+              operator: DoesNotExist
       ingress:
         enabled: false
 

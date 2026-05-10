@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: monitoring-alerts
+  name: prometheus-alerts
   namespace: controller-observability
   labels:
     # Le label "release: kube-prometheus-stack" est utilisé par Prometheus pour découvrir

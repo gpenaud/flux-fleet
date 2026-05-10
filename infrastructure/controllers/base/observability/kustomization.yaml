@@ -9,4 +9,5 @@ resources:
   - prometheus.yaml
   - grafana.yaml
   - loki.yaml
-  - alloy.yaml
+  - alloy/alloy.yaml
+  - alloy/rbac.yaml
