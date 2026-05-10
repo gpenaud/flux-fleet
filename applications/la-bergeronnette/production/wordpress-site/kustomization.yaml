@@ -34,4 +34,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "backup-srv1515851-la-bergeronnette-wordpress-site"
+        value: "alter-it-infra01-backup-la-bergeronnette-wordpress-site"

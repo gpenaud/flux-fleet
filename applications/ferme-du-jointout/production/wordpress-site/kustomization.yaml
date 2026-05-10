@@ -20,21 +20,24 @@ patches:
     path: values.yaml
   - target:
       kind: Namespace
-      name: ferme-du-jointout-wordpress
+      name: ferme-du-jointout-wordpress-site
     patch: |
       - op: replace
         path: /metadata/name
         value: ferme-du-jointout-wordpress-site
+  # Add the k8up backup annotation to the PVC
+  - target:
+      kind: PersistentVolumeClaim
+      namespace: ferme-du-jointout-wordpress-site
+    patch: |-
+      - op: add
+        path: /metadata/annotations/k8up.io~1backup
+        value: "true"
+  # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
-      name: ferme-du-jointout
-    patch: |
+      name: wordpress
+    patch: |-
       - op: replace
-        path: /metadata/name
-        value:
-          name: wordpress-site
-      - op: add
-        path: /spec
-        value:
-          podConfigRef:
-            name: wordpress-site
+        path: /spec/backend/s3/bucket
+        value: "alter-it-infra01-backup-ferme-du-jointout-wordpress-site"
