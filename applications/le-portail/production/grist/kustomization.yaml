@@ -40,4 +40,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "backup-srv1515851-le-portail-grist"
+        value: "alter-it-infra01-backup-le-portail-grist"

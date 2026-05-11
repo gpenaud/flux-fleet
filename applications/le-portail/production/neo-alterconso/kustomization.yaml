@@ -1,26 +1,19 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: le-portail-alterconso
+namespace: le-portail-neo-alterconso
 resources:
-  - ../../base/alterconso/
+  - ../../base/neo-alterconso/
   - secrets.enc.yaml
 patches:
   - path: values.yaml
     target:
       kind: HelmRelease
-      name: alterconso
-  - target:
-      kind: ImageUpdateAutomation
-      name: alterconso
-    patch: |
-      - op: replace
-        path: /spec/update/path
-        value: ./applications/le-portail/localhost
+      name: neo-alterconso
   # Add the k8up backup annotation to the PVC
   - target:
       kind: PersistentVolumeClaim
-      namespace: le-portail-alterconso
+      namespace: le-portail-neo-alterconso
     patch: |-
       - op: add
         path: /metadata/annotations/k8up.io~1backup
@@ -28,8 +21,8 @@ patches:
   # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
-      name: alterconso
+      name: neo-alterconso
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "alter-it-infra01-backup-le-portail-alterconso"
+        value: "alter-it-infra01-backup-le-portail-neo-alterconso"

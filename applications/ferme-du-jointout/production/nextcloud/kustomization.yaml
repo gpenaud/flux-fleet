@@ -26,4 +26,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "backup-srv1515851-ferme-du-jointout-nextcloud"
+        value: "alter-it-infra01-backup-ferme-du-jointout-nextcloud"

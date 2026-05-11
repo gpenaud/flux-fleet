@@ -39,4 +39,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "backup-srv1515851-le-portail-dolibarr"
+        value: "alter-it-infra01-backup-le-portail-dolibarr"
