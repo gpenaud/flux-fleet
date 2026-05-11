@@ -86,6 +86,21 @@ spec:
             store: inmemory
         instance_addr: 127.0.0.1
 
+      # === Stockage GLOBAL en S3 OVH ===
+      # Tous les composants (chunks, index, ruler, admin) utilisent S3
+      storage:
+        type: s3
+        bucketNames:
+          chunks: alter-it-infra01-platform-loki-chunks
+          ruler: alter-it-infra01-platform-loki-rules
+          admin: alter-it-infra01-platform-loki-rules
+        s3:
+          endpoint: s3.sbg.io.cloud.ovh.net
+          region: sbg
+          s3ForcePathStyle: true
+          # credentials via env vars AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY
+          # injectées dans le pod via extraEnvFrom
+
       # Schéma v13 = le plus récent et le plus efficace en stockage
       schemaConfig:
         configs:
