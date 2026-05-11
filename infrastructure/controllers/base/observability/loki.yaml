@@ -142,9 +142,6 @@ spec:
 
       # === Ruler : pour les alertes LogQL (étape suivante) ===
       ruler:
-        enable_api: true
-        enable_alertmanager_v2: true
-        alertmanager_url: http://kube-prometheus-stack-alertmanager.controller-observability.svc.cluster.local:9093/alertmanager
         storage:
           type: s3
           s3:
@@ -155,10 +152,18 @@ spec:
             secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
             # Les credentials viennent des env vars AWS_ACCESS_KEY_ID et AWS_SECRET_ACCESS_KEY
             # qu'on injecte via extraEnvFrom plus bas
-        rule_path: /var/loki/rules-temp
-        ring:
-          kvstore:
-            store: inmemory
+
+    # === Config évaluation/Alertmanager : bloc séparé ===
+    rulerConfig:
+      enable_api: true
+      enable_alertmanager_v2: true
+      alertmanager_url: "http://kube-prometheus-stack-alertmanager.controller-observability.svc.cluster.local:9093/alertmanager"
+      rule_path: /var/loki/rules-temp
+      evaluation_interval: 1m
+      poll_interval: 1m
+      ring:
+        kvstore:
+          store: inmemory
 
     # === Rules Loki via ConfigMap ===
     # Le chart monte ce ConfigMap dans /var/loki/rules/fake/
