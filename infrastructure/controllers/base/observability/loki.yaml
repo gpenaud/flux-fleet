@@ -59,6 +59,8 @@ spec:
       replicas: 0
 
     singleBinary:
+      extraArgs:
+        - "-config.expand-env=true"
       extraEnvFrom:
         - secretRef:
             name: loki-s3-credentials
@@ -80,8 +82,6 @@ spec:
     loki:
       # Pas de multi-tenant : un seul "user" virtuel dans ton cluster
       auth_enabled: false
-      extraArgs:
-        - "-config.expand-env=true"
 
       commonConfig:
         replication_factor: 1
