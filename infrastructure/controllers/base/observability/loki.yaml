@@ -104,14 +104,14 @@ spec:
             store: inmemory
         wal:
           dir: /var/loki/ruler-wal
-        # storage:
-        #   type: s3
-        #   s3:
-        #     endpoint: s3.sbg.io.cloud.ovh.net
-        #     bucketnames: alter-it-infra01-platform-loki-rules
-        #     s3forcepathstyle: true
-        #     access_key_id: "${AWS_ACCESS_KEY_ID}"
-        #     secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+        storage:
+          type: s3
+          s3:
+            endpoint: s3.sbg.io.cloud.ovh.net
+            bucketnames: alter-it-infra01-platform-loki-rules
+            s3forcepathstyle: true
+            access_key_id: "${AWS_ACCESS_KEY_ID}"
+            secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
 
       # === Stockage GLOBAL en S3 OVH ===
       # Tous les composants (chunks, index, ruler, admin) utilisent S3
