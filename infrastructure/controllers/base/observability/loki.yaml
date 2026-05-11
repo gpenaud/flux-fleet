@@ -104,14 +104,31 @@ spec:
             store: inmemory
         wal:
           dir: /var/loki/ruler-wal
-        storage:
-          type: s3
-          s3:
-            endpoint: s3.sbg.io.cloud.ovh.net
-            bucketnames: alter-it-infra01-platform-loki-rules
-            s3forcepathstyle: true
-            access_key_id: "${AWS_ACCESS_KEY_ID}"
-            secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+        # storage:
+        #   type: s3
+        #   s3:
+        #     endpoint: s3.sbg.io.cloud.ovh.net
+        #     bucketnames: alter-it-infra01-platform-loki-rules
+        #     s3forcepathstyle: true
+        #     access_key_id: "${AWS_ACCESS_KEY_ID}"
+        #     secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+
+      # === Stockage GLOBAL en S3 OVH ===
+      # Tous les composants (chunks, index, ruler, admin) utilisent S3
+      storage:
+        type: s3
+        bucketNames:
+          chunks: alter-it-infra01-platform-loki-chunks
+          ruler: alter-it-infra01-platform-loki-rules
+          admin: alter-it-infra01-platform-loki-rules
+        s3:
+          endpoint: s3.sbg.io.cloud.ovh.net
+          region: sbg
+          s3ForcePathStyle: true
+          access_key_id: "${AWS_ACCESS_KEY_ID}"
+          secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+          # credentials via env vars AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY
+          # injectées dans le pod via extraEnvFrom
 
       # Schéma v13 = le plus récent et le plus efficace en stockage
       schemaConfig:
