@@ -77,6 +77,8 @@ spec:
     loki:
       # Pas de multi-tenant : un seul "user" virtuel dans ton cluster
       auth_enabled: false
+      extraArgs:
+        - "-config.expand-env=true"
 
       commonConfig:
         replication_factor: 1
@@ -98,6 +100,8 @@ spec:
           endpoint: s3.sbg.io.cloud.ovh.net
           region: sbg
           s3ForcePathStyle: true
+          access_key_id: "${AWS_ACCESS_KEY_ID}"
+          secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
           # credentials via env vars AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY
           # injectées dans le pod via extraEnvFrom
 
@@ -144,6 +148,8 @@ spec:
             endpoint: s3.sbg.io.cloud.ovh.net
             bucketnames: alter-it-infra01-platform-loki-rules
             s3forcepathstyle: true
+            access_key_id: "${AWS_ACCESS_KEY_ID}"
+            secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
             # Les credentials viennent des env vars AWS_ACCESS_KEY_ID et AWS_SECRET_ACCESS_KEY
             # qu'on injecte via extraEnvFrom plus bas
         rule_path: /var/loki/rules-temp
