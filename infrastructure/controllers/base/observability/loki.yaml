@@ -59,6 +59,9 @@ spec:
       replicas: 0
 
     singleBinary:
+      extraEnvFrom:
+        - secretRef:
+            name: loki-s3-credentials
       replicas: 1
       resources:
         requests:
