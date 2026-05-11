@@ -6,6 +6,7 @@ resources:
   - secrets/alertmanager-config.enc.yaml
   - secrets/grafana-admin.enc.yaml
   - secrets/monitoring-basic-auth.enc.yaml
+  - secrets/loki-s3-credentials.enc.yaml
   - prometheus.yaml
   - grafana.yaml
   - loki.yaml

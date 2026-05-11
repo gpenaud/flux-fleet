@@ -26,6 +26,11 @@ spec:
     # séparés) — c'est la complexité d'un cluster prod multi-zones.
     deploymentMode: SingleBinary
 
+    # === Stockage S3 pour les règles d'alerte ===
+    extraEnvFrom:
+      - secretRef:
+          name: loki-s3-credentials
+
     # Ce qui suit désactive tous les composants microservices au cas où une
     # version par défaut les activerait.
     backend:
@@ -125,13 +130,15 @@ spec:
       ruler:
         enable_api: true
         enable_alertmanager_v2: true
-        # On enverra les alertes au même Alertmanager que Prometheus
         alertmanager_url: http://kube-prometheus-stack-alertmanager.controller-observability.svc.cluster.local:9093/alertmanager
-        # Les rules seront stockées dans une ConfigMap (vide pour l'instant)
         storage:
-          type: local
-          local:
-            directory: /var/loki/rules
+          type: s3
+          s3:
+            endpoint: s3.sbg.io.cloud.ovh.net
+            bucketnames: alter-it-infra01-platform-loki-rules
+            s3forcepathstyle: true
+            # Les credentials viennent des env vars AWS_ACCESS_KEY_ID et AWS_SECRET_ACCESS_KEY
+            # qu'on injecte via extraEnvFrom plus bas
         rule_path: /var/loki/rules-temp
         ring:
           kvstore:
