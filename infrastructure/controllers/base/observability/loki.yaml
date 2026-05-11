@@ -112,14 +112,6 @@ spec:
               prefix: loki_index_
               period: 24h
 
-      # Stockage filesystem (le PVC Longhorn ci-dessus)
-      storage:
-        type: filesystem
-        bucketNames:
-          chunks: chunks
-          ruler: ruler
-          admin: admin
-
       # === Limits et rétention ===
       limits_config:
         retention_period: 360h        # 15 jours = 15 * 24h
