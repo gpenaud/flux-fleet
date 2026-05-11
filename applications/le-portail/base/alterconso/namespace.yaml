@@ -7,6 +7,6 @@ metadata:
     alter-it.org/tenant: "${TENANT}"
     alter-it.org/app: "alterconso"
     alter-it.org/managed-by: "fluxcd"
-    reflector/s3-ovh: "true"
+    reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"
     reflector-regcred: "true"

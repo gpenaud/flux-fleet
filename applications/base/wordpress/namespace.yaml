@@ -7,5 +7,5 @@ metadata:
     alter-it.org/tenant: "${TENANT}"
     alter-it.org/app: "wordpress"
     alter-it.org/managed-by: "fluxcd"
-    reflector/s3-ovh: "true"
+    reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"

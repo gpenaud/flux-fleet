@@ -7,16 +7,16 @@ spec:
   failedJobsHistoryLimit: 1
   backend:
     repoPasswordSecretRef:
-      name: s3-ovh
+      name: k8up-credentials
       key: RESTIC_PASSWORD
     s3:
       endpoint: https://s3.sbg.io.cloud.ovh.net 
       bucket: ""
       accessKeyIDSecretRef:
-        name: s3-ovh
+        name: k8up-credentials
         key: AWS_ACCESS_KEY_ID
       secretAccessKeySecretRef:
-        name: s3-ovh
+        name: k8up-credentials
         key: AWS_SECRET_ACCESS_KEY
   backup:
     schedule: '0 2 * * *' # tous les jours à 02h00
