@@ -9,7 +9,8 @@ creation_rules:
     encrypted_regex: ^(data|stringData)$
     age: age1jhryunagv39ar3p9x4zcssh26qnyeqsfurjrjnn59y0g949sc9ms34ljlp
 
-  - path_regex: .*base.*/secrets/.*\.yaml$
+  # 
+  - path_regex: infrastructure/controllers/base/.*\.yaml$
     encrypted_regex: ^(data|stringData)$
     key_groups:
       - age:
