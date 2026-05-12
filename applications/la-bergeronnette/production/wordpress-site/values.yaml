@@ -4,9 +4,9 @@ metadata:
   name: la-bergeronnette-wordpress-site
 spec:
   values:
-    wordpressUsername: la-bergeronnette
+    wordpressUsername: berjoadmin
     wordpressExistingSecret: wordpress
-    wordpressEmail: team@labergeronnette.org
+    wordpressEmail: labergeronnette@wanadoo.fr
     mariadb:
       enabled: false
     externalDatabase:
