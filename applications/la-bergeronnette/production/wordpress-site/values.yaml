@@ -16,6 +16,9 @@ spec:
       database: la-bergeronnette
       existingSecret: wordpress
     wordpressPlugins: []
+    extraEnvVars:
+      - name: WORDPRESS_SKIP_BOOTSTRAP
+        value: "yes"
     service:
       type: ClusterIP
     persistence:
