@@ -1,10 +1,27 @@
 apiVersion: k8up.io/v1
+kind: PodConfig
+metadata:
+  name: podconfig
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: backup
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+---
+apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
   name: wordpress
 spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
+  podConfigRef:
+    name: podconfig
   backend:
     repoPasswordSecretRef:
       name: k8up-credentials
