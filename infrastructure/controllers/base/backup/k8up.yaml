@@ -46,3 +46,5 @@ spec:
       envVars:
         - name: BACKUP_ENABLE_RWO_VOLUMES
           value: "true"
+        - name: BACKUP_PROMURL
+          value: ""
