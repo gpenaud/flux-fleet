@@ -1,16 +1,19 @@
 apiVersion: k8up.io/v1
 kind: PodConfig
 metadata:
-  name: k8up-backup-config
+  name: podconfig
 spec:
-  podSecurityContext:
-    runAsUser: 33
-    runAsGroup: 33
-    fsGroup: 33
-  containers:
-    - env:
-        - name: BACKUP_SKIP_SNAPSHOT_SYNC
-          value: "true"
+  template:
+    spec:
+      containers:
+        - name: backup
+          env:
+            - name: BACKUP_SKIP_SNAPSHOT_SYNC
+              value: "true"
+          securityContext:
+            runAsUser: 33
+            runAsGroup: 33
+            fsGroup: 33
 ---
 apiVersion: k8up.io/v1
 kind: Schedule
@@ -20,7 +23,7 @@ spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
   podConfigRef:
-    name: k8up-backup-config
+    name: podconfig
   backend:
     repoPasswordSecretRef:
       name: k8up-credentials
