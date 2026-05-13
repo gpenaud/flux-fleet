@@ -19,6 +19,10 @@ spec:
       secretAccessKeySecretRef:
         name: k8up-credentials
         key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    runAsUser: 33
+    runAsGroup: 33
+    fsGroup: 33
   backup:
     # 4 fois par semaine : lundi, mardi, mercredi, jeudi à 02h00
     schedule: '0 2 * * 2,3,4,5'
