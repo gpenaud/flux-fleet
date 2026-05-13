@@ -30,13 +30,6 @@ spec:
     remediation:
       retries: 3
   values:
-    # ── Image ──────────────────────────────────────────────────────────────────
-    image:
-      registry: registry.k8s.io
-      repository: external-dns/external-dns
-      # Vérifie la version compatible avec le chart sur https://github.com/kubernetes-sigs/external-dns/releases
-      # Le chart fixe une version par défaut, on laisse vide pour rester aligné.
-
     # ── Provider OVH ───────────────────────────────────────────────────────────
     provider:
       name: ovh
