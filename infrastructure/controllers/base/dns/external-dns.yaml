@@ -61,7 +61,6 @@ spec:
     sources:
       - ingress
       - service
-      - traefik-proxy
 
     # ── Filtrage des zones gérées ──────────────────────────────────────────────
     # À COMPLÉTER : remplace ces exemples par tes vraies zones OVH.
