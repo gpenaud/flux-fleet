@@ -7,7 +7,7 @@ spec:
     nameOverride: "neo-alterconso"
     fullnameOverride: ""
     image:
-      repository: ghcr.io/gpenaud/alterconso
+      repository: ghcr.io/gpenaud/neo-alterconso
       tag: latest
     imagePullSecrets:
       - name: regcred
