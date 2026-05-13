@@ -16,7 +16,7 @@ pipelines:
     restore_mysql_dump
   purge: |-
     purge_deployments --all
-    remove_pvcs --all
+    # remove_pvcs --all
 
 deployments:
   alterconso:
@@ -42,10 +42,14 @@ deployments:
                 tls: true
           vhost: ${SERVICE}.${TENANT}.localhost
         mysql:
-          user: ${SERVICE}
-          password: ${SERVICE}
-          database: ${SERVICE}
-          rootPassword: ${SERVICE}
+          # user: ${SERVICE}
+          # password: ${SERVICE}
+          # database: ${SERVICE}
+          # rootPassword: ${SERVICE}
+          user: alterconso
+          password: ***REMOVED***
+          database: alterconso
+          rootPassword: ***REMOVED***
 
   restore:
     kubectl:
@@ -65,16 +69,16 @@ deployments:
               claimName: ${TENANT}-${SERVICE}
           backend:
             repoPasswordSecretRef:
-              name: s3-ovh
+              name: k8up-credentials
               key: RESTIC_PASSWORD
             s3:
               endpoint: https://s3.sbg.io.cloud.ovh.net
               bucket: backup-${SERVER}-${TENANT}-${SERVICE}
               accessKeyIDSecretRef:
-                name: s3-ovh
+                name: k8up-credentials
                 key: AWS_ACCESS_KEY_ID
               secretAccessKeySecretRef:
-                name: s3-ovh
+                name: k8up-credentials
                 key: AWS_SECRET_ACCESS_KEY
 
   regcred:

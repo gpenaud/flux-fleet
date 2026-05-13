@@ -116,16 +116,16 @@ deployments:
               claimName: ${TENANT}-${SERVICE}-${SERVICE}
           backend:
             repoPasswordSecretRef:
-              name: s3-ovh
+              name: k8up-credentials
               key: RESTIC_PASSWORD
             s3:
               endpoint: https://s3.sbg.io.cloud.ovh.net
               bucket: backup-${SERVER}-${TENANT}-${SERVICE}
               accessKeyIDSecretRef:
-                name: s3-ovh
+                name: k8up-credentials
                 key: AWS_ACCESS_KEY_ID
               secretAccessKeySecretRef:
-                name: s3-ovh
+                name: k8up-credentials
                 key: AWS_SECRET_ACCESS_KEY
 
 functions:

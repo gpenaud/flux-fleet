@@ -6,7 +6,7 @@ vars:
     default: local
   SERVER: srv1515851
   BASE_DIR: ${DEVSPACE_USER_HOME}/work
-  S3_SECRET_PATH: ${BASE_DIR}/flux-fleet/infrastructure/controllers/base/secrets/s3-ovh.enc.yaml
+  S3_SECRET_PATH: ${BASE_DIR}/flux-fleet/infrastructure/controllers/base/secrets/k8up-credentials.enc.yaml
 
 imports:
   - path: ./le-portail/wordpress-epilibres/devspace.yaml
@@ -63,12 +63,11 @@ pipelines:
     # devspace run-pipeline purge --config la-bergeronnette/wordpress-site/devspace.yaml
 
   test-deploy: |-
-    create_deployments k8up
-    
+    devspace run-pipeline deploy --config le-portail/alterconso/devspace.yaml
   test-restore: |-
-    devspace run-pipeline restore --config ferme-du-jointout/nextcloud/devspace.yaml
+    devspace run-pipeline restore --config le-portail/alterconso/devspace.yaml
   test-purge: |-
-    devspace run-pipeline purge --config ferme-du-jointout/nextcloud/devspace.yaml
+    devspace run-pipeline purge --config le-portail/alterconso/devspace.yaml
 
 hooks:
   - command: sops --decrypt ${S3_SECRET_PATH} | yq '.metadata.namespace = "${NAMESPACE}"' | kubectl apply -f -
