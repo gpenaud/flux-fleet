@@ -1,0 +1,74 @@
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: neo-alterconso
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  backend:
+    repoPasswordSecretRef:
+      name: k8up-credentials
+      key: RESTIC_PASSWORD
+    s3:
+      endpoint: https://s3.sbg.io.cloud.ovh.net 
+      bucket: ""
+      accessKeyIDSecretRef:
+        name: k8up-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: k8up-credentials
+        key: AWS_SECRET_ACCESS_KEY
+  backup:
+    # 4 fois par semaine : lundi, mardi, mercredi, jeudi à 02h00
+    schedule: '0 2 * * 2,3,4,5'
+  check:
+    schedule: '0 3 * * 4' # vérification chaque jeudi
+  prune:
+    schedule: '0 4 * * 4' # nettoyage chaque jeudi selon la rétention ci-dessous
+    retention:
+      keepLast: 4    # toujours garder les 4 derniers (couvre la 1ère semaine)
+      keepWeekly: 4  # 1 snapshot par semaine pendant 4 semaines (1 mois)
+      keepMonthly: 2 # 1 snapshot par mois pendant 6 mois (~2 snapshots sur 1 an)
+      keepYearly: 1  # 1 snapshot annuel
+
+---
+apiVersion: k8up.io/v1
+kind: PreBackupPod
+metadata:
+  name: pre-backup
+  labels:
+    reflector/mysql-operator: "true"
+  annotations:
+    k8up.io/backup: "true"
+spec:
+  backupCommand: sh -c 'mysqldump --no-tablespaces --single-transaction --hex-blob -h alterconso-database.le-portail-alterconso.svc.cluster.local -u $ALTERCONSO_MYSQL_USER -p"$ALTERCONSO_MYSQL_PASSWORD" $ALTERCONSO_MYSQL_DATABASE'
+  fileExtension: .sql
+  pod:
+    spec:
+      containers:
+        - name: db-dump
+          image: mysql:5.7
+          command: ["sleep", "infinity"]
+          env:
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-operator
+                  key: rootPassword
+            - name: ALTERCONSO_MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: alterconso
+                  key: MYSQL_USER
+            - name: ALTERCONSO_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: alterconso
+                  key: MYSQL_PASSWORD
+            - name: ALTERCONSO_MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: alterconso
+                  key: MYSQL_DATABASE

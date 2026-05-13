@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${TENANT}-neo-alterconso
+  labels:
+    alter-it.org/tenant: "${TENANT}"
+    alter-it.org/app: "neo-alterconso"
+    alter-it.org/managed-by: "fluxcd"
+    reflector/k8up-credentials: "true"
+    reflector/mysql-operator: "true"
+    reflector-regcred: "true"
