@@ -9,9 +9,6 @@ spec:
         fsGroup: 33
       containers:
         - name: backup
-          env:
-            - name: BACKUP_SKIP_SNAPSHOT_SYNC
-              value: "true"
           securityContext:
             runAsUser: 33
             runAsGroup: 33
