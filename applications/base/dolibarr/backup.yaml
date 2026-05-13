@@ -7,9 +7,10 @@ spec:
     runAsUser: 33
     runAsGroup: 33
     fsGroup: 33
-  env:
-    - name: BACKUP_SKIP_SNAPSHOT_SYNC
-      value: "true"
+  containers:
+    - env:
+        - name: BACKUP_SKIP_SNAPSHOT_SYNC
+          value: "true"
 ---
 apiVersion: k8up.io/v1
 kind: Schedule
