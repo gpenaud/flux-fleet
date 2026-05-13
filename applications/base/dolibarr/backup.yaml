@@ -1,4 +1,16 @@
-
+apiVersion: k8up.io/v1
+kind: PodConfig
+metadata:
+  name: k8up-backup-config
+spec:
+  podSecurityContext:
+    runAsUser: 33
+    runAsGroup: 33
+    fsGroup: 33
+  env:
+    - name: BACKUP_SKIP_SNAPSHOT_SYNC
+      value: "true"
+---
 apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
@@ -6,6 +18,8 @@ metadata:
 spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
+  podConfigRef:
+    name: k8up-backup-config
   backend:
     repoPasswordSecretRef:
       name: k8up-credentials
@@ -19,10 +33,6 @@ spec:
       secretAccessKeySecretRef:
         name: k8up-credentials
         key: AWS_SECRET_ACCESS_KEY
-  podSecurityContext:
-    runAsUser: 33
-    runAsGroup: 33
-    fsGroup: 33
   backup:
     # 4 fois par semaine : lundi, mardi, mercredi, jeudi à 02h00
     schedule: '0 2 * * 2,3,4,5'
