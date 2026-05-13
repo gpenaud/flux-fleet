@@ -3,6 +3,7 @@ kind: HelmRepository
 metadata:
   name: gpenaud-charts
 spec:
+  type: oci
   interval: 5m
   url: oci://ghcr.io/gpenaud/charts
 
