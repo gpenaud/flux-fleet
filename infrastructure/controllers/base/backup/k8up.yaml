@@ -46,5 +46,7 @@ spec:
       envVars:
         - name: BACKUP_ENABLE_RWO_VOLUMES
           value: "true"
+        - name: BACKUP_SKIP_SNAPSHOT_SYNC
+          value: "true"
         - name: BACKUP_PROMURL
           value: ""
