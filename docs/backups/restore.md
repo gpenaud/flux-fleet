@@ -11,9 +11,9 @@ Les sauvegardes sont stockées dans des dépôts **Restic** sur S3 OVH. La resta
 brew install restic
 
 # Récupérer les credentials S3 depuis le secret (production)
-kubectl --context production -n le-portail-wordpress get secret s3-ovh -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d
-kubectl --context production -n le-portail-wordpress get secret s3-ovh -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d
-kubectl --context production -n le-portail-wordpress get secret s3-ovh -o jsonpath='{.data.RESTIC_PASSWORD}' | base64 -d
+kubectl --context production -n le-portail-wordpress get secret k8up-credentials -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d
+kubectl --context production -n le-portail-wordpress get secret k8up-credentials -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d
+kubectl --context production -n le-portail-wordpress get secret k8up-credentials -o jsonpath='{.data.RESTIC_PASSWORD}' | base64 -d
 ```
 
 ---

@@ -118,7 +118,7 @@ Secrets infrastructure déployés :
 | `dns-ovh` | Credentials OVH API pour cert-manager |
 | `dns-ovh-ferme-du-jointout` | Credentials OVH API (tenant spécifique) |
 | `mysql-operator` | Mot de passe root MySQL |
-| `s3-ovh` | Credentials S3 OVH pour les sauvegardes K8up |
+| `k8up-credentials` | Credentials S3 OVH pour les sauvegardes K8up |
 
 ---
 

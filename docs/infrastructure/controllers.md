@@ -82,7 +82,7 @@ Réplication de Secrets et ConfigMaps entre namespaces.
 - **Namespace** : `controller-reflector`
 - **Présent** : localhost + production
 
-Utilisé principalement pour répliquer le secret `mysql-operator` (mot de passe root) et les credentials S3 (`s3-ovh`) dans les namespaces des applications.
+Utilisé principalement pour répliquer le secret `mysql-operator` (mot de passe root) et les credentials S3 (`k8up-credentials`) dans les namespaces des applications.
 
 Annotation de configuration :
 ```yaml

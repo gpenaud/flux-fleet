@@ -85,8 +85,8 @@ spec:
 |-----------|--------|
 | Endpoint  | `https://s3.sbg.io.cloud.ovh.net` |
 | Provider  | OVH Object Storage (région SBG) |
-| Auth      | Secret `s3-ovh` (SOPS chiffré) |
-| Chiffrement | Restic (mot de passe dans secret `s3-ovh`) |
+| Auth      | Secret `k8up-credentials` (SOPS chiffré) |
+| Chiffrement | Restic (mot de passe dans secret `k8up-credentials`) |
 
 ---
 
