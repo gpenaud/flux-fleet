@@ -30,6 +30,9 @@ spec:
     remediation:
       retries: 3
   values:
+    image:
+      repository: registry.k8s.io/external-dns/external-dns
+      # tag laissé vide -> chart utilise sa version par défaut
     # ── Provider OVH ───────────────────────────────────────────────────────────
     provider:
       name: ovh
