@@ -32,13 +32,6 @@ spec:
     # === DaemonSet : un Alloy par nœud ===
     controller:
       type: daemonset
-    alloy:
-      # === Mounts pour els fichiers de log ===
-      mounts:
-        varlog: true # monte /var/log
-        dockercontainers: true   # monte /var/lib/docker/containers (legacy mais sans effet sur k3s)
-      # Positions persistantes (souvent par défaut, à vérifier)
-      storagePath: /var/lib/alloy
       # === Tolerations pour tourner sur tous les nœuds ===
       tolerations:
         - effect: NoSchedule
@@ -50,6 +43,12 @@ spec:
     # On l'écrit en River/Alloy DSL directement.
     # C'est un langage HCL-like assez lisible, propre à Grafana Alloy.
     alloy:
+    # === Mounts pour els fichiers de log ===
+      mounts:
+        varlog: true # monte /var/log
+        dockercontainers: true   # monte /var/lib/docker/containers (legacy mais sans effet sur k3s)
+      # Positions persistantes (souvent par défaut, à vérifier)
+      storagePath: /var/lib/alloy
       configMap:
         content: |
           // ============================================================
