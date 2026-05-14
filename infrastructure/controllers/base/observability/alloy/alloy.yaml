@@ -109,7 +109,7 @@ spec:
               separator    = "@"
               target_label = "__path__"
               regex        = "([^@]+)@([^@]+)@([^@]+)@(.+)"
-              replacement  = "/var/log/pods/$1_$2_$3/$4/*.log"
+              replacement  = "/var/log/pods/$1_$2_$3/$4/*.tototutu"
             }
           }
           
