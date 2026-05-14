@@ -32,6 +32,13 @@ spec:
     # === DaemonSet : un Alloy par nœud ===
     controller:
       type: daemonset
+    alloy:
+      # === Mounts pour els fichiers de log ===
+      mounts:
+        varlog: true # monte /var/log
+        dockercontainers: true   # monte /var/lib/docker/containers (legacy mais sans effet sur k3s)
+      # Positions persistantes (souvent par défaut, à vérifier)
+      storagePath: /var/lib/alloy
       # === Tolerations pour tourner sur tous les nœuds ===
       tolerations:
         - effect: NoSchedule
@@ -95,8 +102,12 @@ spec:
           
           // 4. Source : tail des fichiers logs des pods
           //    Alloy lit /var/log/pods/<ns>_<pod>_<uid>/<container>/N.log
-          loki.source.kubernetes "pods" {
-            targets    = discovery.relabel.pod_logs.output
+          local.file_match "pod_logs" {
+            path_targets = discovery.relabel.pod_logs.output
+          }
+
+          loki.source.file "pods" {
+            targets    = local.file_match.pod_logs.targets
             forward_to = [loki.process.parse.receiver]
           }
           
