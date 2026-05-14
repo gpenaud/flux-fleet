@@ -121,7 +121,7 @@ spec:
               target_label  = "__path__"
               // On a "ns/pod/uid/container", on transforme en "ns_pod_uid/container"
               regex         = "([^/]+)/([^/]+)/([^/]+)/(.+)"
-              replacement   = "/var/log/pods/$1_$2_$3/$4/*.log"
+              replacement   = ""AVANT_$1_MILIEU_$2_FIN""
             }
           }
           
