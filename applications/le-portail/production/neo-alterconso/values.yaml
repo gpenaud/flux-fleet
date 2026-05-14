@@ -94,7 +94,7 @@ spec:
       smtp_host: smtp-relay.brevo.com
       smtp_port: 587
       smtp_user: "a74b88001@smtp-brevo.com"
-      default_email: noreply@example.com
+      default_email: alterconso@leportail.org
 
       superadmin:
         email: "ops.gpenaud@gmail.com"
