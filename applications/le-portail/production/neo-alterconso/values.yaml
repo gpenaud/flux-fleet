@@ -97,7 +97,7 @@ spec:
       default_email: alterconso@leportail.org
 
       superadmin:
-        email: "ops.gpenaud@gmail.com"
+        email: "alterconso@leportail.org"
         first_name: Super
         last_name: Admin
 
