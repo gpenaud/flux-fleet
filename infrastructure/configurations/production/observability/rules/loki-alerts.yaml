@@ -16,7 +16,7 @@ spec:
           expr: |
             sum by (namespace) (
               count_over_time(
-                {container=~"backup.*"} |~ "(?i)error" [10m]
+                {container=~"backup.*", level=~"(?i)error"} [10m]
               )
             ) > 0
           for: 2m
@@ -31,4 +31,4 @@ spec:
               dernières minutes. C'est typiquement le mode silent failure de k8up
               où Restic logue des erreurs mais le Job termine avec succès.
               
-              Investiguer : kubectl -n {{ $labels.namespace }} logs -l app.kubernetes.io/managed-by=k8up --tail=200 | grep -i error
+              Investiguer : kubectl -n {{ $labels.namespace }} logs -l k8upjob=true --tail=200 | grep -i error
