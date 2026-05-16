@@ -24,18 +24,18 @@ spec:
               endpoint: ovh-eu
               authenticationMethod: application
               applicationKeyRef:
-                name: dns-ovh
+                name: ovh-dns-zone-alter-it-eu
                 key: applicationKey
               applicationSecretRef:
-                name: dns-ovh
+                name: ovh-dns-zone-alter-it-eu
                 key: applicationSecret
               applicationConsumerKeyRef:
-                name: dns-ovh
+                name: ovh-dns-zone-alter-it-eu
                 key: applicationConsumerKey
         selector:
           dnsZones:
-            - leportail.org
-            - labergeronnette.org
+            - "alter-it.eu"
+            - "*.alter-it.eu"
       - dns01:
           webhook:
             groupName: acme.alter-it.org
@@ -44,14 +44,55 @@ spec:
               endpoint: ovh-eu
               authenticationMethod: application
               applicationKeyRef:
-                name: dns-ovh-ferme-du-jointout
+                name: ovh-dns-zone-leportail-org
                 key: applicationKey
               applicationSecretRef:
-                name: dns-ovh-ferme-du-jointout
+                name: ovh-dns-zone-leportail-org
                 key: applicationSecret
               applicationConsumerKeyRef:
-                name: dns-ovh-ferme-du-jointout
+                name: ovh-dns-zone-leportail-org
+                key: applicationConsumerKey
+        selector:
+          dnsZones:
+            - "leportail.org"
+            - "*.leportail.org"
+      - dns01:
+          webhook:
+            groupName: acme.alter-it.org
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              authenticationMethod: application
+              applicationKeyRef:
+                name: ovh-dns-zone-fermedujointout-fr
+                key: applicationKey
+              applicationSecretRef:
+                name: ovh-dns-zone-fermedujointout-fr
+                key: applicationSecret
+              applicationConsumerKeyRef:
+                name: ovh-dns-zone-fermedujointout-fr
                 key: applicationConsumerKey
         selector:
             dnsZones:
-              - fermedujointout.fr
+              - "fermedujointout.fr"
+              - "*.fermedujointout.fr"
+      - dns01:
+          webhook:
+            groupName: acme.alter-it.org
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              authenticationMethod: application
+              applicationKeyRef:
+                name: ovh-dns-zone-labergeronnette-org
+                key: applicationKey
+              applicationSecretRef:
+                name: ovh-dns-zone-labergeronnette-org
+                key: applicationSecret
+              applicationConsumerKeyRef:
+                name: ovh-dns-zone-labergeronnette-org
+                key: applicationConsumerKey
+        selector:
+            dnsZones:
+              - "labergeronnette.org"
+              - "*.labergeronnette.org"
