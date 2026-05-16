@@ -68,8 +68,8 @@ spec:
       # HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "false"
 
       # Database : SQLite sur PVC
-      HEADSCALE_DATABASE_TYPE: "sqlite3"
-      HEADSCALE_DATABASE_SQLITE_PATH: "/var/lib/headscale/db.sqlite"
+      # HEADSCALE_DATABASE_TYPE: "sqlite3"
+      # HEADSCALE_DATABASE_SQLITE_PATH: "/var/lib/headscale/db.sqlite"
 
       # DERP : utilisation des serveurs publics Tailscale (défaut chart)
       # Pas besoin de surcharger pour l'instant
@@ -79,13 +79,12 @@ spec:
 
     # Persistance pour la base SQLite + clés privées
     persistence:
-      data:
+      config:
         enabled: true
-        type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 1Gi
         storageClass: longhorn
-        mountPath: /var/lib/headscale
+        retain: true
 
     # Service ClusterIP — exposition via IngressRoute Traefik
     service:
