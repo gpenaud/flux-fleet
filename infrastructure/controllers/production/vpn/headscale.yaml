@@ -87,6 +87,11 @@ spec:
         storageClass: longhorn
         retain: true
         # mountPath par défaut : /etc/headscale (laissé tel quel)
+      run:
+        enabled: true
+        type: emptyDir
+        mountPath: /var/run/headscale
+
 
     # PostgreSQL subchart désactivé — on reste sur SQLite
     postgresql:
