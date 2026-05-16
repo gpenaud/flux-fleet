@@ -38,7 +38,7 @@ spec:
           # rewriting. Le serveur doit recevoir le Host original.
           passHostHeader: true
   tls:
-    secretName: headscale-alter-it-eu-tls
+    secretName: ovh-dns-zone-alter-it-eu
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -46,7 +46,7 @@ metadata:
   name: headscale-alter-it-eu
   namespace: controller-vpn
 spec:
-  secretName: headscale-alter-it-eu-tls
+  secretName: ovh-dns-zone-alter-it-eu
   duration: 2160h    # 90 jours
   renewBefore: 720h  # renouvellement 30 jours avant expiration
   issuerRef:
