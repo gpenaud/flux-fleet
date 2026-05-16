@@ -6,4 +6,4 @@ resources:
   - ../base/secrets
   - traefik.yaml
   - longhorn.yaml
-  - mysql.yaml
+  - mysql
