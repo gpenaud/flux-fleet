@@ -1,0 +1,129 @@
+
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: gabe565
+  namespace: controller-vpn
+spec:
+  type: oci
+  url: oci://ghcr.io/gabe565/charts
+  interval: 1h
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: headscale
+  namespace: controller-vpn
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: headscale
+      version: "0.16.x"  # à pinner précisément après vérification artifacthub
+      sourceRef:
+        kind: HelmRepository
+        name: gabe565
+        namespace: controller-vpn
+      interval: 1h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      repository: ghcr.io/juanfont/headscale
+      tag: v0.26.1  # à valider — dernière patch stable au moment du déploiement
+
+    # Args par défaut du chart : ["serve"]
+    args: ["serve"]
+
+    # Configuration Headscale via variables d'environnement
+    # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
+    env:
+      # URL publique du serveur (doit matcher le cert + DNS)
+      HEADSCALE_SERVER_URL: "https://headscale.alter-it.eu"
+
+      # Adresse d'écoute du serveur HTTP principal
+      HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"
+
+      # Endpoint metrics Prometheus (utile pour ton stack obs ensuite)
+      HEADSCALE_METRICS_LISTEN_ADDR: "0.0.0.0:9090"
+
+      # gRPC : laissé en loopback, accessible uniquement via kubectl exec
+      HEADSCALE_GRPC_LISTEN_ADDR: "127.0.0.1:50443"
+      HEADSCALE_GRPC_ALLOW_INSECURE: "true"
+
+      # Préfixes IP attribués aux nœuds du tailnet
+      HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
+      HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
+
+      # MagicDNS : base domain DIFFÉRENT du server_url
+      HEADSCALE_DNS_BASE_DOMAIN: "ts.alter-it.eu"
+      HEADSCALE_DNS_MAGIC_DNS: "true"
+
+      # Override nameservers globaux : on les définira plus tard pour le split DNS
+      # HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "false"
+
+      # Database : SQLite sur PVC
+      HEADSCALE_DATABASE_TYPE: "sqlite3"
+      HEADSCALE_DATABASE_SQLITE_PATH: "/var/lib/headscale/db.sqlite"
+
+      # DERP : utilisation des serveurs publics Tailscale (défaut chart)
+      # Pas besoin de surcharger pour l'instant
+
+      # Logs
+      HEADSCALE_LOG_LEVEL: "info"
+
+    # Persistance pour la base SQLite + clés privées
+    persistence:
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: longhorn
+        mountPath: /var/lib/headscale
+
+    # Service ClusterIP — exposition via IngressRoute Traefik
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+            targetPort: 8080
+          metrics:
+            enabled: true
+            port: 9090
+            targetPort: 9090
+
+    # Pas d'Ingress géré par le chart — on utilise une IngressRoute Traefik externe
+    ingress:
+      main:
+        enabled: false
+
+    # Resources : Headscale est très léger
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+    # Pod security context (k8s restricted)
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
