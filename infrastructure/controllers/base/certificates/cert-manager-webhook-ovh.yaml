@@ -37,11 +37,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    resourceNames: 
-      - "ovh-dns-zone-alter-it-eu", 
-      - "ovh-dns-zone-leportail-org",
-      - "ovh-dns-zone-fermedujointout-fr",
-      - "ovh-dns-zone-labergeronnette-org"
+    resourceNames: ["ovh-dns-zone-alter-it-eu", "ovh-dns-zone-leportail-org", "ovh-dns-zone-fermedujointout-fr", "ovh-dns-zone-labergeronnette-org" ]
     verbs: ["get", "list", "watch"]
 
 ---
