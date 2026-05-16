@@ -67,9 +67,10 @@ spec:
       # Override nameservers globaux : on les définira plus tard pour le split DNS
       # HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "false"
 
-      # Database : SQLite sur PVC
-      # HEADSCALE_DATABASE_TYPE: "sqlite3"
-      # HEADSCALE_DATABASE_SQLITE_PATH: "/var/lib/headscale/db.sqlite"
+      # Database : SQLite — le chart positionne automatiquement
+      # HEADSCALE_DATABASE_TYPE=sqlite3 et HEADSCALE_DATABASE_SQLITE_PATH
+      # vers persistence.config.mountPath/db.sqlite quand postgresql.enabled=false.
+      # Les chemins de private.key et noise_private.key sont aussi gérés par le chart.
 
       # DERP : utilisation des serveurs publics Tailscale (défaut chart)
       # Pas besoin de surcharger pour l'instant
@@ -77,7 +78,7 @@ spec:
       # Logs
       HEADSCALE_LOG_LEVEL: "info"
 
-    # Persistance pour la base SQLite + clés privées
+    # Persistance : une seule PVC pour config + clés + SQLite (sous /etc/headscale)
     persistence:
       config:
         enabled: true
@@ -85,6 +86,11 @@ spec:
         size: 1Gi
         storageClass: longhorn
         retain: true
+        # mountPath par défaut : /etc/headscale (laissé tel quel)
+
+    # PostgreSQL subchart désactivé — on reste sur SQLite
+    postgresql:
+      enabled: false
 
     # Service ClusterIP — exposition via IngressRoute Traefik
     service:
@@ -112,17 +118,40 @@ spec:
         cpu: 200m
         memory: 256Mi
 
-    # Pod security context (k8s restricted)
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 65532
-      runAsGroup: 65532
-      fsGroup: 65532
-      seccompProfile:
-        type: RuntimeDefault
+    # Pod security context appliqué à TOUS les containers (init + main)
+    # via defaultPodOptions de la bjw-s common library
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
 
+    # Override du securityContext de l'initContainer "config" (hardcodé par le chart)
+    # Nécessaire pour passer Pod Security Admission "restricted"
+    initContainers:
+      config:
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # l'init écrit /etc/headscale/config.yaml
+          runAsNonRoot: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+
+    # SecurityContext du container principal Headscale
     securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
       capabilities:
         drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
