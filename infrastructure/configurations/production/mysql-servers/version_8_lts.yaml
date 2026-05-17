@@ -12,6 +12,7 @@ spec:
   edition: community
   mycnf: |
     [mysqld]
+    # Régénéré 2026-05-17 17h
     # Activer le performance_schema pour les métriques et diagnostics
     performance_schema=ON
     # Configurations d'InnoDB pour de meilleures performances
