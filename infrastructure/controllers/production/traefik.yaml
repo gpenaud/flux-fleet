@@ -61,9 +61,8 @@ spec:
               permanent: true
               scheme: https
               to: websecure
-    service:
-      spec:
-        externalTrafficPolicy: Local
+    additionalArguments:
+      - "--entryPoints.websecure.forwardedHeaders.trustedIPs=10.42.0.0/16,10.43.0.0/16,127.0.0.1/32"
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -75,3 +74,5 @@ spec:
     sourceRange:
       - 100.64.0.0/10
       - 127.0.0.1/32
+    ipStrategy:
+      depth: 1   # ← prendre la 1ère IP dans X-Forwarded-For
