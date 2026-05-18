@@ -45,18 +45,50 @@ spec:
       dashboard: true
       insecure: true
     logs:
-      general:
-        level: DEBUG
       access:
         enabled: true
+      general:
+        level: DEBUG
     providers:
       kubernetesCRD:
         allowCrossNamespace: true
+    
+    hostNetwork: true
+    
+    service:
+      type: ClusterIP
+    
+    deployment:
+      strategy:
+        type: Recreate
+        rollingUpdate: null    # désactive explicitement le rolling update
+    
     ports:
       web:
+        port: 8000
+        hostPort: 80
         http:
           redirections:
             entryPoint:
-              to: websecure
-              scheme: https
               permanent: true
+              scheme: https
+              to: websecure
+      websecure:
+        port: 8443
+        hostPort: 443
+        tls:
+          enabled: true
+      traefik:
+        port: 8082
+        hostPort: 8082
+      metrics:
+        port: 9101
+        hostPort: 9101
+      tailscale:
+        port: 9443
+        hostPort: 9443
+        tls:
+          enabled: true
+    
+    additionalArguments:
+      - "--entryPoints.tailscale.address=100.64.0.2:9443"
