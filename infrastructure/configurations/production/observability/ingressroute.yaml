@@ -50,4 +50,4 @@ spec:
           namespace: controller-observability
   
   tls:
-    secretName: ovh-dns-zone-alter-it-eu
+    secretName: monitoring-infra01-alter-it-eu-tls
