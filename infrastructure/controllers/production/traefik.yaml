@@ -65,7 +65,7 @@ spec:
     
     ports:
       web:
-        port: 8000
+        port: 80
         hostPort: 80
         http:
           redirections:
@@ -74,7 +74,7 @@ spec:
               scheme: https
               to: websecure
       websecure:
-        port: 8443
+        port: 443
         hostPort: 443
       traefik:
         port: 8082
