@@ -139,7 +139,6 @@ spec:
         cookies:
           - subdomain: 'auth'
             domain: 'alter-it.eu'
-            default_redirection_url: 'https://auth.alter-it.eu'
 
       # --- Storage : SQLite local
       storage:
