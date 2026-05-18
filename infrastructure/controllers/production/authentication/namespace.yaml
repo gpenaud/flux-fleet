@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: controller-authentication
   labels:
-    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce: baseline
