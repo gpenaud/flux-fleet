@@ -14,17 +14,17 @@ spec:
         TYPEORM_DATABASE: "/persist/home.sqlite3"
         GRIST_DATA_DIR: "/persist/docs"
         # GRIST_FORCE_LOGIN: "true"
-        GRIST_SINGLE_ORG: "le-portail"
-        GRIST_OIDC_IDP_ISSUER: "https://auth.alter-it.eu"
-        GRIST_OIDC_IDP_CLIENT_ID: "grist-le-portail"
-        GRIST_OIDC_IDP_CLIENT_SECRET:
-          secretKeyRef:
-            name: grist-oidc-client-secret
-            key: "client_secret"
-        GRIST_OIDC_SP_HOST: "https://grist.leportail.org"
-        GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"
-        GRIST_OIDC_IDP_SCOPES: "openid email profile"
-        GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
+        # GRIST_SINGLE_ORG: "le-portail"
+        # GRIST_OIDC_IDP_ISSUER: "https://auth.alter-it.eu"
+        # GRIST_OIDC_IDP_CLIENT_ID: "grist-le-portail"
+        # GRIST_OIDC_IDP_CLIENT_SECRET:
+        #   secretKeyRef:
+        #     name: grist-oidc-client-secret
+        #     key: "client_secret"
+        # GRIST_OIDC_SP_HOST: "https://grist.leportail.org"
+        # GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"
+        # GRIST_OIDC_IDP_SCOPES: "openid email profile"
+        # GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
       extraVolumes:
         - name: grist-persist
           persistentVolumeClaim:
@@ -53,17 +53,17 @@ spec:
         GRIST_DATA_DIR: "/persist/docs"
         GRIST_SANDBOX_FLAVOR: "unsandboxed"
         # GRIST_FORCE_LOGIN: "true"
-        GRIST_SINGLE_ORG: "le-portail"
-        GRIST_OIDC_IDP_ISSUER: "https://auth.alter-it.eu"
-        GRIST_OIDC_IDP_CLIENT_ID: "grist-le-portail"
-        GRIST_OIDC_IDP_CLIENT_SECRET:
-          secretKeyRef:
-            name: grist-oidc-client-secret
-            key: "client_secret"
-        GRIST_OIDC_SP_HOST: "https://grist.leportail.org"
-        GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"
-        GRIST_OIDC_IDP_SCOPES: "openid email profile"
-        GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
+        # GRIST_SINGLE_ORG: "le-portail"
+        # GRIST_OIDC_IDP_ISSUER: "https://auth.alter-it.eu"
+        # GRIST_OIDC_IDP_CLIENT_ID: "grist-le-portail"
+        # GRIST_OIDC_IDP_CLIENT_SECRET:
+        #   secretKeyRef:
+        #     name: grist-oidc-client-secret
+        #     key: "client_secret"
+        # GRIST_OIDC_SP_HOST: "https://grist.leportail.org"
+        # GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"
+        # GRIST_OIDC_IDP_SCOPES: "openid email profile"
+        # GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
       extraVolumes:
         - name: grist-persist
           persistentVolumeClaim:
