@@ -6,7 +6,7 @@ metadata:
   namespace: controller-observability
 spec:
   entryPoints:
-    - tailscale
+    - websecure
   
   routes:
     # === Route 1 : Racine → redirect vers /grafana ===
