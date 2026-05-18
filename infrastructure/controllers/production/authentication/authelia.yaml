@@ -273,7 +273,7 @@ spec:
       mountPath: '/secrets'
       # Le users_database.yml monté à part (on le crée à la main)
       additionalSecrets:
-        users-database:
+        authelia-users:
           path: '/config'
           items:
             - key: 'users_database.yml'
