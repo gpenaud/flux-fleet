@@ -85,10 +85,6 @@ spec:
     # ================================================================
     configMap:
       disabled: false
-
-      authentication_backend:
-        file:
-          path: '/secrets/users/users_database.yml'
       
       # --- Serveur
       server:
@@ -110,7 +106,7 @@ spec:
         refresh_interval: '5 minutes'
         file:
           enabled: true
-          path: '/config/users_database.yml'
+          path: '/secrets/users/users_database.yml'
           watch: false
           search:
             email: false
