@@ -76,8 +76,6 @@ spec:
       websecure:
         port: 8443
         hostPort: 443
-        tls:
-          enabled: true
       traefik:
         port: 8082
         hostPort: 8082
@@ -87,8 +85,7 @@ spec:
       tailscale:
         port: 9443
         hostPort: 9443
-        tls:
-          enabled: true
     
     additionalArguments:
       - "--entryPoints.tailscale.address=100.64.0.2:9443"
+      - "--entryPoints.tailscale.http.tls=true"
