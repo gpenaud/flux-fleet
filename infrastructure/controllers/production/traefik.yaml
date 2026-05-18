@@ -98,3 +98,18 @@ spec:
     additionalArguments:
       - "--entryPoints.tailscale.address=100.64.0.2:9443"
       - "--entryPoints.tailscale.http.tls=true"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: infra01-alter-it-eu
+  namespace: controller-traefik
+spec:
+  secretName: infra01-alter-it-eu-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "*.infra01.alter-it.eu"
+  dnsNames:
+    - "*.infra01.alter-it.eu"
+    - "infra01.alter-it.eu"
