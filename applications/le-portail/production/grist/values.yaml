@@ -19,7 +19,7 @@ spec:
           FROM_SECRET:
             secretKeyRef:
               name: grist-oidc-client-secret
-              key: client-secret
+              key: client_secret
         GRIST_OIDC_SP_HOST: "https://grist.leportail.org"
         GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"
         GRIST_OIDC_IDP_SCOPES: "openid email profile"

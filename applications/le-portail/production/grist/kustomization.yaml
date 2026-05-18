@@ -10,10 +10,7 @@ patches:
   - target:
       kind: Namespace
       name: grist
-    patch: |
-      - op: replace
-        path: /metadata/name
-        value: le-portail-grist
+    path: namespace.yaml
   - target:
       kind: HelmRelease
       name: grist
