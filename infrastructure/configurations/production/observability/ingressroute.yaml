@@ -6,11 +6,11 @@ metadata:
   namespace: controller-observability
 spec:
   entryPoints:
-    - websecure
+    - tailscale
   
   routes:
     # === Route 1 : Racine → redirect vers /grafana ===
-    - match: Host(`monitoring.leportail.org`) && Path(`/`)
+    - match: Host(`monitoring.infra01.alter-it.eu`) && Path(`/`)
       kind: Rule
       middlewares:
         - name: monitoring-redirect-root
@@ -22,7 +22,7 @@ spec:
           port: 80
     
     # === Route 2 : Grafana ===
-    - match: Host(`monitoring.leportail.org`) && PathPrefix(`/grafana`)
+    - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/grafana`)
       kind: Rule
       services:
         - name: grafana
@@ -30,7 +30,7 @@ spec:
       # Pas de middleware d'auth : Grafana gère sa propre login
     
     # === Route 3 : Prometheus ===
-    - match: Host(`monitoring.leportail.org`) && PathPrefix(`/prometheus`)
+    - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/prometheus`)
       kind: Rule
       services:
         - name: prometheus-operated
@@ -40,7 +40,7 @@ spec:
           namespace: controller-observability
     
     # === Route 4 : Alertmanager ===
-    - match: Host(`monitoring.leportail.org`) && PathPrefix(`/alertmanager`)
+    - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/alertmanager`)
       kind: Rule
       services:
         - name: alertmanager-operated
@@ -50,6 +50,4 @@ spec:
           namespace: controller-observability
   
   tls:
-    secretName: monitoring-leportail-org-tls
-    domains:
-      - main: monitoring.leportail.org
+    secretName: ovh-dns-zone-alter-it-eu
