@@ -248,8 +248,8 @@ spec:
           
           # Clients
           clients:
-            - client_id: 'grist'
-              client_name: 'Grist'
+            - client_id: 'grist-le-portail'
+              client_name: 'Grist - Ecolieu du Portail'
               client_secret:
                 # Le hash pbkdf2 du client secret en clair
                 value: "$pbkdf2-sha512$310000$Kra1XW1tIxx3aBFtBassbw$0VQPncmkduO4dxiIv1/3eVLB3XQ5Ioq0sU5CdY5Li08EINcciyITqmIxt2tZ7ZzmN4tsOgAKcPC3KQ0v8w0hWQ"
