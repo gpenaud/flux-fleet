@@ -13,6 +13,8 @@ spec:
     - match: Host(`monitoring.infra01.alter-it.eu`) && Path(`/`)
       kind: Rule
       middlewares:
+        - name: tailnet-only
+          namespace: controller-traefik
         - name: monitoring-redirect-root
           namespace: controller-observability
       services:
@@ -24,6 +26,9 @@ spec:
     # === Route 2 : Grafana ===
     - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/grafana`)
       kind: Rule
+      middlewares:
+        - name: tailnet-only
+          namespace: controller-traefik
       services:
         - name: grafana
           port: 80
@@ -36,8 +41,8 @@ spec:
         - name: prometheus-operated
           port: 9090
       middlewares:
-        - name: monitoring-auth
-          namespace: controller-observability
+        - name: tailnet-only
+          namespace: controller-traefik
     
     # === Route 4 : Alertmanager ===
     - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/alertmanager`)
@@ -46,8 +51,8 @@ spec:
         - name: alertmanager-operated
           port: 9093
       middlewares:
-        - name: monitoring-auth
-          namespace: controller-observability
+        - name: tailnet-only
+          namespace: controller-traefik
   
   tls:
     secretName: monitoring-infra01-alter-it-eu-tls
