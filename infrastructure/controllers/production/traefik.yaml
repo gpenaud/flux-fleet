@@ -76,5 +76,5 @@ metadata:
 spec:
   ipAllowList:
     sourceRange:
-      - 100.64.0.0/10
+      - 10.42.0.0/16 # should be tailscale IP range, but we won't work without tailscale operator so we allow the whole svclb private range
       - 127.0.0.1/32
