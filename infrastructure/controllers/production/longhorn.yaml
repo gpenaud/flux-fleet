@@ -44,11 +44,12 @@ spec:
     ingress:
       enabled: true
       ingressClassName: traefik
-      host: longhorn.leportail.org
+      host: longhorn.infra01.alter-it.eu
       tls: true
-      tlsSecret: longhorn.leportail.org-tls
+      tlsSecret: longhorn.infra01.alter-it-eu-tls
       annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-staging
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        traefik.ingress.kubernetes.io/router.middlewares: controller-traefik-tailnet-only@kubernetescrd
 
 ---
 apiVersion: storage.k8s.io/v1
