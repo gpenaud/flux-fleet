@@ -8,7 +8,7 @@ spec:
   basicAuth:
     secret: monitoring-basic-auth
     # Nom du header WWW-Authenticate dans le challenge
-    realm: "Monitoring leportail.org"
+    realm: "Monitoring infra01.alter-it.eu"
     # Strip le header Authorization avant de transmettre au backend
     # (sinon Prometheus/AM verraient les credentials qu'ils n'utilisent pas)
     removeHeader: true
