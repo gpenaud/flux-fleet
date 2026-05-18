@@ -300,3 +300,7 @@ spec:
           items:
             - key: 'users_database.yml'
               path: 'users_database.yml'
+        authelia-smtp:
+          items:
+            - key: 'password.txt'
+              path: 'password.txt'
