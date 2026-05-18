@@ -85,6 +85,10 @@ spec:
     # ================================================================
     configMap:
       disabled: false
+
+      authentication_backend:
+        file:
+          path: '/secrets/users/users_database.yml'
       
       # --- Serveur
       server:
@@ -273,7 +277,7 @@ spec:
       # Le users_database.yml monté à part (on le crée à la main)
       additionalSecrets:
         authelia-users:
-          path: '/config'
+          path: 'users'
           items:
             - key: 'users_database.yml'
               path: 'users_database.yml'
