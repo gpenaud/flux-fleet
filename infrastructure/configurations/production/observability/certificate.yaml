@@ -2,23 +2,13 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: monitoring-leportail-org
+  name: monitoring-infra01-alter-it-eu
   namespace: controller-observability
 spec:
-  # Nom du Secret qui contiendra le certificat (cert-manager le crée)
-  secretName: monitoring-leportail-org-tls
-  
-  # ClusterIssuer existant chez toi (DNS-01 OVH)
+  secretName: monitoring-infra01-alter-it-eu-tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  
-  # Renouvellement : 30j avant expiration (Let's Encrypt valide 90j)
-  renewBefore: 720h
-  
-  # Le DNS demandé
+  commonName: "monitoring.infra01.alter-it.eu"
   dnsNames:
-    - monitoring.leportail.org
-  
-  # Durée du cert : 90 jours (max LE)
-  duration: 2160h
+    - "monitoring.infra01.alter-it.eu"
