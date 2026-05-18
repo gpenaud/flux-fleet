@@ -5,6 +5,7 @@ metadata:
   labels:
     alter-it.org/controller: traefik
     alter-it.org/managed-by: fluxcd
+    reflector/ovh-dns-zone-alter-it-eu: "true"
 
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
@@ -105,7 +106,7 @@ metadata:
   name: infra01-alter-it-eu
   namespace: controller-traefik
 spec:
-  secretName: infra01-alter-it-eu-tls
+  secretName: ovh-dns-zone-alter-it-eu
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
