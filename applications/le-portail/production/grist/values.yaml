@@ -14,6 +14,7 @@ spec:
         TYPEORM_DATABASE: "/persist/home.sqlite3"
         GRIST_DATA_DIR: "/persist/docs"
         GRIST_FORCE_LOGIN: "true"
+        GRIST_SINGLE_ORG: "le-portail"
         GRIST_OIDC_IDP_ISSUER: "https://auth.alter-it.eu"
         GRIST_OIDC_IDP_CLIENT_ID: "grist-le-portail"
         GRIST_OIDC_IDP_CLIENT_SECRET:
@@ -52,6 +53,7 @@ spec:
         GRIST_DATA_DIR: "/persist/docs"
         GRIST_SANDBOX_FLAVOR: "unsandboxed"
         GRIST_FORCE_LOGIN: "true"
+        GRIST_SINGLE_ORG: "le-portail"
         GRIST_OIDC_IDP_ISSUER: "https://auth.alter-it.eu"
         GRIST_OIDC_IDP_CLIENT_ID: "grist-le-portail"
         GRIST_OIDC_IDP_CLIENT_SECRET:
