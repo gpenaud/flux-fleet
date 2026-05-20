@@ -44,7 +44,7 @@ spec:
     # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
     env:
       # URL publique du serveur (doit matcher le cert + DNS)
-      HEADSCALE_SERVER_URL: "https://headscale.alter-it.eu"
+      HEADSCALE_SERVER_URL: "https://headscale.infra01.alter-it.eu"
 
       # Adresse d'écoute du serveur HTTP principal
       HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"
@@ -72,7 +72,8 @@ spec:
       # vers persistence.config.mountPath/db.sqlite quand postgresql.enabled=false.
       # Les chemins de private.key et noise_private.key sont aussi gérés par le chart.
 
-      # DERP : utilisation des serveurs publics Tailscale (défaut chart)
+      # DERP : utilisation des serveurs publics       # Override nameservers globaux : on les définira plus tard pour le split DNS
+      # HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "false"Tailscale (défaut chart)
       # Pas besoin de surcharger pour l'instant
 
       # Logs
