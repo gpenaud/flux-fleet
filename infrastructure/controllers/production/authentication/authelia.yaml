@@ -143,16 +143,12 @@ spec:
         cookies:
           - subdomain: 'auth.infra01'
             domain: 'alter-it.eu'
-            default_redirection_url: 'https://auth.infra01.alter-it.eu'
           - subdomain: 'auth'
             domain: 'leportail.org'
-            default_redirection_url: 'https://auth.leportail.org'
           - subdomain: 'auth'
             domain: 'fermedujointout.fr'
-            default_redirection_url: 'https://fermedujointout.fr'
           - subdomain: 'auth'
             domain: 'labergeronnette.org'
-            default_redirection_url: 'https://labergeronnette.org'
 
       # --- Storage : SQLite local
       storage:
