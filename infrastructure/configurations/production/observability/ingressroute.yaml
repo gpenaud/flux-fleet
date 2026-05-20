@@ -10,7 +10,7 @@ spec:
   
   routes:
     # === Route 1 : Racine → redirect vers /grafana ===
-    - match: Host(`monitoring.infra01.alter-it.eu`) && Path(`/`)
+    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && Path(`/`)
       kind: Rule
       middlewares:
         - name: tailnet-only
@@ -24,7 +24,7 @@ spec:
           port: 80
     
     # === Route 2 : Grafana ===
-    - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/grafana`)
+    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && PathPrefix(`/grafana`)
       kind: Rule
       middlewares:
         - name: tailnet-only
@@ -35,7 +35,7 @@ spec:
       # Pas de middleware d'auth : Grafana gère sa propre login
     
     # === Route 3 : Prometheus ===
-    - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/prometheus`)
+    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && PathPrefix(`/prometheus`)
       kind: Rule
       services:
         - name: prometheus-operated
@@ -45,7 +45,7 @@ spec:
           namespace: controller-traefik
     
     # === Route 4 : Alertmanager ===
-    - match: Host(`monitoring.infra01.alter-it.eu`) && PathPrefix(`/alertmanager`)
+    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && PathPrefix(`/alertmanager`)
       kind: Rule
       services:
         - name: alertmanager-operated
@@ -55,4 +55,4 @@ spec:
           namespace: controller-traefik
   
   tls:
-    secretName: monitoring-infra01-alter-it-eu-tls
+    secretName: monitoring-internal-infra01-alter-it-eu-tls
