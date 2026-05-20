@@ -127,7 +127,7 @@ spec:
         default_policy: 'deny'
         rules:
           # Authelia lui-même : bypass (sinon boucle infinie de login)
-          - domain: 'auth.alter-it.eu'
+          - domain: 'auth.infra01.alter-it.eu'
             policy: 'bypass'
 
       # --- Session
@@ -163,7 +163,7 @@ spec:
           address: 'submissions://smtp.gmail.com:465'
           timeout: '10 seconds'
           sender: 'Authelia <ops.gpenaud@gmail.com>'
-          identifier: 'auth.alter-it.eu'
+          identifier: 'auth.infra01.alter-it.eu'
           subject: '[Authelia] {title}'
           startup_check_address: 'ops.gpenaud@gmail.com'
           disable_html_emails: false
