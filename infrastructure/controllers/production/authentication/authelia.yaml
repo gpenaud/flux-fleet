@@ -338,10 +338,10 @@ spec:
         #   items:
         #     - key: 'users_database.yml'
         #       path: 'users_database.yml'
-      authelia-ldap-bind:
-        items:
-          - key: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
-            path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD' 
+        authelia-ldap-bind:
+          items:
+            - key: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
+              path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD' 
         authelia-secrets:
           items:
             - key: 'AUTHELIA_SESSION_SECRET'
