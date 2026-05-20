@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`directory.infra01.alter-it.eu`)
+    - match: Host(`directory.internal.infra01.alter-it.eu`)
       kind: Rule
       middlewares:
         - name: tailnet-only
@@ -16,17 +16,17 @@ spec:
         - name: lldap
           port: 17170
   tls:
-    secretName: directory-infra01-alter-it-tls
+    secretName: directory-internal-infra01-alter-it-tls
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: directory-infra01-alter-it-tls
+  name: directory-internal-infra01-alter-it-tls
   namespace: controller-directory
 spec:
-  secretName: directory-infra01-alter-it-tls
+  secretName: directory-internal-infra01-alter-it-tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - directory.infra01.alter-it.eu
+    - directory.internal.infra01.alter-it.eu
