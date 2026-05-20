@@ -64,36 +64,36 @@ spec:
     kind: ClusterIssuer
     name: letsencrypt-production
 
----
-# === Zone fermedujointout.fr ===
+# ---
+# # === Zone fermedujointout.fr ===
 
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: authelia-fermedujointout-fr
-  namespace: controller-authentication
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`auth.fermedujointout.fr`)
-      kind: Rule
-      services:
-        - name: authelia
-          port: 80
-  tls:
-    secretName: auth-fermedujointout-fr-tls
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: auth-fermedujointout-fr
-  namespace: controller-authentication
-spec:
-  secretName: auth-fermedujointout-fr-tls
-  commonName: auth.fermedujointout.fr
-  dnsNames:
-    - auth.fermedujointout.fr
-  issuerRef:
-    kind: ClusterIssuer
-    name: letsencrypt-production
+# apiVersion: traefik.io/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: authelia-fermedujointout-fr
+#   namespace: controller-authentication
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#     - match: Host(`auth.fermedujointout.fr`)
+#       kind: Rule
+#       services:
+#         - name: authelia
+#           port: 80
+#   tls:
+#     secretName: auth-fermedujointout-fr-tls
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: auth-fermedujointout-fr
+#   namespace: controller-authentication
+# spec:
+#   secretName: auth-fermedujointout-fr-tls
+#   commonName: auth.fermedujointout.fr
+#   dnsNames:
+#     - auth.fermedujointout.fr
+#   issuerRef:
+#     kind: ClusterIssuer
+#     name: letsencrypt-production
