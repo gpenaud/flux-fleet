@@ -138,7 +138,7 @@ spec:
         inactivity: '5 minutes'
         remember_me: '1 month'
         cookies:
-          - subdomain: 'auth'
+          - subdomain: 'auth.infra01'
             domain: 'alter-it.eu'
 
       # --- Storage : SQLite local
