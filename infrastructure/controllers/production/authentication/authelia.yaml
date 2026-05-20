@@ -138,7 +138,10 @@ spec:
           additional_groups_dn: 'ou=groups'
           groups_filter: '(member={dn})'
           user: 'uid=authelia,ou=people,dc=alter-it,dc=eu'
-          # password vient du secret AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD via env
+          password:
+            disabled: false
+            secret_name: 'authelia-ldap-bind'
+            path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
           attributes:
             username: 'uid'
             display_name: 'displayName'
