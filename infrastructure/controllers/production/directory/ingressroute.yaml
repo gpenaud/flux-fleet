@@ -11,7 +11,7 @@ spec:
       kind: Rule
       middlewares:
         - name: tailnet-only
-          namespace: controller-traefik
+          namespace: controller-ingress
       services:
         - name: lldap
           port: 17170

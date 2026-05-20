@@ -9,3 +9,4 @@ resources:
   - vpn
   - authentication
   - directory
+  - ingress
