@@ -313,6 +313,10 @@ spec:
           items:
             - key: 'users_database.yml'
               path: 'users_database.yml'
+        authelia-secrets:
+          items:
+            - key: 'AUTHELIA_SESSION_SECRET'
+              path: 'AUTHELIA_SESSION_SECRET'
         authelia-smtp:
           items:
             - key: 'password.txt'
