@@ -44,7 +44,7 @@ spec:
     # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
     env:
       # URL publique du serveur (doit matcher le cert + DNS)
-      HEADSCALE_SERVER_URL: "https://headscale.infra01.alter-it.eu"
+      HEADSCALE_SERVER_URL: "https://vpn.infra01.alter-it.eu"
 
       # Adresse d'écoute du serveur HTTP principal
       HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"

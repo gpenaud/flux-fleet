@@ -22,7 +22,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`headscale.infra01.alter-it.eu`)
+    - match: Host(`vpn.infra01.alter-it.eu`)
       kind: Rule
       middlewares:
         - name: headscale-headers
@@ -38,23 +38,23 @@ spec:
           # rewriting. Le serveur doit recevoir le Host original.
           passHostHeader: true
   tls:
-    secretName: headscale-infra01-alter-it-eu-tls
+    secretName: vpn-infra01-alter-it-eu-tls
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: headscale-infra01-alter-it-eu
+  name: vpn-infra01-alter-it-eu
   namespace: controller-vpn
 spec:
-  secretName: headscale-infra01-alter-it-eu-tls
+  secretName: vpn-infra01-alter-it-eu-tls
   duration: 2160h    # 90 jours
   renewBefore: 720h  # renouvellement 30 jours avant expiration
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: headscale.infra01.alter-it.eu
+  commonName: vpn.infra01.alter-it.eu
   dnsNames:
-    - headscale.infra01.alter-it.eu
+    - vpn.infra01.alter-it.eu
   privateKey:
     algorithm: ECDSA
     size: 256
