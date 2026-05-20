@@ -9,6 +9,9 @@ spec:
   routes:
     - match: Host(`directory.alter-it.eu`)
       kind: Rule
+      middlewares:
+        - name: tailnet-only
+          namespace: controller-traefik
       services:
         - name: lldap
           port: 17170
