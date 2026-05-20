@@ -8,3 +8,4 @@ resources:
   - mysql
   - vpn
   - authentication
+  - directory
