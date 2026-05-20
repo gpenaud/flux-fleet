@@ -15,6 +15,19 @@ spec:
           kind: TraefikService
       middlewares:
         - name: tailnet-only
-          namespace: kube-system
+          namespace: controller-ingress
   tls:
     secretName: ingress-internal-infra01-alter-it-eu-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ingress-internal-infra01-alter-it-eu-tls
+  namespace: controller-ingress
+spec:
+  secretName: ingress-internal-infra01-alter-it-eu-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    - ingress.internal.infra01.alter-it.eu

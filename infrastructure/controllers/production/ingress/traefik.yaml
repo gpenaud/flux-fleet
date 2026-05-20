@@ -34,7 +34,7 @@ spec:
   values:
     api:
       dashboard: true
-      insecure: true
+      insecure: false
     logs:
       access:
         enabled: true
