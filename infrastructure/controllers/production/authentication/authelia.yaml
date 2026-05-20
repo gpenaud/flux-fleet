@@ -133,10 +133,13 @@ spec:
       # --- Session
       session:
         name: 'authelia_session'
-        secret: "${SESSION_SECRET}"
-        expiration: 1h
-        inactivity: 15m
-        remember_me: 1M
+        expiration: '1 hour'
+        inactivity: '5 minutes'
+        remember_me: '1 month'
+        encryption_key:
+          disabled: false
+          secret_name: 'authelia-secrets'
+          path: 'AUTHELIA_SESSION_SECRET'
         cookies:
           - subdomain: 'auth.infra01'
             domain: 'alter-it.eu'
