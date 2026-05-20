@@ -30,7 +30,7 @@ spec:
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-production
-
+---
 # === Zone leportail.org ===
 
 apiVersion: traefik.io/v1alpha1
@@ -64,6 +64,7 @@ spec:
     kind: ClusterIssuer
     name: letsencrypt-production
 
+---
 # === Zone fermedujointout.fr ===
 
 apiVersion: traefik.io/v1alpha1
