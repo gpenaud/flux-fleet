@@ -126,8 +126,8 @@ spec:
         refresh_interval: '5 minutes'
         password_reset:
           disable: false   # active le password reset par email
-        custom:
-          implementation: lldap   # disponible Authelia ≥ 4.38
+        ldap:
+          implementation: custom   # disponible Authelia ≥ 4.38
           address: 'ldap://lldap.controller-authentication.svc.cluster.local:3890'
           timeout: '5 seconds'
           start_tls: false
