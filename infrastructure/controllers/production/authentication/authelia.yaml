@@ -98,34 +98,63 @@ spec:
       # --- Theme
       theme: 'dark'
       
-      # --- Authentication backend : file-based
+      # # --- Authentication backend : file-based
+      # authentication_backend:
+      #   password_reset:
+      #     disable: false  # désactivé jusqu'à ce qu'on configure SMTP
+      #   password_change:
+      #     disable: false
+      #   refresh_interval: '5 minutes'
+      #   file:
+      #     enabled: true
+      #     path: '/secrets/users/users_database.yml'
+      #     watch: false
+      #     search:
+      #       email: false
+      #       case_insensitive: false
+      #     password:
+      #       algorithm: 'argon2'
+      #       argon2:
+      #         variant: 'argon2id'
+      #         iterations: 3
+      #         memory: 65536
+      #         parallelism: 4
+      #         key_length: 32
+      #         salt_length: 16
+
       authentication_backend:
-        password_reset:
-          disable: false  # désactivé jusqu'à ce qu'on configure SMTP
-        password_change:
-          disable: false
         refresh_interval: '5 minutes'
-        file:
-          enabled: true
-          path: '/secrets/users/users_database.yml'
-          watch: false
-          search:
-            email: false
-            case_insensitive: false
-          password:
-            algorithm: 'argon2'
-            argon2:
-              variant: 'argon2id'
-              iterations: 3
-              memory: 65536
-              parallelism: 4
-              key_length: 32
-              salt_length: 16
+        password_reset:
+          disable: false   # active le password reset par email
+        ldap:
+          implementation: lldap   # disponible Authelia ≥ 4.38
+          address: 'ldap://lldap.controller-authentication.svc.cluster.local:3890'
+          timeout: '5 seconds'
+          start_tls: false
+          base_dn: 'dc=alter-it,dc=eu'
+          additional_users_dn: 'ou=people'
+          users_filter: '(&({username_attribute}={input})(objectClass=person))'
+          additional_groups_dn: 'ou=groups'
+          groups_filter: '(member={dn})'
+          user: 'uid=authelia,ou=people,dc=alter-it,dc=eu'
+          # password vient du secret AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD via env
+          attributes:
+            username: 'uid'
+            display_name: 'displayName'
+            mail: 'mail'
+            member_of: 'memberOf'
+            group_name: 'cn'
 
       # --- Access Control
       access_control:
         default_policy: 'deny'
         rules:
+          # Tenant leportail
+          - domain: '*.leportail.org'
+            policy: 'one_factor'
+            subject:
+              - 'group:leportail_admins'
+              - 'group:leportail_users'
           # Authelia lui-même : bypass (sinon boucle infinie de login)
           - domain: 'auth.infra01.alter-it.eu'
             policy: 'bypass'
@@ -304,11 +333,15 @@ spec:
       mountPath: '/secrets'
       # Le users_database.yml monté à part (on le crée à la main)
       additionalSecrets:
-        authelia-users:
-          path: 'users'
-          items:
-            - key: 'users_database.yml'
-              path: 'users_database.yml'
+        # authelia-users:
+        #   path: 'users'
+        #   items:
+        #     - key: 'users_database.yml'
+        #       path: 'users_database.yml'
+      authelia-ldap-bind:
+        items:
+          - key: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
+            path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD' 
         authelia-secrets:
           items:
             - key: 'AUTHELIA_SESSION_SECRET'
