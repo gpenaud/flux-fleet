@@ -6,7 +6,7 @@ metadata:
 spec:
   type: oci
   interval: 1h
-  url: oci://ghcr.io/alexmorbo/helm-charts/lldap
+  url: oci://ghcr.io/alexmorbo/helm-charts
 ---
 # clusters/leportail/lldap/helm-release.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
