@@ -1,0 +1,20 @@
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ingress.internal.infra01.alter-it.eu`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+      middlewares:
+        - name: tailnet-only
+          namespace: kube-system
+  tls:
+    secretName: ingress-internal-infra01-alter-it-eu-tls
