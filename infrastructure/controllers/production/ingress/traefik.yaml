@@ -56,3 +56,25 @@ spec:
               permanent: true
               scheme: https
               to: websecure
+      metrics:
+        port: 9100
+        expose:
+          default: false
+        exposedPort: 9100
+        protocol: TCP
+
+    metrics:
+      prometheus:
+        entryPoint: metrics
+        addEntryPointsLabels: true
+        addRoutersLabels: false # ça ferait trop de cardinalité
+        addServicesLabels: true # on a seulement besoin de metrics sur les services
+        buckets:
+          - 0.05
+          - 0.1
+          - 0.25
+          - 0.5
+          - 1
+          - 2.5
+          - 5
+          - 10
