@@ -35,7 +35,7 @@ spec:
   values:
     image:
       repository: ghcr.io/juanfont/headscale
-      tag: v0.26.1  # à valider — dernière patch stable au moment du déploiement
+      tag: v0.28.0  # à valider — dernière patch stable au moment du déploiement
 
     # Args par défaut du chart : ["serve"]
     args: ["serve"]
