@@ -23,7 +23,7 @@ metadata:
 spec:
   secretName: directory-alter-it-tls
   issuerRef:
-    name: letsencrypt-prod  # adapte
+    name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
     - directory.alter-it.eu
