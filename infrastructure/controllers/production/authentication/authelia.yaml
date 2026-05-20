@@ -129,7 +129,7 @@ spec:
         ldap:
           enabled: true
           implementation: 'lldap'
-          address: 'ldap://lldap.controller-authentication.svc.cluster.local:3890'
+          address: 'ldap://lldap.controller-directory.svc.cluster.local:3890'
           timeout: '5 seconds'
           start_tls: false
           base_dn: 'dc=alter-it,dc=eu'
