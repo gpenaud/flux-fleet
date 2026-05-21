@@ -12,3 +12,4 @@ resources:
   - loki.yaml
   - alloy/alloy.yaml
   - alloy/rbac.yaml
+  - dashboards
