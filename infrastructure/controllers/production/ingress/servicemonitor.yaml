@@ -23,3 +23,8 @@ spec:
         - sourceLabels: [exported_service]
           regex: '^controller-.+$'
           action: drop
+        - sourceLabels: [exported_service]
+          regex: '^(.+)-(?:80|8080|http|https)@(?:kubernetes|kubernetescrd)$'
+          targetLabel: exported_service
+          replacement: '${1}'
+          action: replace
