@@ -61,6 +61,8 @@ spec:
         level: info
       auth.anonymous:
         enabled: false
+      users:
+        home_page: "/d/infra01-alter-it/infra01-alter-it-overview"
 
     datasources:
       datasources.yaml:
@@ -95,7 +97,12 @@ spec:
         folderAnnotation: grafana_folder
         provider:
           foldersFromFilesStructure: true
-
+      datasources:
+        enabled: true
+        label: grafana_datasource
+        labelValue: "1"
+        searchNamespace: ALL
+  
     ingress:
       enabled: false
 
