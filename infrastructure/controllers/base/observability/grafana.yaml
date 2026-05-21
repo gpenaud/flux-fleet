@@ -62,7 +62,7 @@ spec:
       auth.anonymous:
         enabled: false
       users:
-        home_page: "/d/infra01-alter-it/infra01-alter-it-overview"
+        home_page: "/d/infra01-alter-it-overview"
 
     datasources:
       datasources.yaml:
