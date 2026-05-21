@@ -77,11 +77,7 @@ spec:
               regex: '^controller-.+$'
               action: drop
             # 2. Drop tout ce qui n'est pas un service Kubernetes
-            # (élimine kubernetes-crd, internal, etc.)
-            - sourceLabels: [exported_service]
-              regex: '^.+@(kubernetes|kubernetescrd)$'
-              action: keep  
-            # 3. Drop les services exposés sur le port 80 (HTTP, redirigé vers HTTPS)
-            - sourceLabels: [exported_service]
+            # (élimine kubernetes-crd, internal, etc.)            - sourceLabels: [exported_service]
+            - sourceLabels: [exported_service] 
               regex: '^.+-80@(kubernetes|kubernetescrd)$'
-              action: drop
+              action: keep
