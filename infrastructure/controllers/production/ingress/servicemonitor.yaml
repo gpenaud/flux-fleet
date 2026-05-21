@@ -26,5 +26,5 @@ spec:
         # 2. Drop tout ce qui n'est pas un service Kubernetes
         # (élimine kubernetes-crd, internal, etc.)            - sourceLabels: [exported_service]
         - sourceLabels: [exported_service] 
-          regex: '^.+-80@(kubernetes|kubernetescrd)$'
+          regex: '^.+@(kubernetes|kubernetescrd)$'
           action: keep
