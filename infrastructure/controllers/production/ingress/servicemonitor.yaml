@@ -23,8 +23,3 @@ spec:
         - sourceLabels: [exported_service]
           regex: '^controller-.+$'
           action: drop
-        # 2. Drop tout ce qui n'est pas un service Kubernetes
-        # (élimine kubernetes-crd, internal, etc.)            - sourceLabels: [exported_service]
-        - sourceLabels: [exported_service] 
-          regex: '^.+@(kubernetes|kubernetescrd)$'
-          action: keep
