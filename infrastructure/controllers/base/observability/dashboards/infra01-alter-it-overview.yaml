@@ -1227,6 +1227,6 @@ data:
       "timepicker": {},
       "timezone": "browser",
       "title": "Single pane of glass — cluster k3s",
-      "uid": "spog-k3s-overview",
+      "uid": "infra01-alter-it-overview",
       "version": 20
     }
