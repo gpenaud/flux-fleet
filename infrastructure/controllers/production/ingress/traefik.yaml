@@ -70,14 +70,3 @@ spec:
         addRoutersLabels: false # ça ferait trop de cardinalité
         addServicesLabels: true # on a seulement besoin de metrics sur les services
         buckets: "0.1,0.3,1,3,10"
-        serviceMonitor:
-          metricRelabelings:
-            # 1. Drop tout ce qui est controller (services d'infrastructure)
-            - sourceLabels: [exported_service]
-              regex: '^controller-.+$'
-              action: drop
-            # 2. Drop tout ce qui n'est pas un service Kubernetes
-            # (élimine kubernetes-crd, internal, etc.)            - sourceLabels: [exported_service]
-            - sourceLabels: [exported_service] 
-              regex: '^.+-80@(kubernetes|kubernetescrd)$'
-              action: keep

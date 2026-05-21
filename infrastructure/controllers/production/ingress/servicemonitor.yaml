@@ -18,3 +18,13 @@ spec:
       path: /metrics
       interval: 30s
       scrapeTimeout: 10s
+      metricRelabelings:
+        # 1. Drop tout ce qui est controller (services d'infrastructure)
+        - sourceLabels: [exported_service]
+          regex: '^controller-.+$'
+          action: drop
+        # 2. Drop tout ce qui n'est pas un service Kubernetes
+        # (élimine kubernetes-crd, internal, etc.)            - sourceLabels: [exported_service]
+        - sourceLabels: [exported_service] 
+          regex: '^.+-80@(kubernetes|kubernetescrd)$'
+          action: keep
