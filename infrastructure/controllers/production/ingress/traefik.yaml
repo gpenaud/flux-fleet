@@ -57,10 +57,10 @@ spec:
               scheme: https
               to: websecure
       metrics:
-        port: 9100
+        port: 8082
         expose:
           default: true
-        exposedPort: 9100
+        exposedPort: 8082
         protocol: TCP
 
     metrics:
