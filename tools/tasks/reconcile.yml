@@ -7,6 +7,14 @@ tasks:
       - flux --context production -n flux-system reconcile source git flux-system
     silent: true
 
+  kustomization:infrastructure:bootstrap:
+    desc: Reconcile sources, then infrastructure-bootstrap
+    cmds:
+      - task reconcile:source
+      - flux --context production -n flux-system suspend kustomization infrastructure-bootstrap
+      - flux --context production -n flux-system resume kustomization infrastructure-bootstrap
+    silent: true
+
   kustomization:infrastructure:configurations:
     desc: Reconcile sources, then infrastructure-configurations
     cmds:
@@ -27,6 +35,7 @@ tasks:
     desc: Reconcile sources, then infrastructure
     cmds:
       - task: source
+      - task: kustomization:infrastructure:bootstrap
       - task: kustomization:infrastructure:controllers
       - task: kustomization:infrastructure:configurations
     silent: true
