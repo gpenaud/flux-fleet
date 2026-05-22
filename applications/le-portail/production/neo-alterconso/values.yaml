@@ -111,4 +111,5 @@ spec:
             pattern: "< 1 commande sur 6m"
 
       notifications:
+        enabled: false
         recipient_category: "Membres réguliers"
