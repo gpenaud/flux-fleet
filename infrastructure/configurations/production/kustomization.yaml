@@ -1,7 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - cluster-issuers/letsencrypt-staging.yaml
-  - cluster-issuers/letsencrypt-production.yaml
-  - mysql-servers/version_8_lts.yaml
+  - authentication
+  - certificates
+  - mysql
   - observability
+  - ingress
+  - storage
+  - vpn
