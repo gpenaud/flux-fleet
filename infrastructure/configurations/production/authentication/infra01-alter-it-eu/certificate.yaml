@@ -1,0 +1,14 @@
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: auth-infra01-alter-it-eu
+  namespace: controller-authentication
+spec:
+  secretName: auth-infra01-alter-it-eu-tls
+  commonName: auth.infra01.alter-it.eu
+  dnsNames:
+    - auth.infra01.alter-it.eu
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production

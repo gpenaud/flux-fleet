@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - infra01-alter-it-eu/certificate.yaml
+  - infra01-alter-it-eu/ingressroute.yaml
+  # - fermedujointout-fr/certificate.yaml
+  # - fermedujointout-fr/ingressroute.yaml
+  - leportail-org/certificate.yaml
+  - leportail-org/ingressroute.yaml
