@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: tenants
+    - name: infrastructure-configurations
   interval: 5m
   retryInterval: 30s
   sourceRef:
