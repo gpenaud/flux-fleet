@@ -1,34 +1,33 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: ferme-du-jointout-wordpress-site
+namespace: le-portail-dolibarr
 resources:
-  - ../../../base/wordpress/
+  - ../../../../base/dolibarr/
   - secrets.enc.yaml
-  - backup-pod-config.yaml
 patches:
   - target:
-      kind: HelmRelease
-      name: wordpress
-    patch: |
-      - op: replace
-        path: /metadata/name
-        value: ferme-du-jointout-wordpress-site
-  - target:
-      kind: HelmRelease
-      name: ferme-du-jointout-wordpress-site
-    path: values.yaml
-  - target:
       kind: Namespace
-      name: ferme-du-jointout-wordpress-site
+      name: dolibarr
     patch: |
       - op: replace
         path: /metadata/name
-        value: ferme-du-jointout-wordpress-site
+        value: le-portail-dolibarr
+  - target:
+      kind: HelmRelease
+      name: dolibarr
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: le-portail-dolibarr
+  - target:
+      kind: HelmRelease
+      name: le-portail-dolibarr
+    path: values.yaml
   # Add the k8up backup annotation to the PVC
   - target:
       kind: PersistentVolumeClaim
-      namespace: ferme-du-jointout-wordpress-site
+      namespace: le-portail-dolibarr
     patch: |-
       - op: add
         path: /metadata/annotations/k8up.io~1backup
@@ -36,8 +35,8 @@ patches:
   # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
-      name: wordpress
+      name: dolibarr
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "alter-it-infra01-backup-ferme-du-jointout-wordpress-site"
+        value: "alter-it-infra01-backup-le-portail-dolibarr"

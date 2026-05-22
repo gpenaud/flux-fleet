@@ -1,14 +1,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: applications-la-bergeronnette
+  name: applications-ferme-du-jointout
   namespace: flux-system
 spec:
   interval: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/la-bergeronnette/${ENVIRONMENT}
+  path: ./applications/tenants/ferme-du-jointout/${ENVIRONMENT}
   prune: true
   decryption:
     provider: sops
@@ -16,4 +16,4 @@ spec:
       name: sops-age-private-key
   postBuild:
     substitute:
-      TENANT: la-bergeronnette
+      TENANT: ferme-du-jointout

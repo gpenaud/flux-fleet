@@ -1,12 +1,11 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: le-portail-wordpress-site
+namespace: le-portail-wordpress-epilibres
 resources:
-  - ../../../base/wordpress/
+  - ../../../../base/wordpress/
   - secrets.enc.yaml
-  - backup-pod-config.yaml
-patches:
+patches: 
   # Rename the helm release
   - target:
       kind: HelmRelease
@@ -14,11 +13,11 @@ patches:
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-wordpress-site
+        value: le-portail-wordpress-epilibres
   # Overrides the helm release values.yaml
   - target:
       kind: HelmRelease
-      name: le-portail-wordpress-site
+      name: le-portail-wordpress-epilibres
     path: values.yaml
   # Overrides the namespace name
   - target:
@@ -27,11 +26,11 @@ patches:
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-wordpress-site
+        value: le-portail-wordpress-epilibres
   # Add the k8up backup annotation to the PVC
   - target:
       kind: PersistentVolumeClaim
-      namespace: le-portail-wordpress-site
+      namespace: le-portail-wordpress-epilibres
     patch: |-
       - op: add
         path: /metadata/annotations/k8up.io~1backup
@@ -43,4 +42,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "alter-it-infra01-backup-le-portail-wordpress-site"
+        value: "alter-it-infra01-backup-le-portail-wordpress-epilibres"

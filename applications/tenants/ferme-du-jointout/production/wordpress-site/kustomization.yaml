@@ -1,31 +1,34 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: le-portail-grist
+namespace: ferme-du-jointout-wordpress-site
 resources:
-  - ../../../base/grist/
-  - storage.yaml
+  - ../../../../base/wordpress/
   - secrets.enc.yaml
+  - backup-pod-config.yaml
 patches:
   - target:
-      kind: Namespace
-      name: grist
-    path: namespace.yaml
-  - target:
       kind: HelmRelease
-      name: grist
+      name: wordpress
     patch: |
       - op: replace
         path: /metadata/name
-        value: le-portail-grist
+        value: ferme-du-jointout-wordpress-site
   - target:
       kind: HelmRelease
-      name: le-portail-grist
+      name: ferme-du-jointout-wordpress-site
     path: values.yaml
+  - target:
+      kind: Namespace
+      name: ferme-du-jointout-wordpress-site
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: ferme-du-jointout-wordpress-site
   # Add the k8up backup annotation to the PVC
   - target:
       kind: PersistentVolumeClaim
-      namespace: le-portail-grist
+      namespace: ferme-du-jointout-wordpress-site
     patch: |-
       - op: add
         path: /metadata/annotations/k8up.io~1backup
@@ -33,8 +36,8 @@ patches:
   # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
-      name: grist
+      name: wordpress
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "alter-it-infra01-backup-le-portail-grist"
+        value: "alter-it-infra01-backup-ferme-du-jointout-wordpress-site"

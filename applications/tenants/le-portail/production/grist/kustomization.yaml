@@ -1,36 +1,31 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: la-bergeronnette-wordpress-site
+namespace: le-portail-grist
 resources:
-  - ../../../base/wordpress/
+  - ../../../../base/grist/
+  - storage.yaml
   - secrets.enc.yaml
 patches:
-  # Rename the helm release
-  - target:
-      kind: HelmRelease
-      name: wordpress
-    patch: |
-      - op: replace
-        path: /metadata/name
-        value: la-bergeronnette-wordpress-site
-  # Overrides the helm release values.yaml
-  - target:
-      kind: HelmRelease
-      name: la-bergeronnette-wordpress-site
-    path: values.yaml
-  # Overrides the namespace name
   - target:
       kind: Namespace
-      name: la-bergeronnette-wordpress
+      name: grist
+    path: namespace.yaml
+  - target:
+      kind: HelmRelease
+      name: grist
     patch: |
       - op: replace
         path: /metadata/name
-        value: la-bergeronnette-wordpress-site
+        value: le-portail-grist
+  - target:
+      kind: HelmRelease
+      name: le-portail-grist
+    path: values.yaml
   # Add the k8up backup annotation to the PVC
   - target:
       kind: PersistentVolumeClaim
-      namespace: la-bergeronnette-wordpress-site
+      namespace: le-portail-grist
     patch: |-
       - op: add
         path: /metadata/annotations/k8up.io~1backup
@@ -38,8 +33,8 @@ patches:
   # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
-      name: wordpress
+      name: grist
     patch: |-
       - op: replace
         path: /spec/backend/s3/bucket
-        value: "alter-it-infra01-backup-la-bergeronnette-wordpress-site"
+        value: "alter-it-infra01-backup-le-portail-grist"
