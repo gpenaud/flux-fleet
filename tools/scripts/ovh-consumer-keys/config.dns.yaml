@@ -1,0 +1,45 @@
+# Configuration pour la génération des consumer keys OVH.
+#
+# Utilisation:
+#   export OVH_APPLICATION_KEY="ton_application_key"
+#   ovh-consumer-keys -config config.yaml -mode per-domain -output keys.yaml
+#
+# Tu obtiens des consumer keys séparés par domaine (isolation forte).
+# Pour un seul token couvrant tous les domaines: -mode all-in-one
+
+# Endpoint OVH (ovh-eu pour Europe, ovh-ca pour Canada, etc.)
+endpoint: ovh-eu
+
+# Clé applicative OVH. Peut aussi être passée via OVH_APPLICATION_KEY (recommandé).
+# application_key: "xxxxxxxxxxxx"
+
+# URL de redirection après validation manuelle. Mets ce que tu veux,
+# c'est juste pour fermer la boucle visuelle dans le navigateur.
+redirect_url: "https://alter-it.eu/"
+
+# Permissions par défaut appliquées à chaque domaine.
+# Le placeholder {domain} est remplacé par le nom de chaque zone.
+# C'est le set minimal pour cert-manager DNS-01.
+permissions:
+  - { method: GET,    path: "/domain/zone/{domain}" }
+  - { method: GET,    path: "/domain/zone/{domain}/record" }
+  - { method: GET,    path: "/domain/zone/{domain}/record/*" }
+  - { method: POST,   path: "/domain/zone/{domain}/record" }
+  - { method: DELETE, path: "/domain/zone/{domain}/record/*" }
+  - { method: POST,   path: "/domain/zone/{domain}/refresh" }
+
+# Liste des domaines à inclure.
+# Chaque domaine peut surcharger les permissions globales si besoin (ex:
+# pour un domaine de pure démo on peut limiter à GET).
+domains:
+  - name: alter-it.eu
+    description: "Domaine opérateur — plateforme d'infra"
+
+  - name: leportail.org
+    description: "Tenant le-portail (services applicatifs)"
+
+  - name: fermedujointout.fr
+    description: "Tenant fermedujointout (services applicatifs)"
+
+  - name: labergeronnette.org
+    description: "Tenant labergeronnette (services applicatifs)"
