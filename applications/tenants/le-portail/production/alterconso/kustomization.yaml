@@ -16,7 +16,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/update/path
-        value: ./applications/le-portail/localhost
+        value: ./applications/tenants/le-portail/production
   # Overrides the k8up bucket values with subPath
   - target:
       kind: Schedule
