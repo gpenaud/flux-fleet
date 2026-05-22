@@ -36,11 +36,4 @@ spec:
       defaultClassReplicaCount: 1
       defaultFsType: xfs      
     ingress:
-      enabled: true
-      ingressClassName: traefik
-      host: longhorn.internal.infra01.alter-it.eu
-      tls: true
-      tlsSecret: longhorn-internal-infra01-alter-it-eu-tls
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        traefik.ingress.kubernetes.io/router.middlewares: controller-ingress-tailnet-only@kubernetescrd
+      enabled: false
