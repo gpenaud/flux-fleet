@@ -29,6 +29,8 @@ spec:
       annotations:
         kubernetes.io/ingress.class: traefik
         cert-manager.io/cluster-issuer: letsencrypt-production
+        external-dns.alpha.kubernetes.io/hostname: wordpress.infra01.alter-it.eu
+        external-dns.alpha.kubernetes.io/target: alter-it.eu
       extraTls:
         - hosts:
             - wordpress.infra01.alter-it.eu
