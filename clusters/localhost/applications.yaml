@@ -5,8 +5,6 @@ metadata:
   name: applications
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: tenants
   interval: 5m
   retryInterval: 30s
   sourceRef:
