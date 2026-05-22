@@ -5,7 +5,7 @@ metadata:
 spec:
   values:
     wordpressUsername: admin
-    wordpressExistingSecret: shared-wordpress
+    wordpressExistingSecret: wordpress
     wordpressEmail: ops.gpenaud@gmail.com
     mariadb:
       enabled: false
