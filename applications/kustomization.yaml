@@ -5,3 +5,4 @@ resources:
   - tenants/le-portail/sync.yaml
   - tenants/la-bergeronnette/sync.yaml
   - tenants/ferme-du-jointout/sync.yaml
+  - tenants/shared/sync.yaml
