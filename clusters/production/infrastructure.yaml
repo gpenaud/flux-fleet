@@ -1,3 +1,20 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-bootstrap
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./infrastructure/bootstrap/production
+  prune: true
+  wait: true
+
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -37,19 +54,19 @@ spec:
   path: ./infrastructure/configurations/production
   prune: true
   wait: true
-  patches:
-    - target:
-        kind: Certificate
-        name: traefik-dashboard
-      patch: |
-        - op: replace
-          path: /spec/dnsNames/0
-          value: traefik.gpenaud.production   
-    - target:
-        kind: IngressRoute
-        name: traefik-dashboard
-      patch: |
-        - op: replace
-          path: /spec/routes/0/match
-          value: traefik.gpenaud.production
+  # patches:
+  #   - target:
+  #       kind: Certificate
+  #       name: traefik-dashboard
+  #     patch: |
+  #       - op: replace
+  #         path: /spec/dnsNames/0
+  #         value: traefik.gpenaud.production   
+  #   - target:
+  #       kind: IngressRoute
+  #       name: traefik-dashboard
+  #     patch: |
+  #       - op: replace
+  #         path: /spec/routes/0/match
+  #         value: traefik.gpenaud.production
         
