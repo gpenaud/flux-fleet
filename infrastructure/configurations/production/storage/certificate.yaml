@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: storage-internal-infra01-alter-it-eu-tls
-  namespace: controller-ingress
+  namespace: controller-longhorn
 spec:
   secretName: storage-internal-infra01-alter-it-eu-tls
   issuerRef:
