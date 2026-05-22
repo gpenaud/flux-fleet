@@ -54,19 +54,4 @@ spec:
   path: ./infrastructure/configurations/production
   prune: true
   wait: true
-  # patches:
-  #   - target:
-  #       kind: Certificate
-  #       name: traefik-dashboard
-  #     patch: |
-  #       - op: replace
-  #         path: /spec/dnsNames/0
-  #         value: traefik.gpenaud.production   
-  #   - target:
-  #       kind: IngressRoute
-  #       name: traefik-dashboard
-  #     patch: |
-  #       - op: replace
-  #         path: /spec/routes/0/match
-  #         value: traefik.gpenaud.production
         
