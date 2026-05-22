@@ -2,11 +2,7 @@ version: '3'
 
 includes:
   infrastructure: ./tools/tasks/infrastructure.yml
-  cluster: ./tools/tasks/cluster.yml
-  reconcile: ./tools/tasks/reconcile.yml
-  database: ./tools/tasks/database.yml
-  backup:k8up: ./tools/tasks/backup.yml
-  backup:import-from-le-portail-to-local: ./tools/tasks/backup/import-from-le-portail-to-local.yml
-  backup:import-from-le-portail-to-production: ./tools/tasks/backup/import-from-le-portail-to-production.yml
-  backup:from-local-to-s3: ./tools/tasks/backup/from-local-to-s3.yml
-  
+  cluster:        ./tools/tasks/cluster.yml
+  reconcile:      ./tools/tasks/reconcile.yml
+  database:       ./tools/tasks/database.yml
+  backup:         ./tools/tasks/backup.yml
