@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: "1.15.x" # chart upstream, à figer/upgrader explicitement
+      version: "1.21.x" # chart upstream, à figer/upgrader explicitement
       sourceRef:
         kind: HelmRepository
         name: external-dns
