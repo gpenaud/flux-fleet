@@ -68,7 +68,6 @@ spec:
     # external-dns ne touchera QUE les records de ces zones.
     domainFilters:
       - leportail.org
-      - fermedujointout.fr
       - labergeronnette.org
       - alter-it.eu
       # ajoute les autres zones ici
