@@ -4,6 +4,10 @@ kind: IngressRoute
 metadata:
   name: monitoring
   namespace: controller-observability
+  annotations:
+      external-dns.alpha.kubernetes.io/hostname: monitoring.internal.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/target: internal.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure

@@ -4,6 +4,10 @@ kind: IngressRoute
 metadata:
   name: traefik-dashboard
   namespace: controller-ingress
+  annotations:
+      external-dns.alpha.kubernetes.io/hostname: ingress.internal.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/target: internal.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure

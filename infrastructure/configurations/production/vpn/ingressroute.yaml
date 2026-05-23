@@ -4,6 +4,10 @@ kind: IngressRoute
 metadata:
   name: headscale
   namespace: controller-vpn
+  annotations:
+      external-dns.alpha.kubernetes.io/hostname: vpn.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/target: infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure

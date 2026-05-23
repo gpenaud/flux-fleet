@@ -4,6 +4,10 @@ kind: IngressRoute
 metadata:
   name: authelia-infra01-alter-it-eu
   namespace: controller-authentication
+  annotations:
+      external-dns.alpha.kubernetes.io/hostname: auth.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/target: infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
