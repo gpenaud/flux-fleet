@@ -5,9 +5,9 @@ metadata:
   name: lldap-ui
   namespace: controller-directory
   annotations:
-      external-dns.alpha.kubernetes.io/hostname: directory.internal.infra01.alter-it.eu
-      external-dns.alpha.kubernetes.io/target: internal.infra01.alter-it.eu
-      external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/hostname: directory.internal.infra01.alter-it.eu
+    external-dns.alpha.kubernetes.io/target: internal.infra01.alter-it.eu
+    external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
