@@ -16,4 +16,4 @@ spec:
       name: sops-age-private-key
   postBuild:
     substitute:
-      TENANT: la-bergeronnette
+      tenant: la-bergeronnette

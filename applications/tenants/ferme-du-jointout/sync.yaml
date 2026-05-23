@@ -16,4 +16,4 @@ spec:
       name: sops-age-private-key
   postBuild:
     substitute:
-      TENANT: ferme-du-jointout
+      tenant: ferme-du-jointout

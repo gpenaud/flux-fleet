@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ${TENANT}-nextcloud
+  name: ${tenant}-nextcloud
   labels:
-    alter-it.org/tenant: ${TENANT}
+    alter-it.org/tenant: ${tenant}
     alter-it.org/app: nextcloud
     alter-it.org/managed-by: fluxcd
     reflector/k8up-credentials: "true"
