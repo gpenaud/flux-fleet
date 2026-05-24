@@ -2,7 +2,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - tenants/_shared/sync.yaml
   - tenants/le-portail/sync.yaml
   - tenants/la-bergeronnette/sync.yaml
   - tenants/ferme-du-jointout/sync.yaml
-  - tenants/shared/sync.yaml
