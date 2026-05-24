@@ -3,9 +3,15 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: wildcard-${tenant}
-  namespace: controller-certificates
+  namespace: controller-cert-manager
 spec:
   secretName: wildcard-${tenant}-tls
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "${tenant_name}-.*"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "${tenant_name}-.*"
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
