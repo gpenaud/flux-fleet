@@ -8,7 +8,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/la-bergeronnette/${ENVIRONMENT}
+  path: ./applications/tenants/la-bergeronnette/${environment}
   prune: true
   decryption:
     provider: sops

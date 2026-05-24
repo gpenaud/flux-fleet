@@ -8,7 +8,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/le-portail/${ENVIRONMENT}
+  path: ./applications/tenants/le-portail/${environment}
   prune: true
   decryption:
     provider: sops
