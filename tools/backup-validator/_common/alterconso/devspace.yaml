@@ -42,14 +42,10 @@ deployments:
                 tls: true
           vhost: ${SERVICE}.${TENANT}.localhost
         mysql:
-          # user: ${SERVICE}
-          # password: ${SERVICE}
-          # database: ${SERVICE}
-          # rootPassword: ${SERVICE}
-          user: alterconso
-          password: ***REMOVED***
-          database: alterconso
-          rootPassword: ***REMOVED***
+          user: ${SERVICE}
+          password: ${SERVICE}
+          database: ${SERVICE}
+          rootPassword: ${SERVICE}
 
   restore:
     kubectl:
