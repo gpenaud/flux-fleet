@@ -17,5 +17,10 @@ spec:
       services:
         - name: nextcloud
           port: 8080
+    - match: Host(`cloud.fermedujointout.fr`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 8080
   tls:
     secretName: wildcard-ferme-du-jointout-tls
