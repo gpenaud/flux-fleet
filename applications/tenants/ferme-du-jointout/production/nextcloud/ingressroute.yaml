@@ -5,7 +5,7 @@ metadata:
   name: nextcloud
   namespace: ferme-du-jointout-nextcloud
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: nextcloud.fermedujointout.fr
+    external-dns.alpha.kubernetes.io/hostname: nextcloud.fermedujointout.fr,cloud.fermedujointout.fr
     external-dns.alpha.kubernetes.io/target: fermedujointout.fr
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
