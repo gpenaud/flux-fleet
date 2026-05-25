@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: ${tenant}-nextcloud
 resources:
   - ../../../../base/nextcloud/
-  - ingress-aliases.yaml
+  - ingressroute.yaml
   - secrets.enc.yaml
 patches:
   - path: values.yaml

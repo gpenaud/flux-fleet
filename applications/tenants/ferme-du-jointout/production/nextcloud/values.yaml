@@ -44,16 +44,4 @@ spec:
         usernameKey: nextcloud-username
         passwordKey: nextcloud-password
     ingress:
-      enabled: true
-      className: traefik
-      annotations:
-        cert-manager.io/cluster-issuer: "letsencrypt-production"
-      hosts:
-        - host: nextcloud.fermedujointout.fr
-          paths:
-            - path: /
-              pathType: Prefix
-      tls:
-        - secretName: nextcloud.fermedujointout.fr-tls
-          hosts:
-            - nextcloud.fermedujointout.fr
+      enabled: false
