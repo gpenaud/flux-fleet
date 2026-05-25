@@ -33,19 +33,7 @@ spec:
     # La liste hosts accepte autant d'entrées que tu veux : domaines, alias,
     # multi-AMAP sur la même app, etc. Chaque host a sa propre liste de paths.
     ingress:
-      enabled: true
-      className: traefik
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-production
-      hosts:
-        - host: neo-alterconso.leportail.org
-          paths:
-            - path: /
-              pathType: Prefix
-      tls:
-        - secretName: neo-alterconso-tls
-          hosts:
-            - neo-alterconso.leportail.org
+      enabled: false
 
     # ─── Base de données ────────────────────────────────────────────────────────
     # Deux modes mutuellement exclusifs :

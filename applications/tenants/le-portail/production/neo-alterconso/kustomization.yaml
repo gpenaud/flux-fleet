@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: le-portail-neo-alterconso
 resources:
   - ../../../../base/neo-alterconso/
+  - ingressroute.yaml
   - secrets.enc.yaml
 patches:
   - path: values.yaml

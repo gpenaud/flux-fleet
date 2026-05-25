@@ -1,0 +1,21 @@
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: neo-alterconso
+  namespace: le-portail-neo-alterconso
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: neo-alterconso.leportail.org
+    external-dns.alpha.kubernetes.io/target: leportail.org
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`neo-alterconso.leportail.org`)
+      kind: Rule
+      services:
+        - name: neo-alterconso
+          port: 80
+  tls:
+    secretName: wildcard-le-portail-tls
