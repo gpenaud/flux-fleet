@@ -8,7 +8,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/ferme-du-jointout/${environment}
+  path: ./applications/tenants/ferme-du-jointout/production
   prune: true
   decryption:
     provider: sops
