@@ -46,7 +46,7 @@ spec:
       - name: "LLDAP_FORCE_UPDATE_PRIVATE_KEY"
         value: "false"
       - name: "LLDAP_FORCE_LDAP_USER_PASS_RESET"
-        value: "true"
+        value: "false"
 
     extraEnvFrom:
       - secretRef:
