@@ -31,6 +31,10 @@ spec:
   path: ./infrastructure/overlays/infra02/bootstrap
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -49,6 +53,10 @@ spec:
   path: ./infrastructure/overlays/infra02/controllers
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -67,3 +75,7 @@ spec:
   path: ./infrastructure/overlays/infra02/configurations
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
