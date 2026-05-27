@@ -193,7 +193,7 @@ spec:
           path: '/config/db.sqlite3'
 
       notifier:
-        disable_startup_check: false
+        disable_startup_check: true
         
         # Désactiver l'ancien notifier filesystem
         filesystem:
