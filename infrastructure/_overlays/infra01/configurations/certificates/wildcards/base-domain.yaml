@@ -1,0 +1,16 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-base-domain
+  namespace: controller-cert-manager
+spec:
+  secretName: wildcard-base-domain-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "${base_domain}"
+  dnsNames:
+    - "${cluster_name}.${base_domain}"
+    - "*.${cluster_name}.${base_domain}"
+    - "*.internal.${cluster_name}.${base_domain}"
