@@ -8,13 +8,18 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/ferme-du-jointout/production
+  path: ./applications/tenants/ferme-du-jointout
   prune: true
   decryption:
     provider: sops
     secretRef:
       name: sops-age-private-key
   postBuild:
+    # substituteFrom:
+    #   - kind: ConfigMap
+    #     name: cluster-vars
     substitute:
+      owner: alter-it
+      cluster: infra01
       tenant: ferme-du-jointout
       tenant_domain: fermedujointout.fr
