@@ -121,9 +121,9 @@ spec:
         drop:
           - ALL
 
-    # ── ServiceMonitor pour kube-prometheus-stack ──────────────────────────────
-    serviceMonitor:
-      enabled: true
-      namespace: controller-dns
-      additionalLabels:
-        release: kube-prometheus-stack # adapte si ton label de discovery diffère
+    # # ── ServiceMonitor pour kube-prometheus-stack ──────────────────────────────
+    # serviceMonitor:
+    #   enabled: true
+    #   namespace: controller-dns
+    #   additionalLabels:
+    #     release: kube-prometheus-stack # adapte si ton label de discovery diffère
