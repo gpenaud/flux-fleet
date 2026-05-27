@@ -1,0 +1,251 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-alerts
+  namespace: controller-observability
+  labels:
+    # Le label "release: kube-prometheus-stack" est utilisé par Prometheus pour découvrir
+    # les rules. Mais on a configuré ruleSelectorNilUsesHelmValues: false dans
+    # kube-prometheus-stack, donc Prometheus prend toutes les PrometheusRule.
+    # Ce label reste utile pour traçabilité et compat future.
+    release: kube-prometheus-stack
+spec:
+  groups:
+    # ====== Groupe 1 : Alertes k8up et backups ======
+    - name: backups
+      interval: 60s
+      rules:
+
+        # --- 1. Job de backup k8up échoué visiblement ---
+        # Cas couvert : le Job sort avec exit != 0 (S3 down, creds, OOM, etc.)
+        # Cas NON couvert : Restic logue ERROR mais Job exit 0 (le bug Nextcloud)
+        # Le compteur ne descend JAMAIS, donc on regarde l'increase sur 1h
+        # → si nouveau failed dans la dernière heure, on alerte
+        - alert: K8upBackupJobFailed
+          expr: increase(k8up_jobs_failed_counter[1h]) > 0
+          for: 5m
+          labels:
+            severity: critical
+            team: infra
+          annotations:
+            summary: "Backup k8up échoué dans {{ $labels.namespace }}"
+            description: |
+              Un job k8up de type {{ $labels.jobType }} a échoué dans le namespace
+              {{ $labels.namespace }}. Vérifier les logs du dernier Job :
+              kubectl -n {{ $labels.namespace }} logs -l app.kubernetes.io/managed-by=k8up --tail=100
+
+        # --- 2. Backup suspectement court (signature du bug Nextcloud) ---
+        # Un backup qui se termine en moins de 30s ET est marqué "succeeded" est suspect.
+        # En pratique, un vrai backup Restic prend au moins 30s-1min même sur un PVC vide
+        # (init du repo, snapshot list, prune marker, etc.).
+        # Cette alerte aurait flag ton bug Nextcloud (job en 19.95s).
+        # - alert: K8upBackupTooFast
+        #   expr: |
+        #     (
+        #       kube_job_status_completion_time
+        #       -
+        #       kube_job_status_start_time
+        #     ) < 30
+        #     and on(namespace, job_name)
+        #     kube_job_status_succeeded == 1
+        #     and on(namespace, job_name)
+        #     kube_job_owner{owner_kind="Backup"} == 1
+        #   for: 5m
+        #   labels:
+        #     severity: warning
+        #     team: infra
+        #   annotations:
+        #     summary: "Backup suspectement court : {{ $labels.namespace }}/{{ $labels.job_name }}"
+        #     description: |
+        #       Le job {{ $labels.job_name }} dans {{ $labels.namespace }} s'est terminé
+        #       en moins de 30s avec un statut succeeded. C'est anormalement court pour
+        #       un vrai backup et peut indiquer un échec silencieux Restic.
+        #       Vérifier les logs : kubectl -n {{ $labels.namespace }} logs job/{{ $labels.job_name }} | grep -i error
+
+    # ====== Groupe 2 : Pods en erreur ======
+    - name: pods
+      interval: 60s
+      rules:
+
+        # --- 3. Pod en CrashLoop ou ConfigError dans les ns applicatifs ---
+        # Couvre : PreBackupPod foireux, app qui ne démarre pas, secret manquant, etc.
+        # Filtre uniquement sur les ns "métier" (ferme-*, le-portail-*, la-bergeronnette-*)
+        - alert: PodInError
+          expr: |
+            sum by (namespace, pod, reason) (
+              kube_pod_container_status_waiting_reason{
+                namespace=~"(ferme-du-jointout|le-portail|la-bergeronnette)-.*",
+                reason=~"CrashLoopBackOff|CreateContainerConfigError|ImagePullBackOff|ErrImagePull"
+              }
+            ) > 0
+          for: 5m
+          labels:
+            severity: warning
+            team: infra
+          annotations:
+            summary: "Pod en erreur : {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: |
+              Le pod {{ $labels.pod }} dans le namespace {{ $labels.namespace }}
+              est en état {{ $labels.reason }} depuis plus de 5 minutes.
+              Inspecter avec : kubectl -n {{ $labels.namespace }} describe pod {{ $labels.pod }}
+
+    # ====== Groupe 3 : Pression nœud (RAM, CPU, disque) ======
+    - name: node-resources
+      interval: 60s
+      rules:
+
+        # --- 4. RAM noeud > 75% (warning) ou > 90% (critical) ---
+        # Calcul : 1 - (mem_available / mem_total)
+        # MemAvailable est le bon indicateur (tient compte des caches reclaimable)
+        - alert: NodeMemoryHigh
+          expr: |
+            (
+              1 - (
+                node_memory_MemAvailable_bytes
+                /
+                node_memory_MemTotal_bytes
+              )
+            ) > 0.75
+          for: 5m
+          labels:
+            severity: warning
+            team: infra
+          annotations:
+            summary: "RAM nœud {{ $labels.instance }} > 75%"
+            description: |
+              Le nœud {{ $labels.instance }} utilise {{ $value | humanizePercentage }}
+              de sa RAM disponible (seuil warning : 75%).
+
+        - alert: NodeMemoryCritical
+          expr: |
+            (
+              1 - (
+                node_memory_MemAvailable_bytes
+                /
+                node_memory_MemTotal_bytes
+              )
+            ) > 0.90
+          for: 5m
+          labels:
+            severity: critical
+            team: infra
+          annotations:
+            summary: "RAM nœud {{ $labels.instance }} > 90% — critique"
+            description: |
+              Le nœud {{ $labels.instance }} utilise {{ $value | humanizePercentage }}
+              de sa RAM (seuil critique : 90%). Risque imminent d'OOM-kill.
+
+        # --- 5. CPU noeud > 75% sur 5min ---
+        # rate sur node_cpu_seconds_total mode != idle, moyenné sur 5min
+        - alert: NodeCPUHigh
+          expr: |
+            (
+              1 - avg by (instance) (
+                rate(node_cpu_seconds_total{mode="idle"}[5m])
+              )
+            ) > 0.75
+          for: 5m
+          labels:
+            severity: warning
+            team: infra
+          annotations:
+            summary: "CPU nœud {{ $labels.instance }} > 75%"
+            description: |
+              Le nœud {{ $labels.instance }} a un CPU moyen à
+              {{ $value | humanizePercentage }} sur les 5 dernières minutes.
+
+        - alert: NodeCPUCritical
+          expr: |
+            (
+              1 - avg by (instance) (
+                rate(node_cpu_seconds_total{mode="idle"}[5m])
+              )
+            ) > 0.90
+          for: 5m
+          labels:
+            severity: critical
+            team: infra
+          annotations:
+            summary: "CPU nœud {{ $labels.instance }} > 90% — critique"
+            description: |
+              CPU saturé à {{ $value | humanizePercentage }} sur le nœud {{ $labels.instance }}.
+
+        # --- 6. Espace disque bas ---
+        # Filtre sur le filesystem racine pour éviter les FS virtuels (overlay, tmpfs)
+        # Seuils inversés : on alerte quand l'espace libre devient FAIBLE
+        - alert: NodeDiskSpaceLow
+          expr: |
+            (
+              node_filesystem_avail_bytes{mountpoint="/", fstype!~"tmpfs|overlay"}
+              /
+              node_filesystem_size_bytes{mountpoint="/", fstype!~"tmpfs|overlay"}
+            ) < 0.25
+          for: 5m
+          labels:
+            severity: warning
+            team: infra
+          annotations:
+            summary: "Disque nœud {{ $labels.instance }} < 25% libre"
+            description: |
+              Le filesystem / du nœud {{ $labels.instance }} a seulement
+              {{ $value | humanizePercentage }} d'espace libre (seuil warning : 25%).
+
+        - alert: NodeDiskSpaceCritical
+          expr: |
+            (
+              node_filesystem_avail_bytes{mountpoint="/", fstype!~"tmpfs|overlay"}
+              /
+              node_filesystem_size_bytes{mountpoint="/", fstype!~"tmpfs|overlay"}
+            ) < 0.10
+          for: 5m
+          labels:
+            severity: critical
+            team: infra
+          annotations:
+            summary: "Disque nœud {{ $labels.instance }} < 10% libre — critique"
+            description: |
+              Disque presque plein sur {{ $labels.instance }} : seulement
+              {{ $value | humanizePercentage }} libre. Risque d'eviction de pods.
+
+    # ====== Groupe 4 : Pression kubelet (signaux pré-eviction) ======
+    - name: kubelet-pressure
+      interval: 60s
+      rules:
+
+        # --- 7. Kubelet annonce DiskPressure ---
+        # Kubelet a ses propres seuils internes (eviction-hard, eviction-soft)
+        # Quand cette condition apparaît, kubelet va commencer à evict des pods
+        # C'est un signal AVANT crash, complémentaire de NodeDiskSpaceLow
+        - alert: KubeletDiskPressure
+          expr: |
+            kube_node_status_condition{
+              condition="DiskPressure",
+              status="true"
+            } == 1
+          for: 5m
+          labels:
+            severity: critical
+            team: infra
+          annotations:
+            summary: "Kubelet en DiskPressure sur {{ $labels.node }}"
+            description: |
+              Le nœud {{ $labels.node }} signale DiskPressure : kubelet va commencer
+              à evict des pods pour libérer de l'espace. Action immédiate requise.
+
+        # --- 8. Kubelet annonce MemoryPressure ---
+        - alert: KubeletMemoryPressure
+          expr: |
+            kube_node_status_condition{
+              condition="MemoryPressure",
+              status="true"
+            } == 1
+          for: 5m
+          labels:
+            severity: critical
+            team: infra
+          annotations:
+            summary: "Kubelet en MemoryPressure sur {{ $labels.node }}"
+            description: |
+              Le nœud {{ $labels.node }} signale MemoryPressure : kubelet va commencer
+              à evict des pods pour libérer de la RAM. Risque d'OOM imminent.
