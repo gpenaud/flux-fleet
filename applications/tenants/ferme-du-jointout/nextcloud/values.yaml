@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nextcloud
+spec:
+  values:
+    internalDatabase:
+      enabled: false
+    mariadb:
+      enabled: false
+    externalDatabase:
+      enabled: true
+      type: mysql
+      host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local:6446
+      database: fdj-nextcloud
+      existingSecret:
+        enabled: true
+        secretName: nextcloud
+        usernameKey: mariadb-username
+        passwordKey: mariadb-password
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 30Gi
+    nextcloud:
+      host: nextcloud.${tenant_domain}
+      datadir: /var/www/html/data
+      # Important : trusted domains
+      configs:
+        custom.config.php: |-
+          <?php
+          $CONFIG = array(
+            'trusted_domains' => [
+              'nextcloud.${tenant_domain}',
+              'cloud.${tenant_domain}'
+            ],
+            'overwrite.cli.url' => 'https://nextcloud.${tenant_domain}',
+            'overwriteprotocol' => 'https',
+          );
+      existingSecret:
+        enabled: true
+        secretName: nextcloud
+        usernameKey: nextcloud-username
+        passwordKey: nextcloud-password
+    ingress:
+      enabled: false
