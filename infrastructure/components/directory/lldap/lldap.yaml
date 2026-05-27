@@ -45,6 +45,8 @@ spec:
       TZ: "Europe/Paris"
       GID: "1000"
       UID: "1000"
+      LLDAP_FORCE_UPDATE_PRIVATE_KEY: "true"
+      LLDAP_FORCE_LDAP_USER_PASS_RESET: "true"
 
     persistence:
       enabled: true
