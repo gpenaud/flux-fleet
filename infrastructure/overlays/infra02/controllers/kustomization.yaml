@@ -10,3 +10,5 @@ components:
   - ../../../components/ingress/traefik
   - ../../../components/vpn
   - ../../../components/backup
+  - ../../../components/directory/authelia
+  
