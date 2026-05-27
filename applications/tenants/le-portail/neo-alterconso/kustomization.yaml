@@ -1,0 +1,15 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ${tenant}-neo-alterconso
+
+resources:
+  - ../../../base/neo-alterconso
+  - ingressroute.yaml
+  - secrets.enc.yaml
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: values.yaml
