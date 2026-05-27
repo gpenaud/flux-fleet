@@ -1,0 +1,129 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: external-dns
+  namespace: controller-external-dns
+spec:
+  interval: 24h
+  url: https://kubernetes-sigs.github.io/external-dns/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: controller-external-dns
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: external-dns
+      version: "1.21.x" # chart upstream, à figer/upgrader explicitement
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+        namespace: controller-external-dns
+      interval: 24h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      repository: registry.k8s.io/external-dns/external-dns
+      # tag laissé vide -> chart utilise sa version par défaut
+    # ── Provider OVH ───────────────────────────────────────────────────────────
+    provider:
+      name: ovh
+
+    # ── Credentials OVH via Secret SOPS ────────────────────────────────────────
+    # Les variables d'env sont lues depuis le secret 'external-dns-ovh-credentials'.
+    env:
+      - name: OVH_APPLICATION_KEY
+        valueFrom:
+          secretKeyRef:
+            name: external-dns-ovh-credentials
+            key: applicationKey
+      - name: OVH_APPLICATION_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: external-dns-ovh-credentials
+            key: applicationSecret
+      - name: OVH_CONSUMER_KEY
+        valueFrom:
+          secretKeyRef:
+            name: external-dns-ovh-credentials
+            key: consumerKey
+
+    # ── Sources surveillées ────────────────────────────────────────────────────
+    # Ingress + Service + Traefik IngressRoute (CRD)
+    sources:
+      - ingress
+      - service
+      - traefik-proxy
+
+    # ── Filtrage des zones gérées ──────────────────────────────────────────────
+    # À COMPLÉTER : remplace ces exemples par tes vraies zones OVH.
+    # external-dns ne touchera QUE les records de ces zones.
+    domainFilters:
+      - leportail.org
+      - labergeronnette.org
+      - alter-it.eu
+      # ajoute les autres zones ici
+
+    # ── Policy ─────────────────────────────────────────────────────────────────
+    # upsert-only : crée + met à jour, ne supprime jamais.
+    # Bascule en 'sync' quand tu auras pris confiance dans le comportement.
+    policy: upsert-only
+
+    # ── TXT registry ───────────────────────────────────────────────────────────
+    # Évite les conflits avec des records gérés manuellement : external-dns
+    # ne touchera qu'aux records qu'il a lui-même créés (taggés via un TXT).
+    registry: txt
+    txtOwnerId: k3s-production-srv1515851
+    txtPrefix: "_external-dns."
+
+    # ── Endpoint OVH ───────────────────────────────────────────────────────────
+    # ovh-eu : zones gérées depuis l'Europe (cas par défaut, le tien).
+    # ovh-ca : zones gérées depuis le Canada.
+    extraArgs:
+      - --ovh-endpoint=ovh-eu
+      # Limiter le rate des appels API OVH (par défaut 20/s, on baisse à 10/s
+      # pour rester courtois et éviter les 429 sur compte partagé).
+      - --ovh-api-rate-limit=10
+
+    # ── Interval de réconciliation ─────────────────────────────────────────────
+    interval: 1m
+
+    # ── Logs ──────────────────────────────────────────────────────────────────
+    logLevel: info
+    logFormat: text
+
+    # ── Ressources (single-node k3s : on reste raisonnable) ────────────────────
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+    # ── Sécurité ──────────────────────────────────────────────────────────────
+    podSecurityContext:
+      fsGroup: 65534
+      runAsUser: 65534
+      runAsNonRoot: true
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+
+    # ── ServiceMonitor pour kube-prometheus-stack ──────────────────────────────
+    serviceMonitor:
+      enabled: true
+      namespace: controller-external-dns
+      additionalLabels:
+        release: kube-prometheus-stack # adapte si ton label de discovery diffère
