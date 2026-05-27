@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lldap-bootstrap-groups
+  namespace: controller-directory
+data:
+  lldap_strict_readonly.json: |
+    {
+      "name": "lldap_strict_readonly"
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lldap-bootstrap-group-memberships
+  namespace: controller-directory
+data:
+  authelia_readonly.json: |
+    {
+      "user": "authelia",
+      "group": "lldap_strict_readonly"
+    }

@@ -47,6 +47,8 @@ spec:
         value: "false"
       - name: "LLDAP_FORCE_LDAP_USER_PASS_RESET"
         value: "false"
+      - name: "LLDAP_BOOTSTRAP_PATH"
+        value: "/bootstrap" # (voir postRenderer pour le volume associé)
 
     extraEnvFrom:
       - secretRef:
@@ -76,6 +78,30 @@ spec:
         memory: 64Mi
       limits:
         memory: 256Mi
+
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: lldap
+            patch: |
+              - op: add
+                path: /spec/template/spec/volumes/-
+                value:
+                  name: bootstrap
+                  projected:
+                    sources:
+                      - configMap:
+                          name: lldap-bootstrap
+                      - secret:
+                          name: lldap-bootstrap-secrets
+              - op: add
+                path: /spec/template/spec/containers/0/volumeMounts/-
+                value:
+                  name: bootstrap
+                  mountPath: /bootstrap
+                  readOnly: true
 
     # readOnlyRootFilesystem: true demande un /tmp writable
     # Si le chart ne le fournit pas par défaut, on patche via postRenderer
