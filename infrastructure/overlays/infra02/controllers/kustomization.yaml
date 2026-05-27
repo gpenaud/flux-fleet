@@ -8,3 +8,4 @@ components:
   - ../../../components/storage
   - ../../../components/dns
   - ../../../components/ingress/traefik
+  - ../../../components/vpn
