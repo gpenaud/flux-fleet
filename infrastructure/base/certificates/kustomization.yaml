@@ -3,5 +3,4 @@ kind: Kustomization
 
 resources:
   - cert-manager.yaml
-  - cert-manager-webhook-ovh.yaml
   - secrets.enc.yaml
