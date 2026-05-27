@@ -1,0 +1,14 @@
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: auth-leportail-org
+  namespace: controller-authentication
+spec:
+  secretName: auth-leportail-org-tls
+  commonName: auth.leportail.org
+  dnsNames:
+    - auth.leportail.org
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
