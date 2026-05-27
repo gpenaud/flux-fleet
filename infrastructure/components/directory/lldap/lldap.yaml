@@ -117,7 +117,7 @@ spec:
                         - /bin/sh
                         - -c
                         - |
-                          until wget -q -O /dev/null http://localhost:17170/health 2>/dev/null; do
+                          until wget -q -O /dev/null http://127.0.0.1:17170/ 2>/dev/null; do
                             echo "Waiting for lldap to be ready..."
                             sleep 1
                           done
