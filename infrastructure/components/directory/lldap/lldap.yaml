@@ -112,6 +112,18 @@ spec:
                   name: bootstrap
                   mountPath: /bootstrap
                   readOnly: true
+              
+              # pour /app/bootstrap.sh (read-only filesystem)
+              - op: add
+                path: /spec/template/spec/volumes/-
+                value:
+                  name: tmp
+                  emptyDir: {}
+              - op: add
+                path: /spec/template/spec/containers/0/volumeMounts/-
+                value:
+                  name: tmp
+                  mountPath: /tmp
 
     # - op: add
     #   path: /spec/template/spec/containers/0/lifecycle
