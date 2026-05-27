@@ -10,4 +10,4 @@ components:
   - ../../../components/ingress/traefik
   - ../../../components/vpn
   - ../../../components/backup/k8up
-  - ../../../components/directory/authelia
+  - ../../../components/authentication/authelia
