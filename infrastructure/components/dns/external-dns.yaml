@@ -2,7 +2,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: external-dns
-  namespace: controller-external-dns
+  namespace: controller-dns
 spec:
   interval: 24h
   url: https://kubernetes-sigs.github.io/external-dns/
@@ -11,7 +11,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: external-dns
-  namespace: controller-external-dns
+  namespace: controller-dns
 spec:
   interval: 30m
   chart:
@@ -21,7 +21,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: external-dns
-        namespace: controller-external-dns
+        namespace: controller-dns
       interval: 24h
   install:
     remediation:
@@ -124,6 +124,6 @@ spec:
     # ── ServiceMonitor pour kube-prometheus-stack ──────────────────────────────
     serviceMonitor:
       enabled: true
-      namespace: controller-external-dns
+      namespace: controller-dns
       additionalLabels:
         release: kube-prometheus-stack # adapte si ton label de discovery diffère
