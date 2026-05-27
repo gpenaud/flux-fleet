@@ -24,7 +24,7 @@ spec:
       accessMode: ReadWriteOnce
       size: 30Gi
     nextcloud:
-      host: nextcloud.fermedujointout.fr
+      host: nextcloud.${tenant_domain}
       datadir: /var/www/html/data
       # Important : trusted domains
       configs:
@@ -32,10 +32,10 @@ spec:
           <?php
           $CONFIG = array(
             'trusted_domains' => [
-              'nextcloud.fermedujointout.fr',
-              'cloud.fermedujointout.fr'
+              'nextcloud.${tenant_domain}',
+              'cloud.${tenant_domain}'
             ],
-            'overwrite.cli.url' => 'https://nextcloud.fermedujointout.fr',
+            'overwrite.cli.url' => 'https://nextcloud.${tenant_domain}',
             'overwriteprotocol' => 'https',
           );
       existingSecret:
