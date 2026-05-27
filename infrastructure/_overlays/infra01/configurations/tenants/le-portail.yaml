@@ -1,0 +1,16 @@
+---
+apiVersion: capsule.clastix.io/v1beta2
+kind: Tenant
+metadata:
+  name: le-portail
+spec:
+  owners:
+    - name: le-portail-admin
+      kind: User
+    - name: local
+      kind: User
+  namespaceOptions:
+    quota: 10
+    additionalMetadata:
+      labels:
+        capsule.clastix.io/tenant: le-portail

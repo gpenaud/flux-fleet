@@ -1,0 +1,16 @@
+---
+apiVersion: capsule.clastix.io/v1beta2
+kind: Tenant
+metadata:
+  name: la-bergeronnette
+spec:
+  owners:
+    - name: la-bergeronnette-admin
+      kind: User
+    - name: local
+      kind: User
+  namespaceOptions:
+    quota: 10
+    additionalMetadata:
+      labels:
+        capsule.clastix.io/tenant: la-bergeronnette
