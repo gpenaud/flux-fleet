@@ -3,7 +3,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: k8up
-  namespace: controller-k8up
+  namespace: controller-backup
 spec:
   interval: 5m0s
   url: https://k8up-io.github.io/k8up
@@ -13,7 +13,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: k8up
-  namespace: controller-k8up
+  namespace: controller-backup
 spec:
   interval: 5m
   timeout: 5m
@@ -24,7 +24,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: k8up
-        namespace: controller-k8up
+        namespace: controller-backup
       interval: 5m
   install:
     remediation:

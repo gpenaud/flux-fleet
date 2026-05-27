@@ -9,4 +9,4 @@ components:
   - ../../../components/dns
   - ../../../components/ingress/traefik
   - ../../../components/vpn
-  - ../../../components/backups
+  - ../../../components/backup
