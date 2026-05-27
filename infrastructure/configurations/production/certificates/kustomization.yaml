@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - clusterissuers/letsencrypt-staging.yaml
   - clusterissuers/letsencrypt-production.yaml
+  - wildcards/base-domain.yaml
