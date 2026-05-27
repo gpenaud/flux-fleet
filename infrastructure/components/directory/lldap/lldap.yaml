@@ -47,6 +47,11 @@ spec:
         value: "false"
       - name: "LLDAP_FORCE_LDAP_USER_PASS_RESET"
         value: "false"
+      - name: "LLDAP_ADMIN_PASSWORD"
+        valueFrom:
+          secretKeyRef:
+            name: lldap-secrets
+            key: lldap-ldap-user-pass
 
     extraEnvFrom:
       - secretRef:
