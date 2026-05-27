@@ -91,11 +91,21 @@ spec:
                 value:
                   name: bootstrap
                   projected:
-                    sources:
-                      - configMap:
-                          name: lldap-bootstrap
-                      - secret:
-                          name: lldap-bootstrap-secrets
+                    - secret:
+                        name: lldap-bootstrap-users
+                        items:
+                          - key: authelia.json
+                            path: users/authelia.json
+                    - configMap:
+                        name: lldap-bootstrap-groups
+                        items:
+                          - key: lldap_strict_readonly.json
+                            path: groups/lldap_strict_readonly.json
+                    - configMap:
+                        name: lldap-bootstrap-group-memberships
+                        items:
+                          - key: authelia_readonly.json
+                            path: group-memberships/authelia_readonly.json
               - op: add
                 path: /spec/template/spec/containers/0/volumeMounts/-
                 value:

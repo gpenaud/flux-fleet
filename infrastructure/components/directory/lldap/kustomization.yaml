@@ -4,4 +4,5 @@ kind: Component
 resources:
   - namespace.yaml
   - lldap.yaml
+  - configmaps.yaml
   - secrets.enc.yaml
