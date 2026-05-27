@@ -44,7 +44,7 @@ spec:
 
     extraEnv:
       - name: "LLDAP_FORCE_UPDATE_PRIVATE_KEY"
-        value: "true"
+        value: "false"
       - name: "LLDAP_FORCE_LDAP_USER_PASS_RESET"
         value: "true"
 
