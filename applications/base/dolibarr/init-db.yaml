@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: init-db
+  namespace: ${tenant}-dolibarr
   labels:
     reflector/mysql-operator: "true"
   annotations:

@@ -2,6 +2,7 @@ apiVersion: k8up.io/v1
 kind: PodConfig
 metadata:
   name: podconfig
+  namespace: ${tenant}-dolibarr
 spec:
   template:
     spec:
@@ -17,6 +18,7 @@ apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
   name: dolibarr
+  namespace: ${tenant}-dolibarr
 spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
@@ -28,7 +30,7 @@ spec:
       key: RESTIC_PASSWORD
     s3:
       endpoint: https://s3.sbg.io.cloud.ovh.net 
-      bucket: ""
+      bucket: "${owner}-${cluster}-backup-${tenant}-dolibarr"
       accessKeyIDSecretRef:
         name: k8up-credentials
         key: AWS_ACCESS_KEY_ID
