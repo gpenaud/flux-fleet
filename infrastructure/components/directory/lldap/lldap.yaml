@@ -47,8 +47,6 @@ spec:
         value: "false"
       - name: "LLDAP_FORCE_LDAP_USER_PASS_RESET"
         value: "false"
-      - name: "LLDAP_BOOTSTRAP_PATH"
-        value: "/bootstrap" # (voir postRenderer pour le volume associé)
 
     extraEnvFrom:
       - secretRef:
@@ -96,23 +94,33 @@ spec:
                           name: lldap-bootstrap-users
                           items:
                             - key: authelia.json
-                              path: users/authelia.json
+                              path: user-configs/authelia.json
                       - configMap:
                           name: lldap-bootstrap-groups
                           items:
                             - key: lldap_strict_readonly.json
-                              path: groups/lldap_strict_readonly.json
-                      - configMap:
-                          name: lldap-bootstrap-group-memberships
-                          items:
-                            - key: authelia_readonly.json
-                              path: group-memberships/authelia_readonly.json
+                              path: group-configs/lldap_strict_readonly.json
+
               - op: add
                 path: /spec/template/spec/containers/0/volumeMounts/-
                 value:
                   name: bootstrap
                   mountPath: /bootstrap
                   readOnly: true
+
+              - op: add
+                path: /spec/template/spec/containers/0/lifecycle
+                value:
+                  postStart:
+                    exec:
+                      command:
+                        - /bin/sh
+                        - -c
+                        - |
+                          until wget -q -O /dev/null http://localhost:17170/health 2>/dev/null; do
+                            sleep 1
+                          done
+                          /app/bootstrap.sh
 
     # readOnlyRootFilesystem: true demande un /tmp writable
     # Si le chart ne le fournit pas par défaut, on patche via postRenderer
