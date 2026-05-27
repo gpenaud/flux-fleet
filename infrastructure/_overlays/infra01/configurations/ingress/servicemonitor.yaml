@@ -1,0 +1,30 @@
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: traefik
+  namespace: controller-ingress
+  labels:
+    release: kube-prometheus-stack  # doit matcher le serviceMonitorSelector de ton Prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+  namespaceSelector:
+    matchNames:
+      - controller-ingress
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      metricRelabelings:
+        # 1. Drop tout ce qui est controller (services d'infrastructure)
+        - sourceLabels: [exported_service]
+          regex: '^controller-.+$'
+          action: drop
+        - sourceLabels: [exported_service]
+          regex: '^(.+)-(?:80|8080|http|https)@(?:kubernetes|kubernetescrd)$'
+          targetLabel: exported_service
+          replacement: '${1}'
+          action: replace
