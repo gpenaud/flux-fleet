@@ -9,3 +9,4 @@ metadata:
     alter-it.org/managed-by: "fluxcd"
     reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"
+    reflector/grist-oidc-client-secret: "true"
