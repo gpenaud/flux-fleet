@@ -1,0 +1,166 @@
+
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: gabe565
+  namespace: controller-vpn
+spec:
+  type: oci
+  url: oci://ghcr.io/gabe565/charts
+  interval: 1h
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: headscale
+  namespace: controller-vpn
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: headscale
+      version: "0.16.x"  # à pinner précisément après vérification artifacthub
+      sourceRef:
+        kind: HelmRepository
+        name: gabe565
+        namespace: controller-vpn
+      interval: 1h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      repository: ghcr.io/juanfont/headscale
+      tag: v0.28.0  # à valider — dernière patch stable au moment du déploiement
+
+    # Args par défaut du chart : ["serve"]
+    args: ["serve"]
+
+    # Configuration Headscale via variables d'environnement
+    # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
+    env:
+      # URL publique du serveur (doit matcher le cert + DNS)
+      HEADSCALE_SERVER_URL: "https://vpn.infra01.alter-it.eu"
+
+      # Adresse d'écoute du serveur HTTP principal
+      HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"
+
+      # Endpoint metrics Prometheus (utile pour ton stack obs ensuite)
+      HEADSCALE_METRICS_LISTEN_ADDR: "0.0.0.0:9090"
+
+      # gRPC : laissé en loopback, accessible uniquement via kubectl exec
+      HEADSCALE_GRPC_LISTEN_ADDR: "127.0.0.1:50443"
+      HEADSCALE_GRPC_ALLOW_INSECURE: "true"
+
+      # Préfixes IP attribués aux nœuds du tailnet
+      HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
+      HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
+
+      # MagicDNS : base domain DIFFÉRENT du server_url
+      HEADSCALE_DNS_BASE_DOMAIN: "ts.alter-it.eu"
+      HEADSCALE_DNS_MAGIC_DNS: "true"
+
+      # Override nameservers globaux : on les définira plus tard pour le split DNS
+      # HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "false"
+
+      # Database : SQLite — le chart positionne automatiquement
+      # HEADSCALE_DATABASE_TYPE=sqlite3 et HEADSCALE_DATABASE_SQLITE_PATH
+      # vers persistence.config.mountPath/db.sqlite quand postgresql.enabled=false.
+      # Les chemins de private.key et noise_private.key sont aussi gérés par le chart.
+
+      # DERP : utilisation des serveurs publics       # Override nameservers globaux : on les définira plus tard pour le split DNS
+      # HEADSCALE_DNS_OVERRIDE_LOCAL_DNS: "false"Tailscale (défaut chart)
+      # Pas besoin de surcharger pour l'instant
+
+      # Logs
+      HEADSCALE_LOG_LEVEL: "info"
+
+    # Persistance : une seule PVC pour config + clés + SQLite (sous /etc/headscale)
+    persistence:
+      config:
+        enabled: true
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: longhorn
+        retain: true
+        # mountPath par défaut : /etc/headscale (laissé tel quel)
+      run:
+        enabled: true
+        type: emptyDir
+        mountPath: /var/run/headscale
+
+
+    # PostgreSQL subchart désactivé — on reste sur SQLite
+    postgresql:
+      enabled: false
+
+    # Service ClusterIP — exposition via IngressRoute Traefik
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+            targetPort: 8080
+          metrics:
+            enabled: true
+            port: 9090
+            targetPort: 9090
+
+    # Pas d'Ingress géré par le chart — on utilise une IngressRoute Traefik externe
+    ingress:
+      main:
+        enabled: false
+
+    # Resources : Headscale est très léger
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+    # Pod security context appliqué à TOUS les containers (init + main)
+    # via defaultPodOptions de la bjw-s common library
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      # Force kubelet à chown le volume si l'owner ne matche pas fsGroup.
+      # Nécessaire avec Longhorn qui ne propage pas toujours fsGroup au mount.
+      fsGroupChangePolicy: OnRootMismatch
+      seccompProfile:
+        type: RuntimeDefault
+
+
+    # Override du securityContext de l'initContainer "config" (hardcodé par le chart)
+    # Nécessaire pour passer Pod Security Admission "restricted"
+    initContainers:
+      config:
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # l'init écrit /etc/headscale/config.yaml
+          runAsNonRoot: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+
+    # SecurityContext du container principal Headscale
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
