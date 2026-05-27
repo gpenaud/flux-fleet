@@ -9,6 +9,5 @@ components:
   - ../../../components/dns
   - ../../../components/ingress/traefik
   - ../../../components/vpn
-  - ../../../components/backup
+  - ../../../components/backup/k8up
   - ../../../components/directory/authelia
-  
