@@ -116,7 +116,12 @@ spec:
                       command:
                         - /bin/sh
                         - -c
-                        - /app/bootstrap.sh
+                        - |
+                          until wget -q -O /dev/null http://localhost:17170/health 2>/dev/null; do
+                            echo "Waiting for lldap to be ready..."
+                            sleep 1
+                          done
+                          /app/bootstrap.sh
 
     # readOnlyRootFilesystem: true demande un /tmp writable
     # Si le chart ne le fournit pas par défaut, on patche via postRenderer
