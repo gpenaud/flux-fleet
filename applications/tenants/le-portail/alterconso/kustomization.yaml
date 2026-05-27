@@ -1,0 +1,25 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ${tenant}-alterconso
+
+resources:
+  - ../../../base/alterconso
+  - secrets.enc.yaml
+
+components:
+  - ../../../components/backup
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: values.yaml
+
+  - target:
+      kind: ImageUpdateAutomation
+      name: alterconso
+    patch: |
+      - op: replace
+        path: /spec/update/path
+        value: ./applications/tenants/le-portail

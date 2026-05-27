@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alterconso
+spec:
+  values:
+    webapp:
+      image:
+        version: 1.0.6 # {"$imagepolicy": "alterconso:alterconso:tag"}
+      ingress:
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+        hosts:
+          - name: alterconso.${tenant_domain}
+            path: /
+            tls: true
+      vhost: alterconso.${tenant_domain}
+    database:
+      persistentVolume:
+        enabled: true
+        storageClass: longhorn
+        capacity:
+          storage: 2Gi
+  valuesFrom:
+    - kind: Secret
+      name: alterconso
+      valuesKey: MYSQL_DATABASE
+      targetPath: mysql.database
+    - kind: Secret
+      name: alterconso
+      valuesKey: MYSQL_USER
+      targetPath: mysql.user
+    - kind: Secret
+      name: alterconso
+      valuesKey: MYSQL_PASSWORD
+      targetPath: mysql.password
+    - kind: Secret
+      name: alterconso
+      valuesKey: MYSQL_ROOT_PASSWORD
+      targetPath: mysql.rootPassword
