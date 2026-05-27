@@ -1,40 +1,53 @@
 version: '3'
 
+env:
+  KUBE_CONTEXT:
+    sh: kubectl config current-context
+
 tasks:
   source:
     desc: Reconcile source flux-system
     cmds:
-      - flux --context production -n flux-system reconcile source git flux-system
+      - flux --context ${KUBE_CONTEXT} -n flux-system reconcile source git flux-system
+    silent: true
+
+  kustomization:cluster:configuration:
+    desc: Reconcile sources, then cluster-configuration
+    cmds:
+      - task reconcile:source
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization cluster-configuration
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization cluster-configuration
     silent: true
 
   kustomization:infrastructure:bootstrap:
     desc: Reconcile sources, then infrastructure-bootstrap
     cmds:
       - task reconcile:source
-      - flux --context production -n flux-system suspend kustomization infrastructure-bootstrap
-      - flux --context production -n flux-system resume kustomization infrastructure-bootstrap
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-bootstrap
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-bootstrap
     silent: true
 
   kustomization:infrastructure:configurations:
     desc: Reconcile sources, then infrastructure-configurations
     cmds:
       - task reconcile:source
-      - flux --context production -n flux-system suspend kustomization infrastructure-configurations
-      - flux --context production -n flux-system resume kustomization infrastructure-configurations
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-configurations
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-configurations
     silent: true
 
   kustomization:infrastructure:controllers:
     desc: Reconcile sources, then infrastructure-controllers
     cmds:
       - task reconcile:source
-      - flux --context production -n flux-system suspend kustomization infrastructure-controllers
-      - flux --context production -n flux-system resume kustomization infrastructure-controllers
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-controllers
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controllers
     silent: true
 
   kustomization:infrastructure:
     desc: Reconcile sources, then infrastructure
     cmds:
       - task: source
+      - task: kustomization:cluster:configuration
       - task: kustomization:infrastructure:bootstrap
       - task: kustomization:infrastructure:controllers
       - task: kustomization:infrastructure:configurations
@@ -44,6 +57,48 @@ tasks:
     desc: Reconcile sources, then applications
     cmds:
       - task reconcile:source
-      - flux --context production -n flux-system suspend kustomization applications
-      - flux --context production -n flux-system resume kustomization applications
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization applications
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization applications
+    silent: true
+
+  kustomization:applications:le-portail:
+    desc: Reconcile sources, then applications
+    cmds:
+      - task reconcile:source
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization applications-le-portail
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization applications-le-portail
+    silent: true
+
+  kustomization:applications:ferme-du-jointout:
+    desc: Reconcile sources, then applications
+    cmds:
+      - task reconcile:source
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization applications-ferme-du-jointout
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization applications-ferme-du-jointout
+    silent: true
+
+  kustomization:applications:la-bergeronnette:
+    desc: Reconcile sources, then applications
+    cmds:
+      - task reconcile:source
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization applications-la-bergeronnette
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization applications-la-bergeronnette
+    silent: true
+
+  kustomization:applications:shared:
+    desc: Reconcile sources, then applications
+    cmds:
+      - task reconcile:source
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization applications-shared
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization applications-shared
+    silent: true
+
+  kustomization:applications:all:
+    desc: Reconcile sources, then applications
+    cmds:
+      - task reconcile:source
+      - task reconcile:kustomization:applications:le-portail
+      - task reconcile:kustomization:applications:ferme-du-jointout
+      - task reconcile:kustomization:applications:la-bergeronnette
+      - task reconcile:kustomization:applications:shared
     silent: true
