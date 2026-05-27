@@ -37,16 +37,20 @@ spec:
       create: false
       existingSecret: lldap-secrets
 
-    extraEnvFrom:
-      - secretRef:
-          name: lldap-secrets
-
     env:
       TZ: "Europe/Paris"
       GID: "1000"
       UID: "1000"
-      LLDAP_FORCE_UPDATE_PRIVATE_KEY: "true"
-      LLDAP_FORCE_LDAP_USER_PASS_RESET: "true"
+
+    extraEnv:
+      - name: "LLDAP_FORCE_UPDATE_PRIVATE_KEY"
+        value: "true"
+      - name: "LLDAP_FORCE_LDAP_USER_PASS_RESET"
+        value: "true"
+
+    extraEnvFrom:
+      - secretRef:
+          name: lldap-secrets
 
     persistence:
       enabled: true
