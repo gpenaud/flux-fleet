@@ -5,4 +5,5 @@ resources:
   - namespace.yaml
   - init-db.yaml
   - helm.yaml
+  - ingressroute.yaml
   - backup.yaml

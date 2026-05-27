@@ -29,7 +29,7 @@ spec:
       key: RESTIC_PASSWORD
     s3:
       endpoint: https://s3.sbg.io.cloud.ovh.net 
-      bucket: ""
+      bucket: "${owner}-${cluster}-backup-${tenant}-nextcloud"
       accessKeyIDSecretRef:
         name: k8up-credentials
         key: AWS_ACCESS_KEY_ID

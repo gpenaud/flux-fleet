@@ -1,0 +1,26 @@
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud
+  namespace: ${tenant}-nextcloud
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: nextcloud.${tenant_domain},cloud.${tenant_domain}
+    external-dns.alpha.kubernetes.io/target: ${tenant_domain}
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`nextcloud.${tenant_domain}`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 8080
+    - match: Host(`cloud.${tenant_domain}`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 8080
+  tls:
+    secretName: wildcard-${tenant}-tls
