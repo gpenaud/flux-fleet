@@ -1,0 +1,76 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: alexmorbo
+  namespace: controller-directory
+spec:
+  type: oci
+  interval: 1h
+  url: oci://ghcr.io/alexmorbo/helm-charts
+---
+# clusters/leportail/lldap/helm-release.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: lldap
+  namespace: controller-directory
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: lldap
+      version: "1.0.x"
+      sourceRef:
+        kind: HelmRepository
+        name: alexmorbo
+        namespace: controller-directory
+  values:
+    replicaCount: 1  # NE PAS AUGMENTER (SQLite)
+
+    image:
+      registry: ghcr.io
+      repository: lldap/lldap
+      tag: "2026-01-06-alpine"  # pin explicite, pas latest
+      pullPolicy: IfNotPresent
+
+    secret:
+      create: false
+      existingSecret: lldap-secrets
+
+    extraEnvFrom:
+      - secretRef:
+          name: lldap-secrets
+
+    env:
+      TZ: "Europe/Paris"
+      GID: "1000"
+      UID: "1000"
+
+    persistence:
+      enabled: true
+      size: 1Gi
+      accessModes: ["ReadWriteOnce"]
+      storageClass: longhorn
+      annotations:
+        # Pour que k8up backup ce PVC, voir Schedule k8up plus bas
+        k8up.io/backup: "true"
+
+    service:
+      type: ClusterIP
+      ldap_port: 3890
+      http_port: 17170
+      ldaps_enabled: false
+
+    ingress:
+      enabled:
+
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+
+    # readOnlyRootFilesystem: true demande un /tmp writable
+    # Si le chart ne le fournit pas par défaut, on patche via postRenderer
+    # (à valider après premier déploiement : si crash sur /tmp, ajouter ici)
