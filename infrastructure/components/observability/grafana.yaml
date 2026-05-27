@@ -1,0 +1,110 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: grafana
+  namespace: flux-system
+spec:
+  interval: 24h
+  # Repo migré en janvier 2026 (anciennement grafana.github.io/helm-charts)
+  url: https://grafana-community.github.io/helm-charts
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+  namespace: controller-observability
+spec:
+  interval: 1h
+  dependsOn:
+    - name: kube-prometheus-stack
+  chart:
+    spec:
+      chart: grafana
+      version: "9.x"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+      interval: 24h
+  values:
+    persistence:
+      enabled: true
+      storageClassName: longhorn
+      size: 5Gi
+      accessModes:
+        - ReadWriteOnce
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 96Mi
+      limits:
+        memory: 192Mi
+
+    admin:
+      existingSecret: grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
+
+    grafana.ini:
+      server:
+        domain: monitoring.leportail.org
+        root_url: https://monitoring.leportail.org/grafana
+        serve_from_sub_path: true
+      analytics:
+        check_for_updates: false
+        reporting_enabled: false
+      log:
+        mode: console
+        level: info
+      auth.anonymous:
+        enabled: false
+      users:
+        home_page: "/d/infra01-alter-it-overview"
+
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            access: proxy
+            url: http://prometheus-operated.controller-observability.svc.cluster.local:9090/prometheus
+            isDefault: true
+            jsonData:
+              timeInterval: 60s
+          - name: Loki
+            type: loki
+            uid: loki
+            access: proxy
+            url: http://loki.controller-observability.svc.cluster.local:3100
+            isDefault: false
+            jsonData:
+              # Limite le nombre de lignes retournées par requête (défaut 1000)
+              maxLines: 5000
+              # Timeout des requêtes (utile sur queries longues)
+              timeout: 60
+
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+        folderAnnotation: grafana_folder
+        provider:
+          foldersFromFilesStructure: true
+      datasources:
+        enabled: true
+        label: grafana_datasource
+        labelValue: "1"
+        searchNamespace: ALL
+  
+    ingress:
+      enabled: false
+
+    serviceMonitor:
+      enabled: false

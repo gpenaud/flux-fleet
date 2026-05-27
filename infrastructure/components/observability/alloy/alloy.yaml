@@ -1,0 +1,185 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: grafana-original
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://grafana.github.io/helm-charts
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: controller-observability
+spec:
+  interval: 1h
+  # Alloy doit démarrer après Loki (sinon il push dans le vide)
+  dependsOn:
+    - name: loki
+  chart:
+    spec:
+      chart: alloy
+      version: "1.x"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-original
+        namespace: flux-system
+      interval: 24h
+  values:
+    # === DaemonSet : un Alloy par nœud ===
+    controller:
+      type: daemonset
+      # === Tolerations pour tourner sur tous les nœuds ===
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+
+    # === Configuration Alloy ===
+    # On l'écrit en River/Alloy DSL directement.
+    # C'est un langage HCL-like assez lisible, propre à Grafana Alloy.
+    alloy:
+    # === Mounts pour els fichiers de log ===
+      mounts:
+        varlog: true # monte /var/log
+        dockercontainers: true   # monte /var/lib/docker/containers (legacy mais sans effet sur k3s)
+      # Positions persistantes (souvent par défaut, à vérifier)
+      storagePath: /var/lib/alloy
+      configMap:
+        content: |
+          // ============================================================
+          // PIPELINE LOGS KUBERNETES → LOKI
+          // ============================================================
+          
+          // 1. Découverte des pods k8s
+          discovery.kubernetes "pods" {
+            role = "pod"
+          }
+          
+          // 2. Filtrage : on garde tout sauf kube-system, kube-public, kube-node-lease
+          //    et le namespace controller-observability lui-même (auto-exclusion :
+          //    sinon Alloy et Loki logueraient les logs qu'ils traitent → boucle)
+          discovery.relabel "pod_logs" {
+            targets = discovery.kubernetes.pods.targets
+            
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              regex         = "kube-system|kube-public|kube-node-lease|controller-observability"
+              action        = "drop"
+            }
+            
+            // 3. Construction des labels Loki à partir des metadata k8s
+            //    On garde des labels stables et peu nombreux pour éviter
+            //    l'explosion de cardinalité.
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              target_label  = "namespace"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_name"]
+              target_label  = "pod"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              target_label  = "container"
+            }
+            // Label "app" depuis app.kubernetes.io/name (standard k8s) si présent
+            rule {
+              source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+              target_label  = "app"
+            }
+            // Label "node" pour pouvoir filtrer par hôte
+            rule {
+              source_labels = ["__meta_kubernetes_pod_node_name"]
+              target_label  = "node"
+            }
+
+            rule {
+              action = "replace"
+              source_labels = [
+                "__meta_kubernetes_namespace",
+                "__meta_kubernetes_pod_name",
+                "__meta_kubernetes_pod_uid",
+                "__meta_kubernetes_pod_container_name",
+              ]
+              separator    = "/"
+              target_label = "__path__"
+              regex        = `([^/]+)/([^/]+)/([^/]+)/(.+)`
+              replacement  = `/var/log/pods/${1}_${2}_${3}/${4}/*.log`
+            }
+          }
+          
+          // 4. Source : tail des fichiers logs des pods
+          //    Alloy lit /var/log/pods/<ns>_<pod>_<uid>/<container>/N.log
+          local.file_match "pod_logs" {
+            path_targets = discovery.relabel.pod_logs.output
+          }
+
+          loki.source.file "pods" {
+            targets    = local.file_match.pod_logs.targets
+            forward_to = [loki.process.parse.receiver]
+          }
+          
+          // 5. Processing : parsing CRI + ajout d'un label level si présent
+          loki.process "parse" {
+            // Parse le format CRI/containerd des logs
+            stage.cri {}
+            
+            // Détection du niveau de log dans le contenu
+            // (heuristique simple : cherche "level=X" ou un mot-clé en début)
+            stage.match {
+              selector = "{namespace=~\".+\"}"
+              
+              stage.regex {
+                expression = "(?i)(?P<level>ERROR|WARN|WARNING|INFO|DEBUG|FATAL|PANIC)"
+              }
+              
+              stage.labels {
+                values = {
+                  level = "level",
+                }
+              }
+            }
+            
+            forward_to = [loki.write.default.receiver]
+          }
+
+          // 6.
+          // ============================================================
+          // LOKI RULES PUSH — depuis PrometheusRule labellisées
+          // ============================================================
+
+          loki.rules.kubernetes "lokirules" {
+            address = "http://loki.controller-observability.svc.cluster.local:3100"
+            
+            // Ne push que les PrometheusRule avec label loki_rule=true
+            rule_selector {
+              match_labels = {
+                loki_rule = "true",
+              }
+            }
+          }
+          
+          // 7. Push vers Loki
+          loki.write "default" {
+            endpoint {
+              url = "http://loki.controller-observability.svc.cluster.local:3100/loki/api/v1/push"
+            }
+          }
+
+    # === Resources ===
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+
+    # === ServiceMonitor pour scraper les métriques Alloy ===
+    # (alloy expose ses propres métriques sur :12345)
+    serviceMonitor:
+      enabled: false   # On le désactive pour l'instant, on activera quand on aura validé que ça marche

@@ -1,0 +1,14 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: monitoring-internal-infra01-alter-it-eu
+  namespace: controller-observability
+spec:
+  secretName: monitoring-internal-infra01-alter-it-eu-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "monitoring.internal.infra01.alter-it.eu"
+  dnsNames:
+    - "monitoring.internal.infra01.alter-it.eu"
