@@ -1,0 +1,356 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: authelia
+  namespace: controller-authentication
+spec:
+  interval: 24h
+  url: https://charts.authelia.com
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authelia-storage
+  namespace: controller-authentication
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authelia
+  namespace: controller-authentication
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: authelia
+      version: "0.11.5"
+      sourceRef:
+        kind: HelmRepository
+        name: authelia
+        namespace: controller-authentication
+      interval: 12h
+
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+
+  values:
+    # ================================================================
+    # Pod : Deployment (pas DaemonSet, mono-instance suffit)
+    # ================================================================
+    pod:
+      kind: 'Deployment'
+      replicas: 1
+      
+      # Users database monté depuis un secret externe (gérer hors chart)
+      env:
+        - name: TZ
+          value: "Europe/Paris"
+
+    # ================================================================
+    # Persistence : PVC Longhorn pour SQLite
+    # ================================================================
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: '1Gi'
+      accessModes:
+        - 'ReadWriteOnce'
+
+    # ================================================================
+    # Service : ClusterIP, exposé via IngressRoute séparée
+    # ================================================================
+    service:
+      type: 'ClusterIP'
+      port: 80
+
+    # ================================================================
+    # Ingress : géré par notre IngressRoute Traefik séparée
+    # ================================================================
+    ingress:
+      enabled: false
+
+    # ================================================================
+    # Configuration Authelia
+    # ================================================================
+    
+    configMap:
+      disabled: false
+      
+      # --- Serveur
+      server:
+        port: 9091
+      
+      # --- Logs
+      log:
+        level: 'info'
+      
+      # --- Theme
+      theme: 'dark'
+      
+      # # --- Authentication backend : file-based
+      # authentication_backend:
+      #   password_reset:
+      #     disable: false  # désactivé jusqu'à ce qu'on configure SMTP
+      #   password_change:
+      #     disable: false
+      #   refresh_interval: '5 minutes'
+      #   file:
+      #     enabled: true
+      #     path: '/secrets/users/users_database.yml'
+      #     watch: false
+      #     search:
+      #       email: false
+      #       case_insensitive: false
+      #     password:
+      #       algorithm: 'argon2'
+      #       argon2:
+      #         variant: 'argon2id'
+      #         iterations: 3
+      #         memory: 65536
+      #         parallelism: 4
+      #         key_length: 32
+      #         salt_length: 16
+
+      authentication_backend:
+        refresh_interval: '5 minutes'
+        password_reset:
+          disable: false   # active le password reset par email
+        ldap:
+          enabled: true
+          implementation: 'lldap'
+          address: 'ldap://lldap.controller-directory.svc.cluster.local:3890'
+          timeout: '5 seconds'
+          start_tls: false
+          base_dn: 'dc=alter-it,dc=eu'
+          additional_users_dn: 'ou=people'
+          users_filter: '(&({username_attribute}={input})(objectClass=person))'
+          additional_groups_dn: 'ou=groups'
+          groups_filter: '(member={dn})'
+          user: 'uid=authelia,ou=people,dc=alter-it,dc=eu'
+          password:
+            disabled: false
+            secret_name: 'authelia-ldap-bind'
+            path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
+          attributes:
+            username: 'uid'
+            display_name: 'displayName'
+            mail: 'mail'
+            member_of: 'memberOf'
+            group_name: 'cn'
+
+      # --- Access Control
+      access_control:
+        default_policy: 'deny'
+        rules:
+          # Tenant leportail
+          - domain: '*.leportail.org'
+            policy: 'one_factor'
+            subject:
+              - 'group:leportail_admins'
+              - 'group:leportail_users'
+          # Authelia lui-même : bypass (sinon boucle infinie de login)
+          - domain: 'auth.infra01.alter-it.eu'
+            policy: 'bypass'
+
+      # --- Session
+      session:
+        name: 'authelia_session'
+        expiration: '1 hour'
+        inactivity: '5 minutes'
+        remember_me: '1 month'
+        encryption_key:
+          disabled: false
+          secret_name: 'authelia-secrets'
+          path: 'AUTHELIA_SESSION_SECRET'
+        cookies:
+          - subdomain: 'auth.infra01'
+            domain: 'alter-it.eu'
+          - subdomain: 'auth'
+            domain: 'leportail.org'
+          - subdomain: 'auth'
+            domain: 'fermedujointout.fr'
+          - subdomain: 'auth'
+            domain: 'labergeronnette.org'
+
+      # --- Storage : SQLite local
+      storage:
+        encryption_key:
+          # Le chart génère le Secret tout seul à partir de cette valeur
+          value: "AX03F64FzxEUUlZsI3/xrFnNZPjrsdljovjpeAWbE5eacWN2y7+Pwa98/MssUCX7TA+rMP"
+        local:
+          enabled: true
+          path: '/config/db.sqlite3'
+
+      notifier:
+        disable_startup_check: false
+        
+        # Désactiver l'ancien notifier filesystem
+        filesystem:
+          enabled: false
+        
+        # Activer SMTP
+        smtp:
+          enabled: true
+          address: 'submissions://smtp.gmail.com:465'
+          timeout: '10 seconds'
+          sender: 'Authelia <ops.gpenaud@gmail.com>'
+          identifier: 'auth.infra01.alter-it.eu'
+          subject: '[Authelia] {title}'
+          startup_check_address: 'ops.gpenaud@gmail.com'
+          disable_html_emails: false
+          disable_require_tls: false
+          disable_starttls: false
+          username: 'ops.gpenaud@gmail.com'
+          password:
+            secret_name: 'authelia-smtp'
+            path: 'password.txt'
+          tls:
+            skip_verify: false
+            minimum_version: 'TLS1.2'
+          
+      # --- Regulation (rate limit anti-brute force)
+      regulation:
+        max_retries: 5
+        find_time: '2 minutes'
+        ban_time: '5 minutes'
+
+      # --- Identity Providers : OIDC
+      identity_providers:
+        oidc:
+          enabled: true
+
+          # Clients
+          clients:
+            - client_id: 'grist-le-portail'
+              client_name: 'Grist - Ecolieu du Portail'
+              client_secret:
+                # Le hash pbkdf2 du client secret en clair
+                value: "$pbkdf2-sha512$310000$Kra1XW1tIxx3aBFtBassbw$0VQPncmkduO4dxiIv1/3eVLB3XQ5Ioq0sU5CdY5Li08EINcciyITqmIxt2tZ7ZzmN4tsOgAKcPC3KQ0v8w0hWQ"
+              public: false
+              authorization_policy: 'one_factor'
+              redirect_uris:
+                - 'https://grist.leportail.org/oauth2/callback'
+              scopes:
+                - 'openid'
+                - 'email'
+                - 'profile'
+              userinfo_signed_response_alg: 'none'
+              token_endpoint_auth_method: 'client_secret_basic'
+              consent_mode: 'implicit'
+          
+          hmac_secret:
+            value: "0FZg4+U4lhgJqUA49n1H0SoO6NzAuC94hRG4jtjBozwQQjwPL/tRuWznPqUJMauV5yXlz58YFc6mWro5R"
+          
+          # JWKS : clé RSA pour signer les id_tokens
+          # On la met directement en valeur (le chart la mettra dans un secret pour nous)
+          jwks:
+            - key_id: 'default'
+              algorithm: 'RS256'
+              use: 'sig'
+              key:
+                value: |
+                  -----BEGIN PRIVATE KEY-----
+                  MIIJRAIBADANBgkqhkiG9w0BAQEFAASCCS4wggkqAgEAAoICAQC2Yq/HHzVVCSuu
+                  gjU6iKUf7zsLYRXdjjFW6/cnkOmH0L8QpkPaBCZBq8AD5fmWFRjjrQaA+cN4kAg/
+                  EPEEjH1Kcyj6VDVGqnS+Pm/rupRHdJ8TdtPwQUMcckRKmyJ0Jn5NHsOFZa7vK1eA
+                  JGt/a8JBSH1lsQtS9HogU+vHBSLU1rrHUvuHPUBPO73Crzl/QK3bpvAQwjrjZUeN
+                  PCuREUXAJBg70yRqEqPt4EmunnZq4ZWKZgW2xSxy66piIBTz0JnzwbWnHdVQso/i
+                  KnRrVFhPPcX4SqnJvqzKOLCWtJZxopgx4LFP1lfg4Eoof61jjWz7oT+MA4l2H+Oo
+                  FbM/vmTMljgbrcCwjvcwB/VkY6QKHHWT+xFItUueS50sJ7+2QPox5IUazZxJLz9p
+                  xkfKDIQIxJUJQmlAk7MdH5xka4h11v7dKls+MqpiRQssHPtshHXbmwJlHFyNkkRq
+                  6TH5KLunj2oHzZyjnLmSNePn0BGWfl0PDFjkTYBL+N0bZZP8purtD0jzeeppoGZi
+                  3XabV5WfGt8gs4kLh5CO/XUj+jTQ4y7PV4VroQmfIRsoPYVZZM3wtCADePFmAcMx
+                  MKPw8hzxx86FqriEjEq4hyNm74iZdsOAZuAVg/6vhtk/yvH9uUFy3RABLGGJaTBG
+                  KPfpi73l1xSmPtjTIUZkzYO754QJCwIDAQABAoICAAPDcjhxUWq+yghLfDOyrCLw
+                  5HlYoy3eMvBwkA9gncuv/Vv87PuBCGpkfo2AtQS+zLOuAgCuprTvK+xj5MVLl4OY
+                  xWiyTM3M0081qfOQTGJTwBCTwXh8sEN/AXUUpxevJP4MZiEeNweND7zU2ORZNzny
+                  TVFy33adFYQN7JiVEjdCyGSNNs7UmbtzfSKY9l5vhDw7FqBnPEstmitflCU7LlhH
+                  pmRdoqu5qhOiLthhQV+f5gkOuowfR3Uw8w7GoLK4mY9Tw57Tg8UAL5iNeGIv7F6T
+                  j2k53oULionltOch33+Fc7nbwWznUbWR4JXeBJhAS9ZpaQ6c6BI9mDdYs0kxHD1U
+                  zhMjAsgOgsMjJo8L/sKmKVUHni1sqXppM7iPEmBsDlLIWx/fz4S0s6xyyTjoPlBK
+                  9xBiNZ3vyHHWDg6A+Ftmb0M1p3/dbrM39dovLrrOZhX1CJA50M+YPGwzXlsqX2q5
+                  7fFyeJ+hVywZGREfv/WNUjwwoLTSAi6NbUAEw15m8sLdjaswf2kl9D1ccXq/++uV
+                  IVbU5ZhtNqMdyDXdd9BxE02GMF8Pxxa84E1HAJL37QJCMExmIGww8HdKthsx8gr0
+                  Pef1Oxf2X3lm5LqQ+8OEv0lClEKqa6qJqfASZT0SsAUI6k69vaV54GnyJq8m6tNh
+                  7R0wgXZzEKAwscLcDEApAoIBAQD9EVkSfTsCyHmV4rlAk5oAwBs7Ct4LrsaTqjWk
+                  1/qzMUGsDUVrtozsQbIUOsTkdBxYjKUXtVivQ0p2+XDBE3TIkDCfCtRSpiNRDi+9
+                  aMxLq1FXD7gUhUN/lI8qbvUZZmVOLJ2EZ8xHRCbFYlJtuZ+2PIOlTAaq9sze4jAe
+                  pNNR2oQW0sxariScxiXnxzUEQJrsUuuyhkfngVTd3RAYRBK+y4O0cht+SGnwCLn2
+                  3DuT/vFHCp6/zVZjLV+2o3z7jPI/FrB94jy2NHA6KiiEuvbVtbIYnZ7OV76GKJqz
+                  D22bhzsoWNtRuJDzovmh4qM7Qse4jx+86893sR7vwbexNZUFAoIBAQC4f64lR8zj
+                  CyCZACSATPSypkqR2/EZAQhuCHZkkOAiLuBxZxF3d3au0la/rgxjVc0CFQIuvbjO
+                  d/jNokc0zOWFUKRrgNb9QGJKbESuJkitO4ykA9p0Xg7gI9Fvp3dFLIpAGoMh4ZeL
+                  sxzDxJ4gc1sPF71ngvgAfmknRMn1FQ3Co6jVBiJryg+f+rpmqnD3A9MUcFLeehb0
+                  WZ+i6HjHTzjElgqM0hUbuNgPv0xFLJ/FlLiGyU8P8DHw3thiU6M3QkbpCVI3DLM1
+                  aa5kK4Lfei8e+h325IX6LgxTc4zc07VsNRB4MzS8nSEvuF4GneTF2kevv662LRHz
+                  FNCAUJUgtILPAoIBAQDOctCPXMo/QvytYgBuxfrkkdOlHwB112b4H+sTR36loJFK
+                  oqj3bj0Yn59/EVJ+bJqTQmmMJczrbaHZ3TQ2zoB+/eIsXNFJe29kOIaJpmzDbkc1
+                  FwW899pQwgjpPQuGZRpP4+W8llD38okOjV9hVAUOzd83ggYOgrgvO6a12RDrva/0
+                  TpOXhmkn3B4gL0r45Rt9n0fYo+MU4VUyiZ0Prrj8HVqcYlo7cye5QeUzlgakfV6n
+                  7eoD3qeS0Pk8LbNQI3OcNA5XI7ETk0Par3nOjhe/0DIyEqPzAXHUUFujp/pq3q9M
+                  AvEogcD+gP3VKuau+ZOk5F2n6Vee9UefoBES5/thAoIBAQCM1/urPgqs8FusMS2s
+                  PBM5JjUa8Bo3ilBTH2ayEt7neX2hVJtC5hHWF4Bdx5JxapicFEmcQP0JsRBgepd9
+                  OUWl5g/+eVal8jaWtdwgTd2BUUpmEwL7fqpAdVd2sxMb3YqUsSiV/s9fuBYnZLuJ
+                  7kX/WZIfqR2F0vqXHa5GyBG/GozSQmKYgqI28ILHySl/iI3ktnKsn+tSEfEJvgol
+                  rNabTCc1pVKz3QIj01d4Hz7A6G2Nh7QxaJ3XUWdCeLLKhm/3ikQW/jz4c3rLwWOh
+                  EndSYIHrbjzQ5cJHGpjYI04GEuRFvmFt803YThiJWJPCboX3Jo9LR1DCjos0yU9u
+                  rh6FAoIBAQCG0+7knnLypRiTq92JPWUpgRKAXJ26LkSMLyqg0AFNZTXVy48XnPCc
+                  ko8PX6+XfXS0Fj9Nyx6/X+DQrFnYTGPZqMWiKNzViiaP8FdRs/COD6XdJDE2CwvM
+                  Avn6FZ8AlxZzBooihUH2GP4gMgJVIuWlrRi+6cnjAYHeEGWiG4JK1WenrlEg7C3q
+                  NZ02wzT/Gpfd2uGWwfHkCn0aFAHEBfmWAQe08KGlLgq0jl7pwt1FcqQNI3j4/RPu
+                  Wx3uYUfHWzcR+JqO/zEgI18FkdYXow8I3BpxstZSJynnNIKXhrKbI/3MVJml0woP
+                  /1BnnfqOg7/4/8otKSLINf+hyfJNvmWh
+                  -----END PRIVATE KEY-----
+          
+          # CORS
+          cors:
+            endpoints:
+              - 'authorization'
+              - 'token'
+              - 'revocation'
+              - 'introspection'
+              - 'userinfo'
+            allowed_origins_from_client_redirect_uris: true
+          
+          # Lifespans
+          lifespans:
+            access_token: '1 hour'
+            authorize_code: '1 minute'
+            id_token: '1 hour'
+            refresh_token: '1 hour and 30 minutes'
+
+    # ================================================================
+    # Secrets : on configure le users_database via additionalSecrets
+    # ================================================================
+    secret:
+      mountPath: '/secrets'
+      # Le users_database.yml monté à part (on le crée à la main)
+      additionalSecrets:
+        # authelia-users:
+        #   path: 'users'
+        #   items:
+        #     - key: 'users_database.yml'
+        #       path: 'users_database.yml'
+        authelia-ldap-bind:
+          items:
+            - key: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
+              path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD' 
+        authelia-secrets:
+          items:
+            - key: 'AUTHELIA_SESSION_SECRET'
+              path: 'AUTHELIA_SESSION_SECRET'
+        authelia-smtp:
+          items:
+            - key: 'password.txt'
+              path: 'password.txt'
