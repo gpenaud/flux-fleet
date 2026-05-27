@@ -5,6 +5,7 @@ metadata:
   name: cluster-vars
   namespace: flux-system
 data:
-  cluster_name: infra01
+  owner: alter-it
+  cluster: infra01
   base_domain: alter-it.eu
   environment: production
