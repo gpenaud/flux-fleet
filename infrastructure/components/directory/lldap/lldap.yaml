@@ -117,11 +117,21 @@ spec:
                         - /bin/sh
                         - -c
                         - |
-                          until wget -q -O /dev/null http://127.0.0.1:17170/ 2>/dev/null; do
-                            echo "Waiting for lldap to be ready..."
+                          exec >/tmp/poststart.log 2>&1
+                          set -x
+                          echo "=== postStart start at $(date) ==="
+                          echo "Testing available tools..."
+                          command -v wget || echo "no wget"
+                          command -v curl || echo "no curl"
+                          command -v nc || echo "no nc"
+                          echo "Testing connection..."
+                          until wget -q -O /dev/null http://localhost:17170/health 2>&1; do
+                            echo "waiting..."
                             sleep 1
                           done
-                          /app/bootstrap.sh
+                          echo "=== calling bootstrap.sh ==="
+                          /app/bootstrap.sh || true  # ne pas faire échouer le container si le script bootstrap échoue (ex: si déjà appliqué)
+                          echo "=== postStart end at $(date), exit=$? ==="
 
     # readOnlyRootFilesystem: true demande un /tmp writable
     # Si le chart ne le fournit pas par défaut, on patche via postRenderer
