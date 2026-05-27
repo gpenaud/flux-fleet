@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: wildcard.${cluster_name}.${base_domain}
-  namespace: controller-cert-manager
+  namespace: controller-certificate
 spec:
   secretName: wildcard.${cluster_name}.${base_domain}.tls
   issuerRef:

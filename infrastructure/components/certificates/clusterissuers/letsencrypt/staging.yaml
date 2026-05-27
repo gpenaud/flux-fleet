@@ -6,9 +6,9 @@ metadata:
   namespace: kube-system
   annotations:
     reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-    reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "controller-cert-manager"
+    reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "controller-certificate"
     reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
-    reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "controller-cert-manager"
+    reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "controller-certificate"
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
