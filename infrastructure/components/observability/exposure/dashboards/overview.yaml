@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-cluster-overview
+  name: grafana-dashboard-overview
   namespace: controller-observability
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: "${service_domain}"
+    grafana_folder: ""
 data:
-  ${cluster}.${service_domain}.json: |
+  overview.json: |
     {
       "annotations": {
         "list": [
@@ -49,7 +49,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -113,7 +113,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -177,7 +177,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Backups k8up échoués dans les dernières 24h",
           "fieldConfig": {
@@ -242,7 +242,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "Certificats cert-manager expirant dans moins de 14 jours",
           "fieldConfig": {
@@ -307,7 +307,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -388,7 +388,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "description": "RED par service Traefik — Top 15 par rate. Cliquer sur une ligne pour drill-down.",
           "fieldConfig": {
@@ -581,7 +581,7 @@ data:
                       {
                         "targetBlank": false,
                         "title": "Drill-down dashboard service",
-                        "url": "/d/traefik-service-detail?var-service=$${__value.text}&$${__url_time_range}"
+                        "url": "/d/traefik-service-detail?var-service=${__value.text}&${__url_time_range}"
                       }
                     ]
                   }
@@ -619,7 +619,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "$${DS_PROMETHEUS}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "expr": "topk(15, sum by (exported_service) (rate(traefik_service_requests_total{exported_service!~\".*@internal\"}[5m])))",
               "format": "table",
@@ -630,7 +630,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "$${DS_PROMETHEUS}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "expr": "100 * (\n  sum by (exported_service) (rate(traefik_service_requests_total{exported_service!~\".*@internal\", code=~\"5..\"}[5m]))\n  /\n  (sum by (exported_service) (rate(traefik_service_requests_total{exported_service!~\".*@internal\"}[5m])) > 0)\n) OR (\n  sum by (exported_service) (rate(traefik_service_requests_total{exported_service!~\".*@internal\"}[5m])) * 0\n)",
               "format": "table",
@@ -641,7 +641,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "$${DS_PROMETHEUS}"
+                "uid": "${DS_PROMETHEUS}"
               },
               "expr": "1000 * histogram_quantile(0.95,\n  sum by (exported_service, le) (\n    rate(traefik_service_request_duration_seconds_bucket{exported_service!~\".*@internal\"}[5m])\n  )\n)",
               "format": "table",
@@ -715,7 +715,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -784,7 +784,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -851,7 +851,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -918,7 +918,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1028,7 +1028,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "$${DS_PROMETHEUS}"
+            "uid": "${DS_PROMETHEUS}"
           },
           "fieldConfig": {
             "defaults": {
@@ -1146,7 +1146,7 @@ data:
         {
           "datasource": {
             "type": "loki",
-            "uid": "$${DS_LOKI}"
+            "uid": "${DS_LOKI}"
           },
           "fieldConfig": {
             "defaults": {},
@@ -1226,7 +1226,7 @@ data:
       },
       "timepicker": {},
       "timezone": "browser",
-      "title": "Overview cluster ${cluster}",
-      "uid": "${cluster}.${service_domain}.overview",
+      "title": "Overview,
+      "uid": "dashboard-overview",
       "version": 20
     }
