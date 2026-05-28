@@ -12,7 +12,4 @@ resources:
   - ../../../components/backup/k8up/sync.yaml
   - ../../../components/tenant/sync.yaml
   - ../../../components/database/sync.yaml
- 
-components: []
-  # - ../../../components/database
-  # - ../../../components/observability
+  - ../../../components/observability/sync.yaml
