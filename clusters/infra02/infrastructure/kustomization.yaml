@@ -5,6 +5,7 @@ resources:
   - ../../base
   - ../../components/storage/crds/sync.yaml
   - ../../components/storage/sync.yaml
+  - ../../components/storage/crds/sync.yaml
   - ../../components/dns/sync.yaml
   - ../../components/vpn/sync.yaml
   - ../../components/ingress/traefik/sync.yaml

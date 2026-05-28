@@ -62,6 +62,7 @@ spec:
       - ingress
       - service
       - traefik-proxy
+      - crd
 
     # ── Filtrage des zones gérées ──────────────────────────────────────────────
     # À COMPLÉTER : remplace ces exemples par tes vraies zones OVH.
