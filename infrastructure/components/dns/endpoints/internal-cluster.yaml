@@ -1,0 +1,13 @@
+
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: internal-cluster
+  namespace: controller-dns
+spec:
+  endpoints:
+    - dnsName: internal.${cluster}.${domain}
+      recordType: CNAME
+      targets:
+        - ${cluster}.${domain}
+      recordTTL: 300

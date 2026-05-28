@@ -1,0 +1,13 @@
+
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: cluster
+  namespace: controller-dns
+spec:
+  endpoints:
+    - dnsName: ${cluster}.${domain}
+      recordType: A
+      targets:
+        - "${cluster_endpoint_ip}"
+      recordTTL: 300
