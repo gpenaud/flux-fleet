@@ -5,8 +5,8 @@ metadata:
   name: monitoring
   namespace: controller-observability
   annotations:
-      external-dns.alpha.kubernetes.io/hostname: monitoring.internal.infra01.alter-it.eu
-      external-dns.alpha.kubernetes.io/target: internal.infra01.alter-it.eu
+      external-dns.alpha.kubernetes.io/hostname: monitoring.internal.${cluster}.${service_domain}
+      external-dns.alpha.kubernetes.io/target: internal.${cluster}.${service_domain}
       external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
@@ -14,7 +14,7 @@ spec:
   
   routes:
     # === Route 1 : Racine → redirect vers /grafana ===
-    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && Path(`/`)
+    - match: Host(`monitoring.internal.${cluster}.${service_domain}`) && Path(`/`)
       kind: Rule
       middlewares:
         - name: tailnet-only
@@ -28,7 +28,7 @@ spec:
           port: 80
     
     # === Route 2 : Grafana ===
-    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && PathPrefix(`/grafana`)
+    - match: Host(`monitoring.internal.${cluster}.${service_domain}`) && PathPrefix(`/grafana`)
       kind: Rule
       middlewares:
         - name: tailnet-only
@@ -39,7 +39,7 @@ spec:
       # Pas de middleware d'auth : Grafana gère sa propre login
     
     # === Route 3 : Prometheus ===
-    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && PathPrefix(`/prometheus`)
+    - match: Host(`monitoring.internal.${cluster}.${service_domain}`) && PathPrefix(`/prometheus`)
       kind: Rule
       services:
         - name: prometheus-operated
@@ -49,7 +49,7 @@ spec:
           namespace: controller-ingress
     
     # === Route 4 : Alertmanager ===
-    - match: Host(`monitoring.internal.infra01.alter-it.eu`) && PathPrefix(`/alertmanager`)
+    - match: Host(`monitoring.internal.${cluster}.${service_domain}`) && PathPrefix(`/alertmanager`)
       kind: Rule
       services:
         - name: alertmanager-operated
@@ -59,4 +59,4 @@ spec:
           namespace: controller-ingress
   
   tls:
-    secretName: monitoring-internal-infra01-alter-it-eu-tls
+    secretName: monitoring.internal.${cluster}.${service_domain}.tls

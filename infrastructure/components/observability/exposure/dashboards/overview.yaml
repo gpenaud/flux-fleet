@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-infra01-alter-it-overview
+  name: grafana-dashboard-${cluster}-alter-it-overview
   namespace: controller-observability
   labels:
     grafana_dashboard: "1"
   annotations:
-    grafana_folder: "infra01-alter-it"
+    grafana_folder: "${cluster}-alter-it"
 data:
-  infra01-alter-it-overview.json: |
+  ${cluster}-alter-it-overview.json: |
     {
       "annotations": {
         "list": [
@@ -1227,6 +1227,6 @@ data:
       "timepicker": {},
       "timezone": "browser",
       "title": "Single pane of glass — cluster k3s",
-      "uid": "infra01-alter-it-overview",
+      "uid": "${cluster}-alter-it-overview",
       "version": 20
     }
