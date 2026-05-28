@@ -11,6 +11,7 @@ resources:
   - ../../../components/authentication/authelia/sync.yaml
   - ../../../components/backup/k8up/sync.yaml
   - ../../../components/tenant/sync.yaml
+  - ../../../components/database/sync.yaml
  
 components: []
   # - ../../../components/database
