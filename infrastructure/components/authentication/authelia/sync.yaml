@@ -5,13 +5,14 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-directory-lldap
+    - name: infrastructure-controller-storage
+    - name: infrastructure-controller-directory-ldap
   interval: 1h
   retryInterval: 2m
   timeout: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./
+  path: ./infrastructure/components/authentication/authelia
   prune: true
   wait: true

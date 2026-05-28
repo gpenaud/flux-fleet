@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - ../../../base
   - ../../../components/storage
+  - ../../../components/directory/lldap
+  - ../../../components/authentication/authelia
  
 components: []
   # - ../../../components/storage
