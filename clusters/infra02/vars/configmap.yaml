@@ -1,0 +1,12 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-vars
+  namespace: flux-system
+data:
+  owner: alter-it
+  cluster: infra02
+  domain: alter-it.eu
+  environment: production
+  tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
