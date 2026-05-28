@@ -6,3 +6,4 @@ resources: []
 components:
   - ../../../components/certificate/clusterissuers/letsencrypt
   - ../../../components/certificate/wildcards
+  - ../../../components/database/clusters/version_8
