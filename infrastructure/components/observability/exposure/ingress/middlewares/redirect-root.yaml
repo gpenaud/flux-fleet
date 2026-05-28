@@ -8,6 +8,6 @@ spec:
   redirectRegex:
     # Quand on tape exactement https://monitoring.internal.${cluster}.${service_domain} (avec ou sans / final)
     # → redirect 302 vers /grafana
-    regex: "^https?://monitoring\\.internal\\.${cluster}\\.alter-it\\.eu/?$"
+    regex: "^https?://monitoring\\.internal\\.${cluster}\\.${service_domain}/?$"
     replacement: "https://monitoring.internal.${cluster}.${service_domain}/grafana"
     permanent: false
