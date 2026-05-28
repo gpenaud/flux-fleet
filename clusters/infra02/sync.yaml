@@ -12,12 +12,11 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-bootstrap
+  name: infrastructure
   namespace: flux-system
 spec:
   dependsOn:
@@ -28,61 +27,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/overlays/infra02/bootstrap
-  prune: true
-  wait: true
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age-private-key
-  postBuild:
-    substituteFrom:
-      - kind: ConfigMap
-        name: cluster-vars
-        optional: false
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infrastructure-controllers
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: infrastructure-bootstrap
-  interval: 1h
-  retryInterval: 2m
-  timeout: 5m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./infrastructure/overlays/infra02/controllers
-  prune: true
-  wait: true
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age-private-key
-  postBuild:
-    substituteFrom:
-      - kind: ConfigMap
-        name: cluster-vars
-        optional: false
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infrastructure-configurations
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: infrastructure-controllers
-  interval: 1h
-  retryInterval: 2m
-  timeout: 5m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./infrastructure/overlays/infra02/configurations
+  path: ./infrastructure/overlays/infra02
   prune: true
   wait: true
   decryption:
