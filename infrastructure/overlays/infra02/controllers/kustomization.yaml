@@ -3,10 +3,10 @@ kind: Kustomization
  
 resources:
   - ../../../base
-  - ../../../components/storage
-  - ../../../components/ingress/traefik
-  - ../../../components/directory/lldap
-  - ../../../components/authentication/authelia
+  - ../../../components/storage/sync.yaml
+  - ../../../components/ingress/traefik/sync.yaml
+  - ../../../components/directory/lldap/sync.yaml
+  - ../../../components/authentication/authelia/sync.yaml
 
  
 components: []
