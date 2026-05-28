@@ -7,5 +7,5 @@ metadata:
 data:
   owner: alter-it
   cluster: infra02
-  base_domain: alter-it.eu
+  service_domain: alter-it.eu
   environment: production
