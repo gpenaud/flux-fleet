@@ -29,3 +29,6 @@ spec:
         kind: HelmRepository
         name: mysql-operator
         namespace: controller-database
+      values:
+        envs:
+          k8sClusterDomain: cluster.local
