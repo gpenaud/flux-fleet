@@ -125,19 +125,19 @@ spec:
                   name: tmp
                   mountPath: /tmp
 
-    # - op: add
-    #   path: /spec/template/spec/containers/0/lifecycle
-    #   value:
-    #     postStart:
-    #       exec:
-    #         command:
-    #           - /bin/sh
-    #           - -c
-    #           - |
-    #             until wget -q -O /dev/null http://127.0.0.1:17170/health 2>/dev/null; do
-    #               sleep 1
-    #             done
-    #             /app/bootstrap.sh
+              - op: add
+                path: /spec/template/spec/containers/0/lifecycle
+                value:
+                  postStart:
+                    exec:
+                      command:
+                        - /bin/sh
+                        - -c
+                        - |
+                          until wget -q -O /dev/null http://127.0.0.1:17170/health 2>/dev/null; do
+                            sleep 1
+                          done
+                          /app/bootstrap.sh
 
     # readOnlyRootFilesystem: true demande un /tmp writable
     # Si le chart ne le fournit pas par défaut, on patche via postRenderer
