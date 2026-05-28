@@ -13,3 +13,4 @@ components:
   - ../../../components/directory/lldap
   - ../../../components/authentication/authelia
   - ../../../components/tenants
+  - ../../../components/database
