@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: vars
+    - name: cluster-vars
   interval: 1h
   retryInterval: 2m
   timeout: 5m
