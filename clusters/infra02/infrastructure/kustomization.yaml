@@ -5,10 +5,10 @@ resources:
   - ../../../infrastructure/components/storage/crds/sync.yaml
   - ../../../infrastructure/components/storage/sync.yaml
   - ../../../infrastructure/components/reflector/sync.yaml
-  # - ../../../infrastructure/components/dns/crds/sync.yaml
+  - ../../../infrastructure/components/dns/crds/sync.yaml
   - ../../../infrastructure/components/certificate/sync.yaml
   - ../../../infrastructure/components/certificate/webhooks/ovh/sync.yaml
-  - ../../../infrastructure/components/certificate/clusterissuers/letsencrypt/sync.yaml
+  - ../../../infrastructure/components/certificate/issuers/sync.yaml
   - ../../../infrastructure/components/certificate/wildcards/sync.yaml
   - ../../../infrastructure/components/dns/sync.yaml
   - ../../../infrastructure/components/dns/endpoints/sync.yaml
