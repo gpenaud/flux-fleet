@@ -3,14 +3,16 @@ kind: Kustomization
  
 resources:
   - ../../../base
- 
-components:
   - ../../../components/storage
-  - ../../../components/dns
-  - ../../../components/ingress/traefik
-  - ../../../components/vpn
-  - ../../../components/backup/k8up
-  - ../../../components/directory/lldap
-  - ../../../components/authentication/authelia
-  - ../../../components/tenants
-  - ../../../components/database
+ 
+components: []
+  # - ../../../components/storage
+  # - ../../../components/dns
+  # - ../../../components/ingress/traefik
+  # - ../../../components/vpn
+  # - ../../../components/backup/k8up
+  # - ../../../components/directory/lldap
+  # - ../../../components/authentication/authelia
+  # - ../../../components/tenants
+  # - ../../../components/database
+  # - ../../../components/observability
