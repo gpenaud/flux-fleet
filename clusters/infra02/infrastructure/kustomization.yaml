@@ -2,22 +2,22 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
  
 resources:
-  - ../../components/storage/crds/sync.yaml
-  - ../../components/storage/sync.yaml
-  - ../../components/reflector/sync.yaml
-  # - ../../components/dns/crds/sync.yaml
-  - ../../components/certificate/sync.yaml
-  - ../../components/certificate/webhooks/ovh/sync.yaml
-  - ../../components/certificate/clusterissuers/letsencrypt/sync.yaml
-  - ../../components/certificate/wildcards/sync.yaml
-  - ../../components/dns/sync.yaml
-  - ../../components/dns/endpoints/sync.yaml
-  - ../../components/vpn/sync.yaml
-  - ../../components/ingress/traefik/sync.yaml
-  - ../../components/directory/lldap/sync.yaml
-  - ../../components/authentication/authelia/sync.yaml
-  - ../../components/backup/k8up/sync.yaml
-  - ../../components/tenant/sync.yaml
-  - ../../components/database/sync.yaml
-  - ../../components/observability/sync.yaml
-  - ../../components/observability/exposure/sync.yaml
+  - ../components/storage/crds/sync.yaml
+  - ../components/storage/sync.yaml
+  - ../components/reflector/sync.yaml
+  # - ../components/dns/crds/sync.yaml
+  - ../components/certificate/sync.yaml
+  - ../components/certificate/webhooks/ovh/sync.yaml
+  - ../components/certificate/clusterissuers/letsencrypt/sync.yaml
+  - ../components/certificate/wildcards/sync.yaml
+  - ../components/dns/sync.yaml
+  - ../components/dns/endpoints/sync.yaml
+  - ../components/vpn/sync.yaml
+  - ../components/ingress/traefik/sync.yaml
+  - ../components/directory/lldap/sync.yaml
+  - ../components/authentication/authelia/sync.yaml
+  - ../components/backup/k8up/sync.yaml
+  - ../components/tenant/sync.yaml
+  - ../components/database/sync.yaml
+  - ../components/observability/sync.yaml
+  - ../components/observability/exposure/sync.yaml
