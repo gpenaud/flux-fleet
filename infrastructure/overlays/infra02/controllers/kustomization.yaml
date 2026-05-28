@@ -1,11 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
  
-resources: []
-  # - ../../../base
-  # - ../../../components/storage
-  # - ../../../components/directory/lldap
-  # - ../../../components/authentication/authelia
+resources:
+  - ../../../base
+  - ../../../components/storage
+  - ../../../components/ingress/traefik
+  - ../../../components/directory/lldap
+  - ../../../components/authentication/authelia
+
  
 components: []
   # - ../../../components/storage
