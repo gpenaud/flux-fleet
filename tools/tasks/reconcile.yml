@@ -11,12 +11,12 @@ tasks:
       - flux --context ${KUBE_CONTEXT} -n flux-system reconcile source git flux-system
     silent: true
 
-  kustomization:cluster:configuration:
-    desc: Reconcile sources, then cluster-configuration
+  kustomization:cluster:vars:
+    desc: Reconcile sources, then cluster-vars
     cmds:
       - task reconcile:source
-      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization cluster-configuration
-      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization cluster-configuration
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization cluster-vars
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization cluster-vars
     silent: true
 
   kustomization:infrastructure:bootstrap:
@@ -47,10 +47,9 @@ tasks:
     desc: Reconcile sources, then infrastructure
     cmds:
       - task: source
-      - task: kustomization:cluster:configuration
-      - task: kustomization:infrastructure:bootstrap
-      - task: kustomization:infrastructure:controllers
-      - task: kustomization:infrastructure:configurations
+      - task: kustomization:cluster:vars
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure
     silent: true
 
   kustomization:applications:
