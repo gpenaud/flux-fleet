@@ -2,13 +2,13 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: monitoring.internal.${cluster}.${service_domain}
+  name: monitoring.internal.${cluster}.${domain}
   namespace: controller-observability
 spec:
-  secretName: monitoring.internal.${cluster}.${service_domain}.tls
+  secretName: monitoring.internal.${cluster}.${domain}.tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: "monitoring.internal.${cluster}.${service_domain}"
+  commonName: "monitoring.internal.${cluster}.${domain}"
   dnsNames:
-    - "monitoring.internal.${cluster}.${service_domain}"
+    - "monitoring.internal.${cluster}.${domain}"

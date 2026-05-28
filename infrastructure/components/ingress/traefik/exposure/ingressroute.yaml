@@ -5,14 +5,14 @@ metadata:
   name: traefik-dashboard
   namespace: controller-ingress
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: ingress.internal.${cluster_name}.${base_domain}
-    external-dns.alpha.kubernetes.io/target: internal.${cluster_name}.${base_domain}
+    external-dns.alpha.kubernetes.io/hostname: ingress.internal.${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/target: internal.${cluster}.${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`ingress.internal.${cluster_name}.${base_domain}`)
+    - match: Host(`ingress.internal.${cluster}.${domain}`)
       kind: Rule
       services:
         - name: api@internal
@@ -21,4 +21,4 @@ spec:
         - name: tailnet-only
           namespace: controller-ingress
   tls:
-    secretName: ingress-internal-${cluster_name}-${base_domain}.tls
+    secretName: ingress-internal-${cluster}-${domain}.tls

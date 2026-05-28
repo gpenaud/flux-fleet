@@ -44,7 +44,7 @@ spec:
     # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
     env:
       # URL publique du serveur (doit matcher le cert + DNS)
-      HEADSCALE_SERVER_URL: "https://vpn.infra01.alter-it.eu"
+      HEADSCALE_SERVER_URL: "https://vpn.${cluster}.${domain}"
 
       # Adresse d'écoute du serveur HTTP principal
       HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"
@@ -61,7 +61,7 @@ spec:
       HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
 
       # MagicDNS : base domain DIFFÉRENT du server_url
-      HEADSCALE_DNS_BASE_DOMAIN: "ts.alter-it.eu"
+      HEADSCALE_DNS_BASE_DOMAIN: "ts.${domain}"
       HEADSCALE_DNS_MAGIC_DNS: "true"
 
       # Override nameservers globaux : on les définira plus tard pour le split DNS

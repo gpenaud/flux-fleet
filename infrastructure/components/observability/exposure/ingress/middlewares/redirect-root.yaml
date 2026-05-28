@@ -6,8 +6,8 @@ metadata:
   namespace: controller-observability
 spec:
   redirectRegex:
-    # Quand on tape exactement https://monitoring.internal.${cluster}.${service_domain} (avec ou sans / final)
+    # Quand on tape exactement https://monitoring.internal.${cluster}.${domain} (avec ou sans / final)
     # → redirect 302 vers /grafana
-    regex: "^https?://monitoring\\.internal\\.${cluster}\\.${service_domain}/?$"
-    replacement: "https://monitoring.internal.${cluster}.${service_domain}/grafana"
+    regex: "^https?://monitoring\\.internal\\.${cluster}\\.${domain}/?$"
+    replacement: "https://monitoring.internal.${cluster}.${domain}/grafana"
     permanent: false
