@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
  
-components:
-  - ../../../components/certificate/clusterissuers/letsencrypt
-  - ../../../components/certificate/wildcards
-  - ../../../components/database/clusters/version_8
+components: []
+  # - ../../../components/certificate/clusterissuers/letsencrypt
+  # - ../../../components/certificate/wildcards
+  # - ../../../components/database/clusters/version_8
