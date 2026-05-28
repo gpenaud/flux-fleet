@@ -1,0 +1,14 @@
+
+# Middleware : headers nécessaires pour le protocole de contrôle Headscale
+# Le client Tailscale utilise HTTP/2 et WebSocket sur /ts2021
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: headscale-headers
+  namespace: controller-vpn
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+    # Pas de compression sur /ts2021 (binaire)
+    # Traefik ne compresse pas par défaut, donc rien à faire ici
