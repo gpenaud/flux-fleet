@@ -3,3 +3,15 @@ kind: Kustomization
  
 resources:
   - ../../base
+  - ../../components/storage/crds/sync.yaml
+  - ../../components/storage/sync.yaml
+  - ../../components/dns/sync.yaml
+  - ../../components/vpn/sync.yaml
+  - ../../components/ingress/traefik/sync.yaml
+  - ../../components/directory/lldap/sync.yaml
+  - ../../components/authentication/authelia/sync.yaml
+  - ../../components/backup/k8up/sync.yaml
+  - ../../components/tenant/sync.yaml
+  - ../../components/database/sync.yaml
+  - ../../components/observability/sync.yaml
+  - ../../components/observability/exposure/sync.yaml
