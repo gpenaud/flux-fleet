@@ -13,3 +13,4 @@ resources:
   - ../../../components/tenant/sync.yaml
   - ../../../components/database/sync.yaml
   - ../../../components/observability/sync.yaml
+  - ../../../components/observability/exposure/sync.yaml
