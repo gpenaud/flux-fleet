@@ -3,10 +3,10 @@ kind: Kustomization
 metadata:
   name: infrastructure-controller-vpn-subnet-router
   namespace: flux-system
+spec:
   dependsOn:
     - name: infrastructure-controller-storage
     - name: infrastructure-controller-vpn
-spec:
   interval: 1h
   retryInterval: 2m
   timeout: 5m
