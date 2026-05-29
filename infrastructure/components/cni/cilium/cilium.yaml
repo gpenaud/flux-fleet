@@ -1,0 +1,120 @@
+
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cilium
+  namespace: controller-cni
+spec:
+  interval: 24h
+  url: https://helm.cilium.io/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: controller-cni
+spec:
+  interval: 30m
+  releaseName: cilium
+
+  chart:
+    spec:
+      chart: cilium
+      version: "1.16.5"        # même version que le bootstrap → adoption sans upgrade simultané
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: controller-cni
+      interval: 12h
+
+  install:
+    crds: CreateReplace
+    disableWait: false
+    remediation:
+      retries: 3
+    # Adoption : prendre la main sur les objets existants même non marqués Helm
+    disableTakeOwnership: false
+
+  upgrade:
+    crds: CreateReplace
+    disableWait: false
+    remediation:
+      retries: 3
+    disableTakeOwnership: false
+
+  # Active la détection de dérive pour que Flux maintienne l'alignement
+  driftDetection:
+    mode: enabled
+
+  values:
+    # ===== BASE — identique au bootstrap pour éviter toute dérive =====
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+
+    kubeProxyReplacement: true
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+
+    ipam:
+      mode: kubernetes
+      operator:
+        clusterPoolIPv4PodCIDRList:
+          - 10.244.0.0/16
+        clusterPoolIPv4MaskSize: 24
+
+    routingMode: tunnel
+    tunnelProtocol: vxlan
+    autoDirectNodeRoutes: false
+
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+
+    # ===== AJOUTS PAR RAPPORT AU BOOTSTRAP =====
+
+    # HA opérateur (le bootstrap avait 1 replica)
+    operator:
+      replicas: 2
+
+    # Hubble — observabilité, utile pour valider le pattern B plus tard
+    hubble:
+      enabled: true
+      relay:
+        enabled: true
+      ui:
+        enabled: true        # tu créeras un IngressRoute pour l'exposer
+      metrics:
+        enabled:
+          - dns
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - http
+
+    # Pas de Gateway API pour l'instant — Traefik en hostNetwork fait le job
+    gatewayAPI:
+      enabled: false
+
+    # Prometheus pour l'observability stack quand tu y arriveras
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: false       # à activer quand kube-prometheus-stack sera là
