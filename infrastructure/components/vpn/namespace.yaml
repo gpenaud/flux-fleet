@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: controller-vpn
   labels:
-    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted
     reflector/ovh-dns-zone-alter-it-eu: "true"
