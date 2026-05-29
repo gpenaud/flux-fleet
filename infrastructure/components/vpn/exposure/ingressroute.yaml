@@ -14,18 +14,9 @@ spec:
   routes:
     - match: Host(`vpn.${cluster}.${domain}`)
       kind: Rule
-      middlewares:
-        - name: headscale-headers
-          namespace: controller-vpn
       services:
         - name: headscale
-          # ⚠️ À vérifier : le nom de Service réel dépend du chart gabe565
-          # Souvent c'est le nom de la release ou "<release>-headscale"
-          # Confirmer après premier déploiement avec : kubectl -n controller-vpn get svc
           port: 8080
           scheme: http
-          # Important pour Headscale : pas de passHostHeader=false, pas de
-          # rewriting. Le serveur doit recevoir le Host original.
-          passHostHeader: true
   tls:
     secretName: wildcard.${cluster}.${domain}.tls
