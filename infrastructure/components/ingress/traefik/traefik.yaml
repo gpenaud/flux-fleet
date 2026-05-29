@@ -50,6 +50,12 @@ spec:
     deployment:
       kind: DaemonSet
     hostNetwork: true
+
+    updateStrategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 1
+        maxSurge: 1
     
     # =====================================================
     # SERVICE : on désactive le Service LoadBalancer
