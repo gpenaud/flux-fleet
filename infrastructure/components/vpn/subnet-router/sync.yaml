@@ -1,0 +1,18 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-controller-vpn-subnet-router
+  namespace: flux-system
+  dependsOn:
+    - name: infrastructure-controller-storage
+    - name: infrastructure-controller-vpn
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./infrastructure/components/vpn/subnet-router
+  prune: true
+  wait: true
