@@ -43,60 +43,50 @@ spec:
     # Configuration Headscale via variables d'environnement
     # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
     env:
-      HEADSCALE_SERVER_URL: https://vpn.${cluster}.${domain}
-      HEADSCALE_LISTEN_ADDR: 0.0.0.0:8080
-      HEADSCALE_METRICS_LISTEN_ADDR: 0.0.0.0:9090
-      HEADSCALE_GRPC_LISTEN_ADDR: 127.0.0.1:50443
+      HEADSCALE_SERVER_URL: "https://vpn.${cluster}.${domain}"
+      HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"
+      HEADSCALE_METRICS_LISTEN_ADDR: "0.0.0.0:9090"
+      HEADSCALE_GRPC_LISTEN_ADDR: "127.0.0.1:50443"
       HEADSCALE_GRPC_ALLOW_INSECURE: "true"
-
-      # DNS (MagicDNS interne au tailnet)
-      HEADSCALE_DNS_BASE_DOMAIN: "ts.${domain}"
-      HEADSCALE_DNS_MAGIC_DNS: "true"
-      HEADSCALE_DNS_NAMESERVERS_GLOBAL: "1.1.1.1 1.0.0.1"
-
-      # Préfixes IP attribués aux nœuds du tailnet
       HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
       HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
+      HEADSCALE_DNS_BASE_DOMAIN: "ts.${domain}"
+      HEADSCALE_DNS_MAGIC_DNS: "true"
+      HEADSCALE_LOG_LEVEL: "info"
 
-      # DERP (relay Tailscale public, suffisant pour démarrer)
-      HEADSCALE_DERP_URLS: https://controlplane.tailscale.com/derpmap/default
-      HEADSCALE_DERP_AUTO_UPDATE_ENABLED: "true"
-      HEADSCALE_DERP_UPDATE_FREQUENCY: 24h
+    # === POLICY ACL : géré nativement par le chart ===
+    configMaps:
+      acl:
+        enabled: true
+        data:
+          acl.hujson: |
+            {
+              "tagOwners": {
+                "tag:k8s-router": ["gpenaud"]
+              },
+              "autoApprovers": {
+                "routes": {
+                  "10.0.1.0/24": ["tag:k8s-router"]
+                }
+              },
+              "acls": [
+                {
+                  "action": "accept",
+                  "src":    ["*"],
+                  "dst":    ["*:*"]
+                }
+              ]
+            }
 
-      # Base SQLite — chemin pointé sur le volume persistant
-      HEADSCALE_DATABASE_TYPE: sqlite3
-      HEADSCALE_DATABASE_SQLITE_PATH: /var/lib/headscale/db.sqlite
-
-      # Policy en mode fichier — montée depuis ConfigMap
-      HEADSCALE_POLICY_MODE: file
-      HEADSCALE_POLICY_PATH: /etc/headscale-policy/acl.hujson
-
-      # Divers
-      HEADSCALE_LOG_LEVEL: info
-      HEADSCALE_NOISE: '{}'
-      HEADSCALE_EPHEMERAL_NODE_INACTIVITY_TIMEOUT: 30m
-
-    # === PERSISTENCE (bjw-s common syntax) ===
+    # Persistance : une seule PVC pour config + clés + SQLite (sous /etc/headscale)
     persistence:
-      # Volume pour la base SQLite + noise_private.key
       config:
         enabled: true
-        type: persistentVolumeClaim
-        storageClass: longhorn
         accessMode: ReadWriteOnce
         size: 1Gi
+        storageClass: longhorn
         retain: true
-        globalMounts:
-          - path: /var/lib/headscale
-
-      # Volume pour la policy ACL (depuis le ConfigMap)
-      policy:
-        enabled: true
-        type: configMap
-        name: headscale-policy
-        globalMounts:
-          - path: /etc/headscale-policy
-
+        # mountPath par défaut : /etc/headscale (laissé tel quel)
       run:
         enabled: true
         type: emptyDir
@@ -110,7 +100,6 @@ spec:
     # Service ClusterIP — exposition via IngressRoute Traefik
     service:
       main:
-        controller: main
         ports:
           http:
             port: 8080
@@ -134,24 +123,43 @@ spec:
         cpu: 200m
         memory: 256Mi
 
-     # === SÉCURITÉ — alignée avec PSS restricted ===
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65532
-        runAsGroup: 65532
-        fsGroup: 65532
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
+    # Pod security context appliqué à TOUS les containers (init + main)
+    # via defaultPodOptions de la bjw-s common library
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+      # Force kubelet à chown le volume si l'owner ne matche pas fsGroup.
+      # Nécessaire avec Longhorn qui ne propage pas toujours fsGroup au mount.
+      fsGroupChangePolicy: OnRootMismatch
+      seccompProfile:
+        type: RuntimeDefault
 
-    controllers:
-      main:
-        containers:
-          main:
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop: ["ALL"]
+
+    # Override du securityContext de l'initContainer "config" (hardcodé par le chart)
+    # Nécessaire pour passer Pod Security Admission "restricted"
+    initContainers:
+      config:
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # l'init écrit /etc/headscale/config.yaml
+          runAsNonRoot: true
+          runAsUser: 65532
+          runAsGroup: 65532
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+
+    # SecurityContext du container principal Headscale
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
