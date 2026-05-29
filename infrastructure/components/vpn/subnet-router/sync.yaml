@@ -16,3 +16,12 @@ spec:
   path: ./infrastructure/components/vpn/subnet-router
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
