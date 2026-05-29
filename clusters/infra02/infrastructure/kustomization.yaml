@@ -7,21 +7,21 @@ resources:
   - ../../../infrastructure/components/cni/cilium/sync.yaml
   - ../../../infrastructure/components/ingress/traefik/sync.yaml
 
-  # - ../../../infrastructure/components/reflector/sync.yaml
-  # - ../../../infrastructure/components/certificate/sync.yaml
-  # - ../../../infrastructure/components/certificate/webhooks/ovh/sync.yaml
-  # - ../../../infrastructure/components/certificate/issuers/sync.yaml
-  # - ../../../infrastructure/components/certificate/wildcards/sync.yaml
-  # - ../../../infrastructure/components/dns/sync.yaml
-  # - ../../../infrastructure/components/dns/crds/sync.yaml
-  # - ../../../infrastructure/components/dns/endpoints/sync.yaml
+  - ../../../infrastructure/components/reflector/sync.yaml
+  - ../../../infrastructure/components/certificate/sync.yaml
+  - ../../../infrastructure/components/certificate/webhooks/ovh/sync.yaml
+  - ../../../infrastructure/components/certificate/issuers/sync.yaml
+  - ../../../infrastructure/components/certificate/wildcards/sync.yaml
+  - ../../../infrastructure/components/dns/sync.yaml
+  - ../../../infrastructure/components/dns/crds/sync.yaml
+  - ../../../infrastructure/components/dns/endpoints/sync.yaml
   # - ../../../infrastructure/components/vpn/sync.yaml
   # - ../../../infrastructure/components/vpn/exposure/sync.yaml
-  # - ../../../infrastructure/components/ingress/traefik/sync.yaml
-  # - ../../../infrastructure/components/directory/lldap/sync.yaml
-  # - ../../../infrastructure/components/authentication/authelia/sync.yaml
-  # - ../../../infrastructure/components/backup/k8up/sync.yaml
-  # - ../../../infrastructure/components/tenant/sync.yaml
+  - ../../../infrastructure/components/ingress/traefik/sync.yaml
+  - ../../../infrastructure/components/directory/lldap/sync.yaml
+  - ../../../infrastructure/components/authentication/authelia/sync.yaml
+  - ../../../infrastructure/components/backup/k8up/sync.yaml
+  - ../../../infrastructure/components/tenant/sync.yaml
   # - ../../../infrastructure/components/database/sync.yaml
   # - ../../../infrastructure/components/observability/sync.yaml
   # - ../../../infrastructure/components/observability/exposure/sync.yaml
