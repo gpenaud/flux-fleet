@@ -61,17 +61,20 @@ spec:
         data:
           acl.hujson: |
             {
-              "groups": {
-                "group:admins": ["gpenaud@"]
-              },
+              // Propriétaires de tags : seul gpenaud peut appliquer tag:k8s-router
               "tagOwners": {
-                "tag:k8s-router": ["group:admins"]
+                "tag:k8s-router": ["gpenaud@${cluster}.${domain}"]
               },
+
+              // Auto-approbation des routes annoncées par les nœuds taggés k8s-router
+              // → le subnet router à venir n'aura besoin d'aucune approbation manuelle
               "autoApprovers": {
                 "routes": {
                   "10.0.1.0/24": ["tag:k8s-router"]
                 }
               },
+
+              // ACL : tout le monde peut tout joindre, à resserrer plus tard
               "acls": [
                 {
                   "action": "accept",
