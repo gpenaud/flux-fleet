@@ -83,8 +83,9 @@ spec:
           default: true
         exposedPort: 443
         protocol: TCP
-        tls:
-          enabled: true
+        http:
+          tls:
+            enabled: true
       # port traefik dashboard (interne, non exposé en hostPort)
       traefik:
         port: 8080
