@@ -4,4 +4,3 @@ kind: Component
 resources:
   - namespace.yaml
   - headscale.yaml
-  - policy.yaml
