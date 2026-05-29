@@ -8,13 +8,11 @@ spec:
   secretName: wildcard.${cluster}.${domain}.tls
   secretTemplate:
     annotations:
-  secretTemplate:
-    annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
       reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "controller-.*"
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
       reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "controller-.*"
-issuerRef:
+  issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "${cluster}.${domain}"
