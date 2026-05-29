@@ -4,6 +4,8 @@ metadata:
   name: infrastructure-controller-cni-cilium
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infrastructure-controller-storage
   interval: 1h
   retryInterval: 2m
   timeout: 5m
