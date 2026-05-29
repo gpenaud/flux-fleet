@@ -4,6 +4,11 @@ kind: Namespace
 metadata:
   name: controller-ingress
   labels:
+    # PSS levé : Traefik a besoin de hostNetwork + bind ports privilégiés 80/443
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+    # Informational labels
     alter-it.org/controller: traefik
     alter-it.org/managed-by: fluxcd
     reflector/ovh-dns-zone-alter-it-eu: "true"
