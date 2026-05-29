@@ -52,7 +52,7 @@ spec:
       HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
       HEADSCALE_DNS_BASE_DOMAIN: "ts.${domain}"
       HEADSCALE_DNS_MAGIC_DNS: "true"
-      HEADSCALE_LOG_LEVEL: "info"
+      HEADSCALE_LOG_LEVEL: "debug"
 
     # === POLICY ACL : géré nativement par le chart ===
     configMaps:
@@ -62,7 +62,7 @@ spec:
           acl.hujson: |
             {
               "groups": {
-                "group:admins": ["gpenaud@${cluster}.${domain}"]
+                "group:admins": ["gpenaud"]
               },
               "tagOwners": {
                 "tag:k8s-router": ["group:admins"]
