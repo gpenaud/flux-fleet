@@ -58,11 +58,13 @@ spec:
               add: ["NET_ADMIN"]
             seccompProfile:
               type: RuntimeDefault
-          volumeMounts:
-            - name: state
-              mountPath: /var/lib/tailscale
-            - name: tmp
-              mountPath: /tmp
+            volumeMounts:
+              - name: state
+                mountPath: /var/lib/tailscale
+              - name: tmp
+                mountPath: /tmp
+              - name: var-run
+                mountPath: /var/run/tailscale
           resources:
             requests:
               cpu: 50m
@@ -78,11 +80,5 @@ spec:
           emptyDir: {}
         - name: var-run
           emptyDir: {}
-      volumeMounts:
-        - name: state
-          mountPath: /var/lib/tailscale
-        - name: tmp
-          mountPath: /tmp
-        - name: var-run
-          mountPath: /var/run/tailscale
+
 
