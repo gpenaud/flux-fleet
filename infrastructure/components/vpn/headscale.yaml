@@ -79,7 +79,7 @@ spec:
     # === PERSISTENCE (bjw-s common syntax) ===
     persistence:
       # Volume pour la base SQLite + noise_private.key
-      data:
+      config:
         enabled: true
         type: persistentVolumeClaim
         storageClass: longhorn
