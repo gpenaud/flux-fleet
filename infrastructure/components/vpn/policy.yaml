@@ -8,7 +8,7 @@ data:
     {
       // Propriétaires de tags : seul gpenaud peut appliquer tag:k8s-router
       "tagOwners": {
-        "tag:k8s-router": ["gpenaud"]
+        "tag:k8s-router": ["gpenaud@${cluster}.${domain}"]
       },
 
       // Auto-approbation des routes annoncées par les nœuds taggés k8s-router
