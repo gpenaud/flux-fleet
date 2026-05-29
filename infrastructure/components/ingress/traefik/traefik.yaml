@@ -49,7 +49,19 @@ spec:
     # =====================================================
     deployment:
       kind: DaemonSet
-    hostNetwork: true
+
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+
+    securityContext:
+      capabilities:
+        drop: ["ALL"]
+        add: ["NET_BIND_SERVICE"]
+      readOnlyRootFilesystem: true
+      runAsGroup: 65532
+      runAsNonRoot: true
+      runAsUser: 65532
+      allowPrivilegeEscalation: false
 
     updateStrategy:
       type: RollingUpdate
