@@ -15,7 +15,7 @@ resources:
   - ../../../infrastructure/components/dns/sync.yaml
   - ../../../infrastructure/components/dns/crds/sync.yaml
   - ../../../infrastructure/components/dns/endpoints/sync.yaml
-  # - ../../../infrastructure/components/vpn/sync.yaml
+  - ../../../infrastructure/components/vpn/sync.yaml
   # - ../../../infrastructure/components/vpn/exposure/sync.yaml
   - ../../../infrastructure/components/directory/lldap/sync.yaml
   - ../../../infrastructure/components/authentication/authelia/sync.yaml
