@@ -62,7 +62,7 @@ spec:
           acl.hujson: |
             {
               "groups": {
-                "group:admins": ["gpenaud"]
+                "group:admins": ["gpenaud@"]
               },
               "tagOwners": {
                 "tag:k8s-router": ["group:admins"]
