@@ -55,7 +55,7 @@ spec:
       type: RollingUpdate
       rollingUpdate:
         maxUnavailable: 1
-        maxSurge: 1
+        maxSurge: 2
     
     # =====================================================
     # SERVICE : on désactive le Service LoadBalancer
