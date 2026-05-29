@@ -28,4 +28,4 @@ spec:
           # rewriting. Le serveur doit recevoir le Host original.
           passHostHeader: true
   tls:
-    secretName: vpn.${cluster}.${domain}.tls
+    secretName: wildcard.${cluster}.${domain}.tls
