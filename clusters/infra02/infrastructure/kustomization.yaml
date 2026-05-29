@@ -4,8 +4,10 @@ kind: Kustomization
 resources: []
   # - ../../../infrastructure/components/cluster-configuration/sync.yaml
 
-  # - ../../../infrastructure/components/storage/crds/sync.yaml
-  # - ../../../infrastructure/components/storage/sync.yaml
+  - ../../../infrastructure/components/storage/crds/sync.yaml
+  - ../../../infrastructure/components/storage/sync.yaml
+  - ../../../infrastructure/components/ingress/traefik/sync.yaml
+  
   # - ../../../infrastructure/components/reflector/sync.yaml
   # - ../../../infrastructure/components/certificate/sync.yaml
   # - ../../../infrastructure/components/certificate/webhooks/ovh/sync.yaml
