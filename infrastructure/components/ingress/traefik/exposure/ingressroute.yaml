@@ -17,8 +17,8 @@ spec:
       services:
         - name: api@internal
           kind: TraefikService
-      middlewares:
-        - name: tailnet-only
-          namespace: controller-ingress
+      # middlewares:
+      #   - name: tailnet-only
+      #     namespace: controller-ingress
   tls:
-    secretName: ingress-internal-${cluster}-${domain}.tls
+    secretName: wildcard.${cluster}-${domain}.tls

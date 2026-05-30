@@ -6,7 +6,7 @@ resources:
   - ../../../infrastructure/components/storage/sync.yaml
   - ../../../infrastructure/components/cni/cilium/sync.yaml
   - ../../../infrastructure/components/ingress/traefik/sync.yaml
-
+  - ../../../infrastructure/components/ingress/traefik/exposure/sync.yaml
   - ../../../infrastructure/components/reflector/sync.yaml
   - ../../../infrastructure/components/certificate/sync.yaml
   - ../../../infrastructure/components/certificate/webhooks/ovh/sync.yaml
