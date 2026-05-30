@@ -69,7 +69,7 @@ spec:
               },
               "autoApprovers": {
                 "routes": {
-                  "10.0.1.0/24": ["tag:k8s-router"]
+                  "${internal_service_cidr}": ["tag:k8s-router"]
                 }
               },
               "acls": [
