@@ -7,7 +7,7 @@ metadata:
 spec:
   endpoints:
     - dnsName: internal.${cluster}.${domain}
-      recordType: CNAME
+      recordType: A
       targets:
-        - ${cluster}.${domain}
+        - ${headscale_endpoint_ip}
       recordTTL: 300
