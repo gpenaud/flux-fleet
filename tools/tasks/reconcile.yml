@@ -52,6 +52,17 @@ tasks:
       - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure
     silent: true
 
+  kustomization:infrastructure:vpn:
+    desc: Reconcile sources, then infrastructure
+    cmds:
+      - task: source
+      - task: kustomization:cluster:vars
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-controller-vpn
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controller-vpn
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-controller-vpn-subnet-router 
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controller-vpn-subnet-router
+    silent: true
+
   kustomization:applications:
     desc: Reconcile sources, then applications
     cmds:
