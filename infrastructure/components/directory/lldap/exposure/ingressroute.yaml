@@ -10,7 +10,7 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
-    - websecure
+    - internal
   routes:
     - match: Host(`directory.internal.${cluster}.${domain}`)
       kind: Rule
