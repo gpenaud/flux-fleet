@@ -10,15 +10,13 @@ metadata:
       external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
-    - websecure
+    - internal
   
   routes:
     # === Route 1 : Racine → redirect vers /grafana ===
     - match: Host(`monitoring.internal.${cluster}.${domain}`) && Path(`/`)
       kind: Rule
       middlewares:
-        - name: tailnet-only
-          namespace: controller-ingress
         - name: monitoring-redirect-root
           namespace: controller-observability
       services:
@@ -30,9 +28,6 @@ spec:
     # === Route 2 : Grafana ===
     - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/grafana`)
       kind: Rule
-      middlewares:
-        - name: tailnet-only
-          namespace: controller-ingress
       services:
         - name: grafana
           port: 80
@@ -44,9 +39,6 @@ spec:
       services:
         - name: prometheus-operated
           port: 9090
-      middlewares:
-        - name: tailnet-only
-          namespace: controller-ingress
     
     # === Route 4 : Alertmanager ===
     - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/alertmanager`)
@@ -54,9 +46,6 @@ spec:
       services:
         - name: alertmanager-operated
           port: 9093
-      middlewares:
-        - name: tailnet-only
-          namespace: controller-ingress
   
   tls:
     secretName: monitoring.internal.${cluster}.${domain}.tls
