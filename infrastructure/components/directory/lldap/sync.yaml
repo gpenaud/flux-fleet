@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-directory-ldap
+  name: infrastructure-controller-directory-lldap
   namespace: flux-system
 spec:
   dependsOn:
