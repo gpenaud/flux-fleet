@@ -108,7 +108,7 @@ spec:
           type: s3
           s3:
             endpoint: s3.sbg.io.cloud.ovh.net
-            bucketnames: alter-it-infra01-platform-loki-rules
+            bucketnames: ${owner}-${cluster}-platform-loki-rules
             s3forcepathstyle: true
             access_key_id: "${AWS_ACCESS_KEY_ID}"
             secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
@@ -118,9 +118,9 @@ spec:
       storage:
         type: s3
         bucketNames:
-          chunks: alter-it-infra01-platform-loki-chunks
-          ruler: alter-it-infra01-platform-loki-rules
-          admin: alter-it-infra01-platform-loki-rules
+          chunks: ${owner}-${cluster}-platform-loki-chunks
+          ruler: ${owner}-${cluster}-platform-loki-rules
+          admin: ${owner}-${cluster}-platform-loki-rules
         s3:
           endpoint: s3.sbg.io.cloud.ovh.net
           region: sbg
