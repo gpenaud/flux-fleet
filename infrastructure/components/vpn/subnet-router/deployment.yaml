@@ -59,9 +59,7 @@ spec:
                   name: tailscale-authkey
                   key: TS_AUTHKEY
             - name: TS_EXTRA_ARGS
-              # value: "--login-server=https://vpn.${cluster}.${domain} --advertise-tags=tag:k8s-router"
-              value: "--login-server=https://vpn.${cluster}.${domain}"
-
+              value: "--login-server=https://vpn.${cluster}.${domain} --advertise-tags=tag:k8s-router"
             - name: TS_ROUTES
               value: "10.0.1.0/24"
             - name: TS_USERSPACE
@@ -71,7 +69,7 @@ spec:
             - name: TS_KUBE_SECRET
               value: ""
             - name: TS_HOSTNAME
-              value: "k8s-router-infra02"
+              value: "k8s-router"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
