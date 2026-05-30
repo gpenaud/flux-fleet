@@ -90,7 +90,6 @@ spec:
               scheme: https
               to: websecure
 
-        # bind sur l'IP de eth1 (à valider — voir note)
       websecure:
         port: 443
         hostPort: 443
@@ -101,7 +100,12 @@ spec:
         http:
           tls:
             enabled: true
-      # port traefik dashboard (interne, non exposé en hostPort)
+      internal:
+        port: 8444
+        expose:
+          default: true
+        exposedPort: 8444
+        protocol: TCP
       traefik:
         port: 8080
         expose:
