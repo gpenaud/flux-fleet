@@ -21,4 +21,4 @@ spec:
       #   - name: tailnet-only
       #     namespace: controller-ingress
   tls:
-    secretName: wildcard.${cluster}-${domain}.tls
+    secretName: wildcard.${cluster}.${domain}.tls
