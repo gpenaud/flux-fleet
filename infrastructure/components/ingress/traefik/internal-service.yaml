@@ -6,7 +6,7 @@ metadata:
   namespace: controller-ingress
 spec:
   type: ClusterIP
-  clusterIP: 10.244.0.100
+  clusterIP: ${internal_service_ip}
   selector: 
     app: traefik
   ports: 

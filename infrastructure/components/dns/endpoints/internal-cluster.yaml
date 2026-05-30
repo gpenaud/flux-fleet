@@ -9,5 +9,5 @@ spec:
     - dnsName: internal.${cluster}.${domain}
       recordType: A
       targets:
-        - ${headscale_endpoint_ip}
+        - ${internal_service_ip}
       recordTTL: 300
