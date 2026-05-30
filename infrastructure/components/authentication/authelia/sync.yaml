@@ -6,7 +6,7 @@ metadata:
 spec:
   dependsOn:
     - name: infrastructure-controller-storage
-    - name: infrastructure-controller-directory-ldap
+    - name: infrastructure-controller-directory-lldap
   interval: 1h
   retryInterval: 2m
   timeout: 5m
