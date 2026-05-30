@@ -7,8 +7,9 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: ${internal_service_ip}
-  selector: 
-    app: traefik
+  selector:     
+    app.kubernetes.io/instance: traefik-controller-ingress
+    app.kubernetes.io/name: traefik
   ports: 
     - port: 443
       targetPort: 8444
