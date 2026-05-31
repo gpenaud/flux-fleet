@@ -71,6 +71,19 @@ spec:
               regex         = "kube-system|kube-public|kube-node-lease|controller-observability"
               action        = "drop"
             }
+
+            rule {
+              action = "replace"
+              source_labels = [
+                "__meta_kubernetes_namespace",
+                "__meta_kubernetes_pod_name",
+                "__meta_kubernetes_pod_container_name",
+              ]
+              separator    = "/"
+              target_label = "__path__"
+              regex        = `([^/]+)/([^/]+)/([^/]+)`
+              replacement  = `/var/log/pods/${1}_${2}_*/${3}/*.log`
+            }
             
             // 3. Construction des labels Loki à partir des metadata k8s
             //    On garde des labels stables et peu nombreux pour éviter
