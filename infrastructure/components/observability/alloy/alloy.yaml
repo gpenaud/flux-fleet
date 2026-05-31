@@ -97,19 +97,6 @@ spec:
               source_labels = ["__meta_kubernetes_pod_node_name"]
               target_label  = "node"
             }
-
-            rule {
-              action = "replace"
-              source_labels = [
-                "namespace",
-                "pod",
-                "container",
-              ]
-              separator    = "/"
-              target_label = "__path__"
-              regex        = `([^/]+)/([^/]+)/([^/]+)`
-              replacement  = `/var/log/pods/${1}_${2}_*/${3}/*.log`
-            }
           }
           
           // 4. Source : tail des fichiers logs des pods
