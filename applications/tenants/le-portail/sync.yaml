@@ -15,11 +15,9 @@ spec:
     secretRef:
       name: sops-age-private-key
   postBuild:
-    # substituteFrom:
-    #   - kind: ConfigMap
-    #     name: cluster-vars
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
     substitute:
-      owner: alter-it
-      cluster: infra01
       tenant: le-portail
-      tenant_domain: leportail.org
+      domain: ${domain_prefix}leportail.org

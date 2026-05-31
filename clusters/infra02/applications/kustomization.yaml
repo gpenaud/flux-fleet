@@ -5,10 +5,6 @@ resources: []
   # # shared
   # - catalog/wordpress
 
-  # # by-tenant
-  # - tenants/le-portail/alterconso
-  # - tenants/le-portail/dolibarr
-
-  # # by-tenant
-  # - tenants/ferme-du-jointout/nextcloud
-  # - tenants/ferme-du-jointout/dolibarr
+  # by-tenant
+  - ../../../applications/tenants/le-portail/sync.yaml
+  # - ../../../applications/tenants/le-portail/alterconso/sync.yaml

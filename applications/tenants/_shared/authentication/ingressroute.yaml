@@ -8,10 +8,10 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`auth.${tenant_domain}`)
+    - match: Host(`auth.${domain}`)
       kind: Rule
       services:
         - name: authelia
           port: 80
   tls:
-    secretName: auth-${tenant}-tls
+    secretName: auth.${domain}.tls
