@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/authentication/authelia
+  path: ./infrastructure/authentication/authelia
   prune: true
   wait: true
   decryption:

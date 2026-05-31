@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/vpn/subnet-router
+  path: ./infrastructure/vpn/subnet-router
   prune: true
   wait: true
   decryption:

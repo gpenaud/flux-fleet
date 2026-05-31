@@ -12,7 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/certificate/wildcards
+  path: ./infrastructure/certificate/wildcards
   prune: true
   wait: true
   decryption:

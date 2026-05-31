@@ -10,6 +10,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/dns/crds
+  path: ./infrastructure/dns/crds
   prune: true
   wait: true

@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/dns
+  path: ./infrastructure/dns
   prune: true
   wait: true
   decryption:

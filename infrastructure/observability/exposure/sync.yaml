@@ -12,7 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/observability/exposure
+  path: ./infrastructure/observability/exposure
   prune: true
   wait: true
   decryption:

@@ -12,7 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/directory/lldap
+  path: ./infrastructure/directory/lldap
   prune: true
   wait: true
   decryption:

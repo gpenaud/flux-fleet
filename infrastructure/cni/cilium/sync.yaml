@@ -12,7 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/components/cni/cilium
+  path: ./infrastructure/cni/cilium
   prune: true
   wait: true
   decryption:
