@@ -2,27 +2,27 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
  
 resources:
-  - ../../../infrastructure/components/storage/crds/sync.yaml
-  - ../../../infrastructure/components/storage/sync.yaml
-  - ../../../infrastructure/components/cni/cilium/sync.yaml
-  - ../../../infrastructure/components/ingress/traefik/sync.yaml
-  - ../../../infrastructure/components/ingress/traefik/exposure/sync.yaml
-  - ../../../infrastructure/components/reflector/sync.yaml
-  - ../../../infrastructure/components/certificate/sync.yaml
-  - ../../../infrastructure/components/certificate/webhooks/ovh/sync.yaml
-  - ../../../infrastructure/components/certificate/issuers/sync.yaml
-  - ../../../infrastructure/components/certificate/wildcards/sync.yaml
-  - ../../../infrastructure/components/dns/sync.yaml
-  - ../../../infrastructure/components/dns/crds/sync.yaml
-  - ../../../infrastructure/components/dns/endpoints/sync.yaml
-  - ../../../infrastructure/components/vpn/sync.yaml
-  - ../../../infrastructure/components/vpn/exposure/sync.yaml
-  - ../../../infrastructure/components/vpn/subnet-router/sync.yaml
-  - ../../../infrastructure/components/directory/lldap/sync.yaml
-  - ../../../infrastructure/components/directory/lldap/exposure/sync.yaml
-  - ../../../infrastructure/components/authentication/authelia/sync.yaml
-  - ../../../infrastructure/components/backup/k8up/sync.yaml
-  - ../../../infrastructure/components/tenant/sync.yaml
-  # - ../../../infrastructure/components/database/sync.yaml
-  - ../../../infrastructure/components/observability/sync.yaml
-  - ../../../infrastructure/components/observability/exposure/sync.yaml
+  - ../../../infrastructure/storage/crds/sync.yaml
+  - ../../../infrastructure/storage/sync.yaml
+  - ../../../infrastructure/cni/cilium/sync.yaml
+  - ../../../infrastructure/ingress/traefik/sync.yaml
+  - ../../../infrastructure/ingress/traefik/exposure/sync.yaml
+  - ../../../infrastructure/reflector/sync.yaml
+  - ../../../infrastructure/certificate/sync.yaml
+  - ../../../infrastructure/certificate/webhooks/ovh/sync.yaml
+  - ../../../infrastructure/certificate/issuers/sync.yaml
+  - ../../../infrastructure/certificate/wildcards/sync.yaml
+  - ../../../infrastructure/dns/sync.yaml
+  - ../../../infrastructure/dns/crds/sync.yaml
+  - ../../../infrastructure/dns/endpoints/sync.yaml
+  - ../../../infrastructure/vpn/sync.yaml
+  - ../../../infrastructure/vpn/exposure/sync.yaml
+  - ../../../infrastructure/vpn/subnet-router/sync.yaml
+  - ../../../infrastructure/directory/lldap/sync.yaml
+  - ../../../infrastructure/directory/lldap/exposure/sync.yaml
+  - ../../../infrastructure/authentication/authelia/sync.yaml
+  - ../../../infrastructure/backup/k8up/sync.yaml
+  - ../../../infrastructure/tenant/sync.yaml
+  # - ../../../infrastructure/database/sync.yaml
+  - ../../../infrastructure/observability/sync.yaml
+  - ../../../infrastructure/observability/exposure/sync.yaml
