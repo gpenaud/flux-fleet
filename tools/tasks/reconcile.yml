@@ -70,7 +70,7 @@ tasks:
       - task: source
       - task: kustomization:cluster:vars
       - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-controller-observability
-      - flux --context ${daemonsetKUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controller-observability
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controller-observability
       - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization infrastructure-controller-observability-exposure 
       - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controller-observability-exposure
       - kubectl -n controller-observability rollout restart daemonset alloy
