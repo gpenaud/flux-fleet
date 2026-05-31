@@ -46,6 +46,13 @@ spec:
       services:
         - name: alertmanager-operated
           port: 9093
-  
+
+      # === Route 5 : Alloy ===
+    - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/alloy`)
+      kind: Rule
+      services:
+        - name: alloy
+          port: 12345
+
   tls:
     secretName: monitoring.internal.${cluster}.${domain}.tls
