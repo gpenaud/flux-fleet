@@ -1228,6 +1228,6 @@ data:
       "timepicker": {},
       "timezone": "browser",
       "title": "Overview",
-      "uid": "dashboard-overview",
+      "uid": "overview",
       "version": 20
     }

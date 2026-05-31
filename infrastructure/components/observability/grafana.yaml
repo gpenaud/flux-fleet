@@ -62,7 +62,7 @@ spec:
       auth.anonymous:
         enabled: false
       users:
-        home_page: "/d/${owner}"
+        home_page: "/d/overview"
 
     datasources:
       datasources.yaml:
