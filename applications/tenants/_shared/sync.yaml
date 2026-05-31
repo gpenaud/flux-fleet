@@ -8,12 +8,9 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/_shared/production
+  path: ./applications/tenants/_shared
   prune: true
   decryption:
     provider: sops
     secretRef:
       name: sops-age-private-key
-  postBuild:
-    substitute:
-      tenant: shared
