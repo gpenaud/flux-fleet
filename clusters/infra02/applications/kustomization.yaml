@@ -6,5 +6,7 @@ resources:
   # - catalog/wordpress
 
   # by-tenant
+  #
   - ../../../applications/tenants/le-portail/sync.yaml
-  # - ../../../applications/tenants/le-portail/alterconso/sync.yaml
+  - ../../../applications/tenants/le-portail/dolibarr/overrides/production/sync.yaml
+
