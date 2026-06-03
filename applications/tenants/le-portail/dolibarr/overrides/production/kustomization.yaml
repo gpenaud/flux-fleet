@@ -1,0 +1,16 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ${tenant}-dolibarr
+
+resources:
+  - ../../../catalog/dolibarr
+  - ../../../catalog/dolibarr/components/init
+  - ../../../catalog/dolibarr/components/backup
+  - secrets.enc.yaml
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: values.yaml
