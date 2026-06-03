@@ -1,0 +1,15 @@
+
+apiVersion: k8up.io/v1
+kind: PodConfig
+metadata:
+  name: podconfig
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 33
+      containers:
+        - name: backup
+          securityContext:
+            runAsUser: 33
+            runAsGroup: 33
