@@ -4,5 +4,5 @@ kind: Namespace
 metadata:
   name: controller-backup
   labels:
-    alter-it.org/controller: k8up
-    alter-it.org/managed-by: fluxcd
+    alter-it.eu/controller: k8up
+    alter-it.eu/managed-by: fluxcd

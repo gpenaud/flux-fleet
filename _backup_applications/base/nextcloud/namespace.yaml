@@ -4,8 +4,8 @@ kind: Namespace
 metadata:
   name: ${tenant}-nextcloud
   labels:
-    alter-it.org/tenant: ${tenant}
-    alter-it.org/app: nextcloud
-    alter-it.org/managed-by: fluxcd
+    alter-it.eu/tenant: ${tenant}
+    alter-it.eu/app: nextcloud
+    alter-it.eu/managed-by: fluxcd
     reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"

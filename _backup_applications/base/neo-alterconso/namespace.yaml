@@ -4,9 +4,9 @@ kind: Namespace
 metadata:
   name: ${tenant}-neo-alterconso
   labels:
-    alter-it.org/tenant: "${tenant}"
-    alter-it.org/app: "neo-alterconso"
-    alter-it.org/managed-by: "fluxcd"
+    alter-it.eu/tenant: "${tenant}"
+    alter-it.eu/app: "neo-alterconso"
+    alter-it.eu/managed-by: "fluxcd"
     reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"
     reflector-regcred: "true"

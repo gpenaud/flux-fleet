@@ -9,6 +9,6 @@ metadata:
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/warn: privileged
     # Informational labels
-    alter-it.org/controller: traefik
-    alter-it.org/managed-by: fluxcd
+    alter-it.eu/controller: traefik
+    alter-it.eu/managed-by: fluxcd
     reflector/ovh-dns-zone-alter-it-eu: "true"

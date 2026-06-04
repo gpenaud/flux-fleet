@@ -3,8 +3,8 @@ kind: Namespace
 metadata:
   name: controller-certificate
   labels:
-    alter-it.org/controller: cert-manager
-    alter-it.org/managed-by: fluxcd
+    alter-it.eu/controller: cert-manager
+    alter-it.eu/managed-by: fluxcd
 
 ---
 apiVersion: source.toolkit.fluxcd.io/v1

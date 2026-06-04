@@ -23,7 +23,7 @@ spec:
         name: cert-manager-webhook-ovh
         namespace: controller-certificate
   values:
-    groupName: acme.alter-it.org
+    groupName: acme.alter-it.eu
     certManager:
       namespace: controller-certificate
       serviceAccountName: cert-manager

@@ -4,9 +4,9 @@ kind: Namespace
 metadata:
   name: grist
   labels:
-    alter-it.org/tenant: "${tenant}"
-    alter-it.org/app: "grist"
-    alter-it.org/managed-by: "fluxcd"
+    alter-it.eu/tenant: "${tenant}"
+    alter-it.eu/app: "grist"
+    alter-it.eu/managed-by: "fluxcd"
     reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"
     reflector/grist-oidc-client-secret: "true"

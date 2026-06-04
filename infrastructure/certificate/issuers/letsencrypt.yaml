@@ -18,7 +18,7 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -38,7 +38,7 @@ spec:
             - "*.alter-it.eu"
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -58,7 +58,7 @@ spec:
             - "*.leportail.org"
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -78,7 +78,7 @@ spec:
               - "*.fermedujointout.fr"
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -116,7 +116,7 @@ spec:
     solvers:
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -136,7 +136,7 @@ spec:
             - "*.alter-it.eu"
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -156,7 +156,7 @@ spec:
             - "*.leportail.org"
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
@@ -176,7 +176,7 @@ spec:
               - "*.fermedujointout.fr"
       - dns01:
           webhook:
-            groupName: acme.alter-it.org
+            groupName: acme.alter-it.eu
             solverName: ovh
             config:
               endpoint: ovh-eu
