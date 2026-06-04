@@ -6,7 +6,7 @@ metadata:
   namespace: controller-database
 spec:
   secretName: mysql-operator
-  instances: 1
+  instances: 3
   tlsUseSelfSigned: true
   version: "8.4.3"
   edition: community
