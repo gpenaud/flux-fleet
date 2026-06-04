@@ -10,4 +10,4 @@ spec:
       recordType: A
       targets:
         - "${cluster_endpoint_ip}"
-      recordTTL: 300
+      recordTTL: 30
