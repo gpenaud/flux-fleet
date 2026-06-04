@@ -11,6 +11,6 @@ data:
   domain_prefix: "staging." # only for applications, not used in cluster configuration, can be empty string if not needed
   environment: staging
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
-  cluster_endpoint_ip: 77.42.9.238
+  cluster_endpoint_ip: 46.225.36.42
   internal_service_cidr: 10.96.0.0/12
   internal_service_ip: 10.96.0.100
