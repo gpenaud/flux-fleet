@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./clusters/infra02/applications/tenants/le-portail
+  path: ./applications/tenants/le-portail
   prune: true
   wait: true
   decryption:
