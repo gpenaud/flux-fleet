@@ -23,6 +23,7 @@ resources:
   - ../../../infrastructure/authentication/authelia/sync.yaml
   - ../../../infrastructure/backup/k8up/sync.yaml
   - ../../../infrastructure/tenant/sync.yaml
-  # - ../../../infrastructure/database/sync.yaml
+  - ../../../infrastructure/database/sync.yaml
+  - ../../../infrastructure/database/clusters/high-availability/sync.yaml
   - ../../../infrastructure/observability/sync.yaml
   - ../../../infrastructure/observability/exposure/sync.yaml
