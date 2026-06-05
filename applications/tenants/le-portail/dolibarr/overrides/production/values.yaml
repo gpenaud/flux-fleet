@@ -45,7 +45,7 @@ spec:
       enabled: false
     externalMariadb:
       enabled: true
-      host: mysql-version-8-lts.controller-mysql-operator.svc.cluster.local
+      host: mysql-version-8-lts.controller-database.svc.cluster.local
       port: 3306
       database: lp-dolibarr
       username: le-portail
