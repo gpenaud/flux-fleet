@@ -21,13 +21,13 @@ spec:
         kubernetes.io/ingress.class: traefik
         cert-manager.io/cluster-issuer: letsencrypt-production
       hosts:
-        - host: dolibarr.${tenant_domain}
+        - host: dolibarr.${domain}
           paths:
             - /
       tls:
-        - secretName: dolibarr.${tenant_domain}-tls
+        - secretName: dolibarr.${domain}-tls
           hosts:
-            - dolibarr.${tenant_domain}
+            - dolibarr.${domain}
     persistence:
       enabled: true
       size: 5Gi
@@ -35,7 +35,7 @@ spec:
       admin:
         username: le-portail
         password: "REPLACED"
-      externalUrl: https://dolibarr.${tenant_domain}
+      externalUrl: https://dolibarr.${domain}
       cron:
         enabled: false
     existingSecret: dolibarr
