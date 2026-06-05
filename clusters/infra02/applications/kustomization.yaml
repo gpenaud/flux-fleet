@@ -8,5 +8,6 @@ resources:
   # by-tenant
   #
   - ../../../applications/tenants/le-portail/sync.yaml
+  - ../../../applications/tenants/le-portail/components/subdomain/sync.yaml
   - ../../../applications/tenants/le-portail/dolibarr/overrides/production/sync.yaml
 
