@@ -2,7 +2,7 @@
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: le-portail-subdomain
+  name: le-portail-zone
   namespace: controller-dns
 spec:
   endpoints:
@@ -10,4 +10,17 @@ spec:
       recordType: A
       targets:
         - "${cluster_endpoint_ip}"
+      recordTTL: 30
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: le-portail-subdomains
+  namespace: controller-dns
+spec:
+  endpoints:
+    - dnsName: "*.${domain}"
+      recordType: CNAME
+      targets:
+        - "${domain}"
       recordTTL: 30
