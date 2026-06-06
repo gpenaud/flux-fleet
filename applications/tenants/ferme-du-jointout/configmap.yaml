@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tenant-vars
+  name: tenant-ferme-du-jointout-vars
   namespace: flux-system
 data:
   tenant: ferme-du-jointout

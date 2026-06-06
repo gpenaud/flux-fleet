@@ -26,5 +26,5 @@ spec:
         name: cluster-vars
         optional: false
       - kind: ConfigMap
-        name: tenant-vars
+        name: tenant-ferme-du-jointout-vars
         optional: false
