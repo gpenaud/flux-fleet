@@ -26,5 +26,5 @@ spec:
         name: cluster-vars
         optional: false
       - kind: ConfigMap
-        name: tenant-vars
+        name: tenant-le-portail-vars
         optional: false
