@@ -47,7 +47,7 @@ spec:
       enabled: true
       host: mysql-version-8-lts.controller-database.svc.cluster.local
       port: 3306
-      database: lp-dolibarr
+      database: fdj-dolibarr
       username: ferme-du-jointout
       existingSecret: dolibarr
       existingSecretKeyPassword: mariadb-password
