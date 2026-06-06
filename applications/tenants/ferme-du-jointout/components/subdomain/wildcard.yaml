@@ -1,0 +1,21 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard.${domain}
+  namespace: controller-certificate
+spec:
+  secretName: wildcard.${domain}.tls
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "${tenant}-.*"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "${tenant}-.*"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "${domain}"
+  dnsNames:
+    - "${domain}"
+    - "*.${domain}"

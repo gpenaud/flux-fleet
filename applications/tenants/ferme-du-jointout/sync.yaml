@@ -2,18 +2,16 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: applications-${tenant}-dolibarr
+  name: applications-ferme-du-jointout
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: applications-${tenant}
   interval: 1h
   retryInterval: 2m
   timeout: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/${tenant}/dolibarr/overrides/production
+  path: ./applications/tenants/ferme-du-jointout
   prune: true
   wait: true
   decryption:
@@ -24,7 +22,4 @@ spec:
     substituteFrom:
       - kind: ConfigMap
         name: cluster-vars
-        optional: false
-      - kind: ConfigMap
-        name: tenant-vars
         optional: false
