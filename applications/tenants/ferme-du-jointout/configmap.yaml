@@ -5,5 +5,5 @@ metadata:
   name: tenant-vars
   namespace: flux-system
 data:
-  tenant: le-portail
+  tenant: ferme-du-jointout
   domain: ${domain_prefix}fermedujointout.fr
