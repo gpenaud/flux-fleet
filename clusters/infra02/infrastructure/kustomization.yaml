@@ -21,6 +21,7 @@ resources:
   - ../../../infrastructure/directory/lldap/sync.yaml
   - ../../../infrastructure/directory/lldap/exposure/sync.yaml
   - ../../../infrastructure/authentication/authelia/sync.yaml
+  - ../../../infrastructure/authentication/authelia/exposure/sync.yaml
   - ../../../infrastructure/backup/k8up/sync.yaml
   - ../../../infrastructure/tenant/sync.yaml
   - ../../../infrastructure/database/sync.yaml

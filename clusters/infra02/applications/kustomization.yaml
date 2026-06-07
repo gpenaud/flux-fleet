@@ -12,6 +12,7 @@ resources:
   - ../../../applications/tenants/le-portail/sync.yaml
   # zone & subdomain creation 
   - ../../../applications/tenants/le-portail/components/subdomain/sync.yaml
+  - ../../../applications/tenants/le-portail/components/authentication/sync.yaml
   # applications
   - ../../../applications/tenants/le-portail/overlays/production/dolibarr/sync.yaml
   - ../../../applications/tenants/le-portail/overlays/production/grist/sync.yaml
