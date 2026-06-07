@@ -1,6 +1,6 @@
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+kind: HelmRepository
 metadata:
   name: app-templates
 spec:
@@ -18,7 +18,7 @@ spec:
     spec:
       chart: charts/grist
       sourceRef:
-        kind: GitRepository
+        kind: HelmRepository
         name: app-templates
   interval: 5m
   timeout: 3m
