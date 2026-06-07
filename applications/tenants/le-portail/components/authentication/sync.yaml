@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: applications-le-portail-components-subdomain
+  name: applications-le-portail-components-authentication
   namespace: flux-system
 spec:
   dependsOn:
@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/le-portail/components/subdomain
+  path: ./applications/tenants/le-portail/components/authentication
   prune: true
   wait: true
   decryption:
