@@ -11,7 +11,7 @@ resources:
   - ../../../applications/tenants/le-portail/components/subdomain/sync.yaml
   - ../../../applications/tenants/le-portail/dolibarr/overrides/production/sync.yaml
 
-  - ../../../applications/tenants/ferme-du-jointout/sync.yaml
-  - ../../../applications/tenants/ferme-du-jointout/components/subdomain/sync.yaml
-  - ../../../applications/tenants/ferme-du-jointout/dolibarr/overrides/production/sync.yaml
+  # - ../../../applications/tenants/ferme-du-jointout/sync.yaml
+  # - ../../../applications/tenants/ferme-du-jointout/components/subdomain/sync.yaml
+  # - ../../../applications/tenants/ferme-du-jointout/dolibarr/overrides/production/sync.yaml
 
