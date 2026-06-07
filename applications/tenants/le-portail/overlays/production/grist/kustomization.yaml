@@ -7,7 +7,7 @@ namespace: ${tenant}-grist
 resources:
   - ../../../../../catalog/grist
   - ../../../../../catalog/grist/components/backup
-  - storage.yaml
+  # - storage.yaml
   - ingressroute.yaml
   - secrets.enc.yaml
 

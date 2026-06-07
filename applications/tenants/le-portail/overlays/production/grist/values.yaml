@@ -4,116 +4,72 @@ metadata:
   name: ${tenant}-grist
 spec:
   values:
-    image:
-      tag: "1.7.13"
-    loadBalancer: 
-      enabled: false
-    homeWorker:
-      envVars:
-        # === STORAGE ===
-        GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
-        TYPEORM_DATABASE: "/persist/home.sqlite3"
-        GRIST_DATA_DIR: "/persist/docs"
-        GRIST_SANDBOX_FLAVOR: "unsandboxed"
+    controllers:
+      grist:
+        type: deployment
+        strategy: Recreate # ← important pour éviter les problèmes de PV concurrents
+        containers:
+          app:
+            image:
+              repository: gristlabs/grist
+              tag: "1.7.13"
+            env:
+              PORT: "8484"
+              APP_HOME_URL: https://grist.${domain}
+              # === STORAGE ===
+              GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
+              TYPEORM_DATABASE: "/persist/home.sqlite3"
+              GRIST_DATA_DIR: "/persist/docs"
+              GRIST_SANDBOX_FLAVOR: "unsandboxed"
 
-        # === IDENTITY ===
-        GRIST_FORCE_LOGIN: "true"
-        GRIST_SINGLE_ORG: "${tenant}"
-        GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
+              # === IDENTITY ===
+              GRIST_FORCE_LOGIN: "true"
+              GRIST_SINGLE_ORG: "${tenant}"
+              GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
 
-        # === PUBLIC URLS ===
-        APP_HOME_URL: "https://grist.${domain}"        # ← AJOUT, débloque ton bug
-        GRIST_OIDC_SP_HOST: "https://grist.${domain}"
+              # === PUBLIC URLS ===
+              APP_HOME_URL: "https://grist.${domain}"
+              GRIST_OIDC_SP_HOST: "https://grist.${domain}"
 
-        # === OIDC ===
-        GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
-        GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
-        GRIST_OIDC_IDP_CLIENT_SECRET:                       # via secretKeyRef
-          secretKeyRef:
-            name: grist-oidc-client-secret
-            key: client_secret
-        GRIST_OIDC_IDP_SCOPES: "openid email profile"
-        GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
-      extraVolumes:
-        - name: grist-persist
-          persistentVolumeClaim:
-            claimName: grist-data
-      extraVolumeMounts:
-        - name: grist-persist
-          mountPath: /persist
-      probes:
-        liveness:
-          path: /status?db=1
-          initialDelaySeconds: 10
-        startup:
-          path: /status?db=1
-          initialDelaySeconds: 10
-    docWorker:
-      replicas: 1
-      useVolume:
-        enabled: false
-      persistence: {}
-      podSecurityContext:
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-      envVars:
-        # === STORAGE ===
-        GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
-        TYPEORM_DATABASE: "/persist/home.sqlite3"
-        GRIST_DATA_DIR: "/persist/docs"
-        GRIST_SANDBOX_FLAVOR: "unsandboxed"
+              # === OIDC ===
+              GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
+              GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
+              GRIST_OIDC_IDP_CLIENT_SECRET:
+                secretKeyRef:
+                  name: grist-oidc-client-secret
+                  key: client_secret
+              GRIST_OIDC_IDP_SCOPES: "openid email profile"
+              GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
+              # + tes env actuels : session secret (via secret), sandbox flavor, OIDC Grist, etc.
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status?db=1
+                    port: 8484
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status?db=1
+                    port: 8484
 
-        # === IDENTITY ===
-        GRIST_FORCE_LOGIN: "true"
-        GRIST_SINGLE_ORG: "${tenant}"
-        GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
+    service:
+      app:
+        controller: grist
+        ports:
+          http:
+            port: 8484
 
-        # === PUBLIC URLS ===
-        APP_HOME_URL: "https://grist.${domain}"        # ← AJOUT, débloque ton bug
-        GRIST_OIDC_SP_HOST: "https://grist.${domain}"
-
-        # === OIDC ===
-        GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
-        GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
-        GRIST_OIDC_IDP_CLIENT_SECRET:                       # via secretKeyRef
-          secretKeyRef:
-            name: grist-oidc-client-secret
-            key: client_secret
-        GRIST_OIDC_IDP_SCOPES: "openid email profile"
-        GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
-      extraVolumes:
-        - name: grist-persist
-          persistentVolumeClaim:
-            claimName: grist-data
-      extraVolumeMounts:
-        - name: grist-persist
-          mountPath: /persist 
-      probes:
-        liveness:
-          path: /status?db=1&docWorkerRegistered=1
-          initialDelaySeconds: 10
-        startup:
-          path: /status?db=1&docWorkerRegistered=1
-          initialDelaySeconds: 10
-    ingress:
-      enabled: false
-      # className: traefik
-      # annotations:
-      #   kubernetes.io/ingress.class: traefik
-      #   cert-manager.io/cluster-issuer: letsencrypt-production
-      # hosts:
-      #   - host: grist.${domain}
-      #     paths:
-      #       - path: /
-      #         pathType: Prefix
-      #   - host: docs.${domain}
-      #     paths:
-      #       - path: /
-      #         pathType: Prefix
-      # tls:
-      #   enabled: true
-      #   additional:
-      #     - secretName: grist.${domain}-tls
-      #       hosts:
-      #         - grist.${domain}
-      #         - docs.${domain}
+    persistence:
+      persist:
+        enabled: true
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        storageClass: longhorn
+        globalMounts:
+          - path: /persist

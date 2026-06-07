@@ -2,12 +2,10 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: dirnum-forked
+  name: app-templates
 spec:
   interval: 5m
-  url: https://github.com/gpenaud/helm-charts-dirnum
-  ref:
-    branch: feature/make-loadbalancer-component-optional
+  url: https://bjw-s-labs.github.io/helm-charts
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -21,7 +19,7 @@ spec:
       chart: charts/grist
       sourceRef:
         kind: GitRepository
-        name: dirnum-forked
+        name: app-templates
   interval: 5m
   timeout: 3m
   install:
