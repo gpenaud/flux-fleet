@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/le-portail/dolibarr/overrides/production
+  path: ./applications/tenants/le-portail/overlays/production/dolibarr
   prune: true
   wait: true
   decryption:
