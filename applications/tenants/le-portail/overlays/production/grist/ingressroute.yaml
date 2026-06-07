@@ -1,0 +1,22 @@
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grist
+  namespace: ${tenant}-grist
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`grist.${domain}`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: grist
+          port: 80
+    - match: Host(`doc.${domain}`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: grist
+          port: 80
+  tls:
+    secretName: wildcard.${domain}.tls

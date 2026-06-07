@@ -1,0 +1,30 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: applications-le-portail-grist
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: applications-le-portail
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./applications/tenants/le-portail/overlays/production/grist
+  prune: true
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
+      - kind: ConfigMap
+        name: tenant-le-portail-vars
+        optional: false

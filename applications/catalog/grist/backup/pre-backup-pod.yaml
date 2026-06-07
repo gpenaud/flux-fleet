@@ -1,0 +1,26 @@
+
+apiVersion: k8up.io/v1
+kind: PreBackupPod
+metadata:
+  name: pre-backup
+  annotations:
+    k8up.io/backup: "true"
+spec:
+  backupCommand: sh -c 'sqlite3 /persist/home.sqlite3 ".backup /tmp/grist-backup.sqlite3" && cat /tmp/grist-backup.sqlite3'
+  fileExtension: .sqlite3
+  pod:
+    spec:
+      containers:
+        - name: grist-dump
+          image: keinos/sqlite3
+          command: ["sleep", "infinity"]
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: grist-data
+              mountPath: /persist
+      volumes:
+        - name: grist-data
+          persistentVolumeClaim:
+            claimName: grist-data

@@ -1,0 +1,31 @@
+
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: grist
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  backend:
+    repoPasswordSecretRef:
+      name: k8up-credentials
+      key: RESTIC_PASSWORD
+    s3:
+      endpoint: https://s3.sbg.io.cloud.ovh.net 
+      bucket: "${owner}-${cluster}-backup-${tenant}-grist"
+      accessKeyIDSecretRef:
+        name: k8up-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: k8up-credentials
+        key: AWS_SECRET_ACCESS_KEY
+  backup:
+    schedule: '0 2 * * *' # tous les jours à 02h00
+  check:
+    schedule: '0 3 * * 1' # vérification chaque lundi
+  prune:
+    schedule: '0 4 * * 1' # nettoyage chaque lundi
+    retention:
+      keepDaily: 7    # 1 snapshot par jour pendant 7 jours
+      keepWeekly: 4   # 1 snapshot par semaine pendant 4 semaines
+      keepMonthly: 6  # 1 snapshot par mois pendant 6 mois
