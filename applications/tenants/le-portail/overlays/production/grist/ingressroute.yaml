@@ -12,11 +12,11 @@ spec:
       kind: Rule
       services:
         - name: grist
-          port: 80
+          port: 8484
     - match: Host(`doc.${domain}`) && PathPrefix(`/`)
       kind: Rule
       services:
         - name: grist
-          port: 80
+          port: 8484
   tls:
     secretName: wildcard.${domain}.tls
