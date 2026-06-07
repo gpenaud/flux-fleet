@@ -2,7 +2,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: app-templates
+  name: bjw-s
 spec:
   interval: 5m
   url: https://bjw-s-labs.github.io/helm-charts
@@ -16,10 +16,10 @@ spec:
   releaseName: grist
   chart:
     spec:
-      chart: charts/grist
+      chart: app-template
       sourceRef:
         kind: HelmRepository
-        name: app-templates
+        name: bjw-s
   interval: 5m
   timeout: 3m
   install:
