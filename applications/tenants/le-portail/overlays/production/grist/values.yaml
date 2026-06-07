@@ -15,7 +15,6 @@ spec:
               tag: "1.7.13"
             env:
               PORT: "8484"
-              APP_HOME_URL: https://grist.${domain}
               # === STORAGE ===
               GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
               TYPEORM_DATABASE: "/persist/home.sqlite3"
