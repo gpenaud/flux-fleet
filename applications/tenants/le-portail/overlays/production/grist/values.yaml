@@ -15,30 +15,30 @@ spec:
               tag: "1.7.13"
             env:
               PORT: "8484"
-              # === STORAGE ===
-              GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
-              TYPEORM_DATABASE: "/persist/home.sqlite3"
-              GRIST_DATA_DIR: "/persist/docs"
-              GRIST_SANDBOX_FLAVOR: "unsandboxed"
+              # # === STORAGE ===
+              # GRIST_DB_URL: "sqlite:////persist/home.sqlite3"
+              # TYPEORM_DATABASE: "/persist/home.sqlite3"
+              # GRIST_DATA_DIR: "/persist/docs"
+              # GRIST_SANDBOX_FLAVOR: "unsandboxed"
 
-              # === IDENTITY ===
-              GRIST_FORCE_LOGIN: "true"
-              GRIST_SINGLE_ORG: "${tenant}"
-              GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
+              # # === IDENTITY ===
+              # GRIST_FORCE_LOGIN: "true"
+              # GRIST_SINGLE_ORG: "${tenant}"
+              # GRIST_DEFAULT_EMAIL: "ops.gpenaud@gmail.com"
 
               # === PUBLIC URLS ===
               APP_HOME_URL: "https://grist.${domain}"
-              GRIST_OIDC_SP_HOST: "https://grist.${domain}"
+              # GRIST_OIDC_SP_HOST: "https://grist.${domain}"
 
-              # === OIDC ===
-              GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
-              GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
-              GRIST_OIDC_IDP_CLIENT_SECRET:
-                secretKeyRef:
-                  name: grist-oidc-client-secret
-                  key: client_secret
-              GRIST_OIDC_IDP_SCOPES: "openid email profile"
-              GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
+              # # === OIDC ===
+              # GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
+              # GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
+              # GRIST_OIDC_IDP_CLIENT_SECRET:
+              #   secretKeyRef:
+              #     name: grist-oidc-client-secret
+              #     key: client_secret
+              # GRIST_OIDC_IDP_SCOPES: "openid email profile"
+              # GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
               # + tes env actuels : session secret (via secret), sandbox flavor, OIDC Grist, etc.
             probes:
               liveness:
@@ -46,14 +46,14 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /status?db=1
+                    path: /status
                     port: 8484
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /status?db=1
+                    path: /status
                     port: 8484
 
     service:
