@@ -5,13 +5,18 @@ resources:
   # # shared
   # - catalog/wordpress
 
+  ### 
   # by-tenant
-  #
+  # 
+  # tenant vars
   - ../../../applications/tenants/le-portail/sync.yaml
+  # zone & subdomain creation 
   - ../../../applications/tenants/le-portail/components/subdomain/sync.yaml
-  - ../../../applications/tenants/le-portail/dolibarr/overrides/production/sync.yaml
+  # applications
+  - ../../../applications/tenants/le-portail/overlays/production/dolibarr/sync.yaml
+  - ../../../applications/tenants/le-portail/overlays/production/grist/sync.yaml
 
   # - ../../../applications/tenants/ferme-du-jointout/sync.yaml
   # - ../../../applications/tenants/ferme-du-jointout/components/subdomain/sync.yaml
-  # - ../../../applications/tenants/ferme-du-jointout/dolibarr/overrides/production/sync.yaml
+  # - ../../../applications/tenants/ferme-du-jointout/overlays/production/dolibarr/sync.yaml
 
