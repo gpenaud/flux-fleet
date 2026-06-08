@@ -1,0 +1,17 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ${tenant}-nextcloud
+
+resources:
+  - ../../../../../catalog/nextcloud
+  - ../../../../../catalog/nextcloud/components/init
+  - ../../../../../catalog/nextcloud/components/backup
+  - ingressroute.yaml
+  - secrets.enc.yaml
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: values.yaml
