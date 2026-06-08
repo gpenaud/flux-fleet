@@ -4,6 +4,3 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helm.yaml
-  - init-db.yaml
-  - ingressroute.yaml
-  - backup.yaml
