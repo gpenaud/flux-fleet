@@ -16,7 +16,8 @@ resources:
   # applications
   - ../../../applications/tenants/le-portail/overlays/production/dolibarr/sync.yaml
   - ../../../applications/tenants/le-portail/overlays/production/grist/sync.yaml
-  - ../../../applications/tenants/le-portail/overlays/production/nextcloud/sync.yaml
+  # - ../../../applications/tenants/le-portail/overlays/production/nextcloud/sync.yaml
+  
   # - ../../../applications/tenants/ferme-du-jointout/sync.yaml
   # - ../../../applications/tenants/ferme-du-jointout/components/subdomain/sync.yaml
   # - ../../../applications/tenants/ferme-du-jointout/overlays/production/dolibarr/sync.yaml
