@@ -5,6 +5,9 @@ resources:
   ### 
   # Shared
   ###
+  - ../../../applications/tenants/shared/sync.yaml
+  # zone & subdomain creation 
+  - ../../../applications/tenants/shared/components/subdomain/sync.yaml
   - ../../../applications/tenants/shared/overlays/production/wordpress/sync.yaml
 
   ### 
