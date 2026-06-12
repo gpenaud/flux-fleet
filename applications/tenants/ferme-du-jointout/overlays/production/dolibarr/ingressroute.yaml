@@ -19,4 +19,4 @@ spec:
         - name: dolibarr
           port: 80
   tls:
-    secretName: wildcard.${domain}
+    secretName: wildcard.${domain}.tls

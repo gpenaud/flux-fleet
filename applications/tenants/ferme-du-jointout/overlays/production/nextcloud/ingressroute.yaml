@@ -19,4 +19,4 @@ spec:
         - name: nextcloud
           port: 8080
   tls:
-    secretName: wildcard.${domain}
+    secretName: wildcard.${domain}.tls
