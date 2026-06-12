@@ -1,0 +1,26 @@
+
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: shared-zone
+  namespace: controller-dns
+spec:
+  endpoints:
+    - dnsName: ${domain}
+      recordType: A
+      targets:
+        - "${cluster_endpoint_ip}"
+      recordTTL: 30
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: shared-subdomains
+  namespace: controller-dns
+spec:
+  endpoints:
+    - dnsName: "*.${domain}"
+      recordType: CNAME
+      targets:
+        - "${domain}"
+      recordTTL: 30

@@ -1,0 +1,9 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-shared-vars
+  namespace: flux-system
+data:
+  tenant: shared
+  domain: ${domain_prefix}alter-it.eu
