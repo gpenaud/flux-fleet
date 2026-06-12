@@ -23,3 +23,6 @@ spec:
       - kind: ConfigMap
         name: cluster-vars
         optional: false
+      - kind: ConfigMap
+        name: tenant-shared-vars
+        optional: false
