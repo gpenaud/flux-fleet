@@ -8,7 +8,8 @@ resources:
   - ../../../../../catalog/wordpress
   - ../../../../../catalog/wordpress/components/init
   - ../../../../../catalog/wordpress/components/backup
-  # - secrets.enc.yaml
+  - ingressroute.yaml
+  - secrets.enc.yaml
 
 patches:
   - target:
