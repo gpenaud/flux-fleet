@@ -1,0 +1,51 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: shared-wordpress
+spec:
+  values:
+    wordpressUsername: admin
+    wordpressExistingSecret: wordpress
+    wordpressEmail: ops.gpenaud@gmail.com
+    multisite:
+      enable: true
+      host: wordpress.${domain}
+      networkType: subdomain
+      enableNipIoRedirect: false
+    mariadb:
+      enabled: false
+    externalDatabase:
+      host: mysql-version-8-lts.controller-database.svc.cluster.local
+      port: 3306
+      user: shared
+      database: shrd-wordpress
+      existingSecret: wordpress
+    wordpressPlugins: []
+    service:
+      type: ClusterIP
+    persistence:
+      enabled: true
+      storageClass: longhorn
+      size: 10Gi
+    ingress:
+      enabled: false
+    resourcesPreset: "none"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+      limits:
+        cpu: 1500m
+        memory: 3Gi
+    initContainers: []
+    volumePermissions:
+      enabled: false
+      resourcesPreset: "none"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+

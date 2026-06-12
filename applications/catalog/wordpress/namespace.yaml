@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wordpress
+  labels:
+    alter-it.eu/tenant: "${tenant}"
+    alter-it.eu/app: "wordpress"
+    alter-it.eu/managed-by: "fluxcd"
+    reflector/k8up-credentials: "true"
+    reflector/mysql-operator: "true"
+    # reflector/wordpress-oidc-client-secret: "true"

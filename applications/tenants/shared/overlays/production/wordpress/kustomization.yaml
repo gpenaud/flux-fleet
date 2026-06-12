@@ -1,0 +1,16 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shared-wordpress
+
+resources:
+  - ../../../../../catalog/wordpress
+  - ../../../../../catalog/wordpress/components/init
+  - ../../../../../catalog/wordpress/components/backup
+  # - secrets.enc.yaml
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: values.yaml

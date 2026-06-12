@@ -1,0 +1,32 @@
+
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: wordpress
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  podConfigRef:
+    name: podconfig
+  backend:
+    repoPasswordSecretRef:
+      name: k8up-credentials
+      key: RESTIC_PASSWORD
+    s3:
+      endpoint: https://s3.sbg.io.cloud.ovh.net 
+      bucket: "${owner}-${cluster}-backup-${tenant}-wordpress"
+      accessKeyIDSecretRef:
+        name: k8up-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: k8up-credentials
+        key: AWS_SECRET_ACCESS_KEY
+  backup:
+    schedule: '0 21 1,15 * *'  # 1er et 15 de chaque mois à 21h
+  check:
+    schedule: '30 21 1,15 * *' # vérification 30min après
+  prune:
+    schedule: '0 22 1,15 * *'  # nettoyage 1h après
+    retention:
+      keepWeekly: 8            # ~4 mois de rétention
+      keepMonthly: 6
