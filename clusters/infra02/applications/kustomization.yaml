@@ -5,7 +5,7 @@ resources:
   ### 
   # Shared
   ###
-  - ../../../applications/tenants/shared/overlays/production/wordpress/sync.yaml
+  # - ../../../applications/tenants/shared/overlays/production/wordpress/sync.yaml
 
   ### 
   # Le Portail
