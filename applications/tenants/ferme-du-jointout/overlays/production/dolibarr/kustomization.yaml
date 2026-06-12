@@ -8,6 +8,7 @@ resources:
   - ../../../../../catalog/dolibarr
   - ../../../../../catalog/dolibarr/components/init
   - ../../../../../catalog/dolibarr/components/backup
+  - ingressroute.yaml
   - secrets.enc.yaml
 
 patches:
