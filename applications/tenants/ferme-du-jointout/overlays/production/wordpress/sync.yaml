@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: shared-wordpress
+    - name: applications-shared-wordpress
   interval: 1h
   retryInterval: 2m
   timeout: 5m
