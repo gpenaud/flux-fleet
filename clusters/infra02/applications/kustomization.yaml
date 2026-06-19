@@ -21,6 +21,7 @@ resources:
   - ../../../applications/tenants/le-portail/overlays/production/dolibarr/sync.yaml
   - ../../../applications/tenants/le-portail/overlays/production/grist/sync.yaml
   - ../../../applications/tenants/le-portail/overlays/production/nextcloud/sync.yaml
+  - ../../../applications/tenants/le-portail/overlays/production/wordpress/sync.yaml
 
   ### 
   # Ferme Du jointout
@@ -32,3 +33,4 @@ resources:
   # applications
   - ../../../applications/tenants/ferme-du-jointout/overlays/production/dolibarr/sync.yaml
   - ../../../applications/tenants/ferme-du-jointout/overlays/production/nextcloud/sync.yaml
+  - ../../../applications/tenants/ferme-du-jointout/overlays/production/wordpress/sync.yaml
