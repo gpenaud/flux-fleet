@@ -28,6 +28,7 @@ resources:
   - ../../../applications/tenants/ferme-du-jointout/sync.yaml
   # zone & subdomain creation 
   - ../../../applications/tenants/ferme-du-jointout/components/subdomain/sync.yaml
+  - ../../../applications/tenants/ferme-du-jointout/components/authentication/sync.yaml
   # applications
   - ../../../applications/tenants/ferme-du-jointout/overlays/production/dolibarr/sync.yaml
   - ../../../applications/tenants/ferme-du-jointout/overlays/production/nextcloud/sync.yaml
