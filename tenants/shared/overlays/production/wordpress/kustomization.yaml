@@ -5,9 +5,9 @@ kind: Kustomization
 namespace: shared-wordpress
 
 resources:
-  - ../../../../../catalog/wordpress
-  - ../../../../../catalog/wordpress/components/init
-  - ../../../../../catalog/wordpress/components/backup
+  - ../../../../../applications/wordpress
+  - ../../../../../applications/wordpress/components/init
+  - ../../../../../applications/wordpress/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
 

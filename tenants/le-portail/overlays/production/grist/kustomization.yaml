@@ -5,8 +5,8 @@ kind: Kustomization
 namespace: ${tenant}-grist
 
 resources:
-  - ../../../../../catalog/grist
-  - ../../../../../catalog/grist/components/backup
+  - ../../../../../applications/grist
+  - ../../../../../applications/grist/components/backup
   # - storage.yaml
   - ingressroute.yaml
   - secrets.enc.yaml

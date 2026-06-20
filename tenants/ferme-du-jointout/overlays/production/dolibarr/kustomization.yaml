@@ -5,9 +5,9 @@ kind: Kustomization
 namespace: ${tenant}-dolibarr
 
 resources:
-  - ../../../../../catalog/dolibarr
-  - ../../../../../catalog/dolibarr/components/init
-  - ../../../../../catalog/dolibarr/components/backup
+  - ../../../../../applications/dolibarr
+  - ../../../../../applications/dolibarr/components/init
+  - ../../../../../applications/dolibarr/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
 
