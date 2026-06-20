@@ -28,3 +28,4 @@ resources:
   - ../../../infrastructure/database/clusters/high-availability/sync.yaml
   - ../../../infrastructure/observability/sync.yaml
   - ../../../infrastructure/observability/exposure/sync.yaml
+  - ../../../infrastructure/workflow/sync.yaml
