@@ -7,9 +7,10 @@ namespace: ${tenant}-grist
 resources:
   - ../../../../../applications/grist
   - ../../../../../applications/grist/components/backup
-  # - storage.yaml
   - ingressroute.yaml
   - secrets.enc.yaml
+  # workflows
+  - ../../../../../workflows/restore/grist/templates/grist
 
 patches:
   - target:
