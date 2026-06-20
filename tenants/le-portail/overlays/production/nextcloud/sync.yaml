@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: applications-le-portail-nextcloud
+  name: tenant-le-portail-nextcloud
   namespace: flux-system
 spec:
   dependsOn:
-    - name: applications-le-portail
+    - name: tenant-le-portail
   interval: 1h
   retryInterval: 2m
   timeout: 5m

@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: applications-ferme-du-jointout-components-subdomain
+  name: tenant-ferme-du-jointout-components-subdomain
   namespace: flux-system
 spec:
   dependsOn:
-    - name: applications-ferme-du-jointout
+    - name: tenant-ferme-du-jointout
   interval: 1h
   retryInterval: 2m
   timeout: 5m

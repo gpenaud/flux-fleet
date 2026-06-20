@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: applications-le-portail-components-subdomain
+  name: tenant-le-portail-components-subdomain
   namespace: flux-system
 spec:
   dependsOn:
-    - name: applications-le-portail
+    - name: tenant-le-portail
   interval: 1h
   retryInterval: 2m
   timeout: 5m
