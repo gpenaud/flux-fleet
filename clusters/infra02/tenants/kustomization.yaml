@@ -18,10 +18,12 @@ resources:
   - ../../../tenants/le-portail/components/subdomain/sync.yaml
   - ../../../tenants/le-portail/components/authentication/sync.yaml
   # applications
-  - ../../../tenants/le-portail/overlays/production/dolibarr/sync.yaml
-  - ../../../tenants/le-portail/overlays/production/grist/sync.yaml
-  - ../../../tenants/le-portail/overlays/production/nextcloud/sync.yaml
-  - ../../../tenants/le-portail/overlays/production/wordpress/sync.yaml
+  - ../../../tenants/le-portail/production/dolibarr/sync.yaml
+  - ../../../tenants/le-portail/production/grist/sync.yaml
+  - ../../../tenants/le-portail/production/nextcloud/sync.yaml
+  - ../../../tenants/le-portail/production/wordpress/sync.yaml
+  # workflows
+
 
   ### 
   # Ferme Du jointout
