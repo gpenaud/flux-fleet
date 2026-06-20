@@ -75,12 +75,12 @@ tasks:
       - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization infrastructure-controller-observability-exposure
     silent: true
 
-  kustomization:applications:
+  kustomization:tenants:
     desc: Reconcile sources, then applications
     cmds:
       - task reconcile:source
-      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization applications
-      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization applications
+      - flux --context ${KUBE_CONTEXT} -n flux-system suspend kustomization tenants
+      - flux --context ${KUBE_CONTEXT} -n flux-system resume kustomization tenants
     silent: true
 
   kustomization:applications:le-portail:
