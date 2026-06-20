@@ -1,0 +1,88 @@
+# tenants/<tenant>/restore-template.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: restore-pvc
+  namespace: ${tenant}-${application}
+spec:
+  serviceAccountName: restore-runner
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: tenant                 # Tenant cible
+      - name: pvc                    # PVC cible (doit exister)
+      - name: service                # ex: nextcloud  -> bucket
+      - name: snapshot
+        value: ""                    # ID restic ; vide = dernier
+      - name: workload-kind
+        value: "deployment"
+      - name: workload-name
+        value: ""
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: scale-down
+            template: scale
+            arguments:
+              parameters: 
+                - name: replicas 
+                  value: "0"
+            when: "{{workflow.parameters.workload-name}} != ''"
+          - name: restore
+            template: k8up-restore
+            dependencies: 
+              - scale-down
+          - name: scale-up
+            template: scale
+            dependencies: 
+              - restore
+            arguments:
+              parameters:
+                - name: replicas
+                  value: "1"
+            when: "{{workflow.parameters.workload-name}} != ''"
+
+    - name: k8up-restore
+      resource:
+        action: create
+        successCondition: status.finished == true   # ⚠️ À VÉRIFIER sur ta version (cf. note)
+        failureCondition: status.conditions.0.reason == Failed
+        manifest: |
+          apiVersion: k8up.io/v1
+          kind: Restore
+          metadata:
+            generateName: argo-restore-
+            namespace: ${tenant}-${application}
+          spec:
+            snapshot: "{{workflow.parameters.snapshot}}"
+            restoreMethod:
+              folder:
+                claimName: "{{workflow.parameters.pvc}}"
+            backend:
+              repoPasswordSecretRef:
+                name: backup-repo 
+                key: password
+              s3:
+                endpoint: https://s3.sbg.io.cloud.ovh.net
+                bucket: alter-it-infra01-backup-{{workflow.parameters.tenant}}-{{workflow.parameters.service}}
+                accessKeyIDSecretRef:
+                  name: backup-credentials
+                  key: username
+                secretAccessKeySecretRef:
+                  name: backup-credentials
+                  key: password
+
+    - name: scale
+      inputs:
+        parameters: 
+          - name: replicas
+      resource:
+        action: patch
+        mergeStrategy: merge
+        flags:
+          - "{{workflow.parameters.workload-kind}}"
+          - "{{workflow.parameters.workload-name}}"
+        manifest: |
+          spec:
+            replicas: {{inputs.parameters.replicas}}
