@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./tenants/ferme-du-jointout/production/dolibarr
+  path: ./tenants/ferme-du-jointout/applications/production/dolibarr
   prune: true
   wait: true
   decryption:

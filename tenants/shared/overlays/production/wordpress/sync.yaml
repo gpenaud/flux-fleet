@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./tenants/shared/production/wordpress
+  path: ./tenants/shared/applications/production/wordpress
   prune: true
   wait: true
   decryption:

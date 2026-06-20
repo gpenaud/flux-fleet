@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./tenants/le-portail/production/nextcloud
+  path: ./tenants/le-portail/applications/production/nextcloud
   prune: true
   wait: true
   decryption:
