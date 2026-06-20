@@ -10,7 +10,7 @@ resources:
   - ingressroute.yaml
   - secrets.enc.yaml
   # workflows
-  - ../../../../../workflows/restore/grist/templates/grist
+  - ../../../../../workflows/restore/templates/grist
 
 patches:
   - target:
