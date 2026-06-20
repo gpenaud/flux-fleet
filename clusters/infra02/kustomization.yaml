@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
   - cluster-vars/sync.yaml
   - infrastructure/sync.yaml
-  - applications/sync.yaml
+  - tenants/sync.yaml
