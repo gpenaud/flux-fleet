@@ -5,9 +5,9 @@ kind: Kustomization
 namespace: ${tenant}-nextcloud
 
 resources:
-  - ../../../../applications/nextcloud
-  - ../../../../applications/nextcloud/components/init
-  - ../../../../applications/nextcloud/components/backup
+  - ../../../../../applications/nextcloud
+  - ../../../../../applications/nextcloud/components/init
+  - ../../../../../applications/nextcloud/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
 
