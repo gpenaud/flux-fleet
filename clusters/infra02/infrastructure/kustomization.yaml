@@ -29,3 +29,4 @@ resources:
   - ../../../infrastructure/observability/sync.yaml
   - ../../../infrastructure/observability/exposure/sync.yaml
   - ../../../infrastructure/workflow/sync.yaml
+  - ../../../infrastructure/workflow/exposure/sync.yaml
