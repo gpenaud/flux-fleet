@@ -5,14 +5,14 @@ metadata:
   name: workflow
   namespace: controller-workflow
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: workflow.internal.${cluster}.${domain}
-    external-dns.alpha.kubernetes.io/target: internal.${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/hostname: workflow.${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
-    - internal
+    - websecure
   routes:
-    - match: Host(`workflow.internal.${cluster}.${domain}`)
+    - match: Host(`workflow.${cluster}.${domain}`)
       kind: Rule
       services:
         - name: argo-workflows-server
