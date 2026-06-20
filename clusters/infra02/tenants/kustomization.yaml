@@ -18,10 +18,10 @@ resources:
   - ../../../tenants/le-portail/components/subdomain/sync.yaml
   - ../../../tenants/le-portail/components/authentication/sync.yaml
   # applications
-  - ../../../tenants/le-portail/production/dolibarr/sync.yaml
-  - ../../../tenants/le-portail/production/grist/sync.yaml
-  - ../../../tenants/le-portail/production/nextcloud/sync.yaml
-  - ../../../tenants/le-portail/production/wordpress/sync.yaml
+  - ../../../tenants/le-portail/applications/production/dolibarr/sync.yaml
+  - ../../../tenants/le-portail/applications/production/grist/sync.yaml
+  - ../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
+  - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
 
   ### 
   # Ferme Du jointout
@@ -31,6 +31,6 @@ resources:
   - ../../../tenants/ferme-du-jointout/components/subdomain/sync.yaml
   - ../../../tenants/ferme-du-jointout/components/authentication/sync.yaml
   # applications
-  - ../../../tenants/ferme-du-jointout/overlays/production/dolibarr/sync.yaml
-  - ../../../tenants/ferme-du-jointout/overlays/production/nextcloud/sync.yaml
-  - ../../../tenants/ferme-du-jointout/overlays/production/wordpress/sync.yaml
+  - ../../../tenants/ferme-du-jointout/applications/production/dolibarr/sync.yaml
+  - ../../../tenants/ferme-du-jointout/applications/production/nextcloud/sync.yaml
+  - ../../../tenants/ferme-du-jointout/applications/production/wordpress/sync.yaml
