@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/shared/components/subdomain
+  path: ./tenants/shared/components/subdomain
   prune: true
   wait: true
   decryption:

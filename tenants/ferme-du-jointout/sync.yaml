@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/ferme-du-jointout
+  path: ./tenants/ferme-du-jointout
   prune: true
   wait: true
   decryption:

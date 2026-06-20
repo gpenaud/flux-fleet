@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/le-portail
+  path: ./tenants/le-portail
   prune: true
   wait: true
   decryption:

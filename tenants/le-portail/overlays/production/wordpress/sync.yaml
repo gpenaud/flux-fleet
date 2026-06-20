@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/le-portail/overlays/production/wordpress
+  path: ./tenants/le-portail/overlays/production/wordpress
   prune: true
   wait: true
   decryption:

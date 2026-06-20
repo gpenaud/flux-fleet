@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/shared
+  path: ./tenants/shared
   prune: true
   wait: true
   decryption:

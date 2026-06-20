@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/ferme-du-jointout/overlays/production/wordpress
+  path: ./tenants/ferme-du-jointout/overlays/production/wordpress
   prune: true
   wait: true
   decryption:

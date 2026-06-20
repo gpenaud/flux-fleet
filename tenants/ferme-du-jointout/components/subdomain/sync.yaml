@@ -13,7 +13,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./applications/tenants/ferme-du-jointout/components/subdomain
+  path: ./tenants/ferme-du-jointout/components/subdomain
   prune: true
   wait: true
   decryption:
