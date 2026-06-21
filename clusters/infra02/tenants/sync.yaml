@@ -5,8 +5,8 @@ metadata:
   name: tenants
   namespace: flux-system
 spec:
-  # dependsOn:
-  #   - name: infrastructure
+  dependsOn:
+    - name: infrastructure
   interval: 1h
   retryInterval: 2m
   timeout: 5m
