@@ -1,23 +1,25 @@
-# tenants/<tenant>/restore-template.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: restore-pvc
   namespace: ${tenant}-${application}
 spec:
+  podGC:
+    strategy: OnWorkflowSuccess
   serviceAccountName: restore-runner
   entrypoint: main
   arguments:
     parameters:
-      - name: tenant                 # Tenant cible
-      - name: pvc                    # PVC cible (doit exister)
-      - name: service                # ex: nextcloud  -> bucket
-      - name: snapshot
-        value: ""                    # ID restic ; vide = dernier
+      - name: path
+      - name: pvc
       - name: workload-kind
         value: "deployment"
       - name: workload-name
         value: ""
+  volumes:
+    - name: ${application}-data
+      persistentVolumeClaim:
+        claimName: ${application}
   templates:
     - name: main
       dag:
@@ -29,25 +31,81 @@ spec:
                 - name: replicas 
                   value: "0"
             when: "{{workflow.parameters.workload-name}} != ''"
-          - name: restore
-            template: k8up-restore
+          - name: resolve-id
+            template: resolve-id
             dependencies: 
               - scale-down
+          - name: create-restore
+            template: create-restore
+            dependencies: 
+              - resolve-id
+            arguments:
+              parameters:
+                - name: snapshot
+                  value: "{{tasks.resolve-id.outputs.parameters.snapshot-id}}"
+          - name: wait-restore
+            template: wait-restore
+            dependencies: 
+              - create-restore
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{tasks.create-restore.outputs.parameters.restore-name}}"
           - name: scale-up
             template: scale
-            dependencies: 
-              - restore
+            dependencies:
+              - wait-restore
             arguments:
               parameters:
                 - name: replicas
                   value: "1"
             when: "{{workflow.parameters.workload-name}} != ''"
 
-    - name: k8up-restore
+    - name: resolve-id
+      script:
+        image: restic/restic:latest
+        command:
+          - sh
+        source: |
+          set -euo pipefail
+          ID=$(restic snapshots --json --latest 1 --path "{{workflow.parameters.path}}" \
+            | jq -r '.[0].short_id')
+          if [ -z "$ID" ] || [ "$ID" = "null" ]; then
+            echo "aucun snapshot pour {{workflow.parameters.path}}" >&2
+            exit 1
+          fi
+          echo "resolved snapshot: $ID" >&2
+          printf '%s' "$ID" > /tmp/snapshot-id
+        env:
+          - name: RESTIC_REPOSITORY
+            value: "s3:https://s3.${s3_region}.io.cloud.ovh.net/alter-it-${cluster}-backup-${tenant}-${application}"
+          - name: RESTIC_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: RESTIC_PASSWORD
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: AWS_SECRET_ACCESS_KEY
+      outputs:
+        parameters:
+          - name: snapshot-id
+            valueFrom:
+              path: /tmp/snapshot-id
+
+    - name: create-restore
+      inputs:
+        parameters:
+          - name: snapshot
       resource:
         action: create
-        successCondition: status.finished == true   # ⚠️ À VÉRIFIER sur ta version (cf. note)
-        failureCondition: status.conditions.0.reason == Failed
         manifest: |
           apiVersion: k8up.io/v1
           kind: Restore
@@ -55,23 +113,51 @@ spec:
             generateName: argo-restore-
             namespace: ${tenant}-${application}
           spec:
-            snapshot: "{{workflow.parameters.snapshot}}"
+            podSecurityContext:
+              runAsUser: 1001
+              fsGroup: 1001
+              fsGroupChangePolicy: OnRootMismatch
+            snapshot: "{{inputs.parameters.snapshot}}"
             restoreMethod:
               folder:
                 claimName: "{{workflow.parameters.pvc}}"
             backend:
               repoPasswordSecretRef:
-                name: backup-repo 
-                key: password
+                name: k8up-credentials
+                key: RESTIC_PASSWORD
               s3:
-                endpoint: https://s3.sbg.io.cloud.ovh.net
-                bucket: alter-it-infra01-backup-{{workflow.parameters.tenant}}-{{workflow.parameters.service}}
+                endpoint: https://s3.${s3_region}.io.cloud.ovh.net
+                bucket: alter-it-${cluster}-backup-${tenant}-${application}
                 accessKeyIDSecretRef:
-                  name: backup-credentials
-                  key: username
+                  name: k8up-credentials
+                  key: AWS_ACCESS_KEY_ID
                 secretAccessKeySecretRef:
-                  name: backup-credentials
-                  key: password
+                  name: k8up-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+      outputs:
+        parameters:
+          - name: restore-name
+            valueFrom:
+              jsonPath: '{.metadata.name}'
+
+    - name: wait-restore
+      inputs:
+        parameters:
+          - name: name
+      script:
+        image: bitnami/kubectl:latest
+        command: 
+          - bash
+        source: |
+          set -euo pipefail
+          kubectl wait --for=condition=Completed \
+            restore/{{inputs.parameters.name}} \
+            -n ${tenant}-${application} --timeout=1800s
+          reason=$(kubectl get restore/{{inputs.parameters.name}} \
+            -n ${tenant}-${application} \
+            -o jsonpath='{.status.conditions[?(@.type=="Completed")].reason}')
+          echo "restore reason: $reason"
+          [ "$reason" = "Succeeded" ] || { echo "restore failed"; exit 1; }
 
     - name: scale
       inputs:
