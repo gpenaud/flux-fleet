@@ -12,6 +12,8 @@ spec:
     parameters:
       - name: path
       - name: pvc
+      - name: cluster_source
+        value: "${cluster}"
       - name: workload-kind
         value: "deployment"
       - name: workload-name
@@ -78,7 +80,7 @@ spec:
           printf '%s' "$ID" > /tmp/snapshot-id
         env:
           - name: RESTIC_REPOSITORY
-            value: "s3:https://s3.${s3_region}.io.cloud.ovh.net/alter-it-${cluster}-backup-${tenant}-${application}"
+            value: "s3:https://s3.${s3_region}.io.cloud.ovh.net/alter-it-{{workflow.parameters.cluster_source}}-backup-${tenant}-${application}"
           - name: RESTIC_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -127,7 +129,7 @@ spec:
                 key: RESTIC_PASSWORD
               s3:
                 endpoint: https://s3.${s3_region}.io.cloud.ovh.net
-                bucket: alter-it-${cluster}-backup-${tenant}-${application}
+                bucket: alter-it-{{workflow.parameters.cluster_source}}-backup-${tenant}-${application}
                 accessKeyIDSecretRef:
                   name: k8up-credentials
                   key: AWS_ACCESS_KEY_ID
