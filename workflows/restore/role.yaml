@@ -5,17 +5,6 @@ metadata:
   name: restore-runner
   namespace: ${tenant}-${application}
 rules:
-  - apiGroups:
-      - k8up.io
-    resources:
-      - restores
-      - snapshots
-    verbs:
-      - create
-      - get
-      - list
-      - watch
-      - delete
   - apiGroups: 
       - apps
     resources:
@@ -27,3 +16,21 @@ rules:
       - get
       - patch
       - update
+  - apiGroups:
+      - k8up.io
+    resources:
+      - restores
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtaskresults
+    verbs:
+      - create
+      - patch
+ 
