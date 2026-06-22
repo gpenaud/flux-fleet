@@ -8,7 +8,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: ts-bootstrap-headscale
-  namespace: headscale
+  namespace: controller-vpn
 rules:
   - apiGroups: [""]
     resources: [pods]
