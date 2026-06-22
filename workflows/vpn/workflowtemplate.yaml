@@ -15,7 +15,7 @@ spec:
         source: |
           set -euo pipefail
           NS=controller-vpn
-          HS_USER_NAME="infra02.alter-it.eu"
+          HS_USER_NAME="gpenaud"
           ROUTER_DEPLOY=tailscale-subnet-router
           AUTHKEY_SECRET=tailscale-authkey
 
