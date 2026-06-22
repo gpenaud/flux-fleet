@@ -5,14 +5,14 @@ metadata:
   name: alterconso
   namespace: ${tenant}-alterconso
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: alterconso.${tenant}
-    external-dns.alpha.kubernetes.io/target: ${tenant}
+    external-dns.alpha.kubernetes.io/hostname: alterconso.${domain}
+    external-dns.alpha.kubernetes.io/target: ${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`alterconso.${tenant}`)
+    - match: Host(`alterconso.${domain}`)
       kind: Rule
       services:
         - name: alterconso
