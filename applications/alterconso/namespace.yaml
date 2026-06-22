@@ -9,4 +9,4 @@ metadata:
     alter-it.eu/managed-by: fluxcd
     reflector/k8up-credentials: "true"
     reflector/mysql-operator: "true"
-    reflector-regcred: "true"
+    reflector/regcred: "true"
