@@ -16,6 +16,6 @@ spec:
       kind: Rule
       services:
         - name: alterconso
-          port: 80
+          port: 8080
   tls:
     secretName: wildcard.${domain}.tls
