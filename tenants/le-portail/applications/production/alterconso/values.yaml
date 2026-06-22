@@ -1,0 +1,103 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alterconso
+spec:
+  values:
+    nameOverride: "alterconso"
+    fullnameOverride: ""
+    image:
+      repository: ghcr.io/gpenaud/alterconso
+      tag: latest
+    imagePullSecrets:
+      - name: regcred
+    replicaCount: 1
+    waitForDatabase:
+      enabled: true
+      image: mysql:8.4
+      timeoutSeconds: 60
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+    # ─── Ingress ────────────────────────────────────────────────────────────────
+    # Expose le service publiquement via un Ingress standard k8s.
+    # Compatible avec n'importe quel controller (Traefik en k3s par défaut,
+    # nginx, contour, etc.) — il suffit de matcher className.
+    #
+    # La liste hosts accepte autant d'entrées que tu veux : domaines, alias,
+    # multi-AMAP sur la même app, etc. Chaque host a sa propre liste de paths.
+    ingress:
+      enabled: false
+
+    # ─── Base de données ────────────────────────────────────────────────────────
+    # Deux modes mutuellement exclusifs :
+    #
+    #   external (default) : pointe sur un MySQL existant (InnoDBCluster, RDS…).
+    #   embedded           : déploie un StatefulSet MySQL via le sub-chart
+    #                        bitnami/mysql. Utile en dev / test / mono-app.
+    #
+    # db_host et db_port sont calculés automatiquement par le template selon
+    # le mode actif — pas besoin de les dupliquer.
+    database:
+      # ─── Mode external ────────────────────────────────────────────────────────
+      external:
+        host: mysql-version-8-lts.controller-database.svc.cluster.local
+        port: "3306"
+      init:
+        enabled: true
+        image: mysql:8.4
+        # Secret externe (typiquement géré via SOPS hors-chart) qui contient
+        # les credentials admin nécessaires aux CREATE/GRANT.
+        # Doit avoir les clés rootUser et rootPassword.
+        adminSecret: "mysql-operator"
+        # Le Job tourne ~5 secondes — quelques requêtes SQL. Resources minimales.
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+
+    secrets:
+      existingSecret: alterconso
+    config:
+      port: "8080"
+      debug: false
+
+      # db_host et db_port sont injectés par le configmap selon database.embedded
+      # (ne pas définir ici).
+      db_user: alterconso
+      db_name: lp-alterconso
+
+      jwt_expiry_hours: 168
+      host: alterconso.${domain}
+
+      smtp_host: smtp-relay.brevo.com
+      smtp_port: 587
+      smtp_user: "a74b88001@smtp-brevo.com"
+      default_email: alterconso@leportail.org
+
+      superadmin:
+        email: "alterconso@leportail.org"
+        first_name: Super
+        last_name: Admin
+
+      messages:
+        recipient_categories:
+          - name: "Membres réguliers"
+            pattern: ">= 3 commandes sur 3m"
+          - name: "Membres occasionnels"
+            pattern: ">= 1 commande sur 6m"
+          - name: "Membres inactifs"
+            pattern: "< 1 commande sur 6m"
+
+      notifications:
+        enabled: false
+        recipient_category: "Membres réguliers"

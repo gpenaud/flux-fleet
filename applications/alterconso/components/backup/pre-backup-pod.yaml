@@ -1,0 +1,41 @@
+
+apiVersion: k8up.io/v1
+kind: PreBackupPod
+metadata:
+  name: pre-backup
+  labels:
+    reflector/mysql-operator: "true"
+  annotations:
+    k8up.io/backup: "true"
+spec:
+  backupCommand: sh -c 'mysqldump --no-tablespaces --single-transaction --hex-blob -h alterconso-database.le-portail-alterconso.svc.cluster.local -u $ALTERCONSO_MYSQL_USER -p"$ALTERCONSO_MYSQL_PASSWORD" $ALTERCONSO_MYSQL_DATABASE'
+  fileExtension: .sql
+  pod:
+    spec:
+      containers:
+        - name: db-dump
+          image: mysql:5.7
+          command: ["sleep", "infinity"]
+          env:
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-operator
+                  key: rootPassword
+            - name: ALTERCONSO_MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: alterconso
+                  key: MYSQL_USER
+            - name: ALTERCONSO_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: alterconso
+                  key: MYSQL_PASSWORD
+            - name: ALTERCONSO_MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: alterconso
+                  key: MYSQL_DATABASE
