@@ -17,6 +17,7 @@ resources:
   - ../../../infrastructure/dns/endpoints/sync.yaml
   - ../../../infrastructure/vpn/sync.yaml
   - ../../../infrastructure/vpn/exposure/sync.yaml
+  - ../../../infrastructure/vpn/subnet-router/bootstrap/sync.yaml
   - ../../../infrastructure/vpn/subnet-router/sync.yaml
   - ../../../infrastructure/directory/lldap/sync.yaml
   - ../../../infrastructure/directory/lldap/exposure/sync.yaml
