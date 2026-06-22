@@ -20,7 +20,7 @@ resources:
   # applications
   - ../../../tenants/le-portail/applications/production/dolibarr/sync.yaml
   - ../../../tenants/le-portail/applications/production/grist/sync.yaml
-  # - ../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
+  - ../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
   - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
 
   ### 
