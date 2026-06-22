@@ -11,7 +11,7 @@ spec:
     - name: infrastructure-controller-ingress-traefik
     - name: infrastructure-controller-database
     - name: infrastructure-controller-certificate
-    - name: infrastructure-controller-authentication
+    - name: infrastructure-controller-authentication-authelia
     - name: infrastructure-controller-reflector
     - name: infrastructure-controller-tenant
     - name: infrastructure-controller-workflow
