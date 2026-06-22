@@ -8,7 +8,7 @@ resources:
   - ../../../tenants/shared/sync.yaml
   # zone & subdomain creation 
   - ../../../tenants/shared/components/subdomain/sync.yaml
-  - ../../../tenants/shared/overlays/production/wordpress/sync.yaml
+  - ../../../tenants/shared/applications/production/wordpress/sync.yaml
 
   ### 
   # Le Portail
