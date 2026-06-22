@@ -1,0 +1,9 @@
+# (A) AMORCE — s'exécute une fois, à l'apply Flux
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: tailscale-router-bootstrap-init
+  namespace: controller-vpn
+spec:
+  workflowTemplateRef:
+    name: tailscale-router-bootstrap
