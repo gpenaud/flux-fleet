@@ -22,7 +22,7 @@ spec:
       enabled: true
       storageClass: longhorn
       accessMode: ReadWriteOnce
-      size: 5Gi
+      size: 3Gi
     nextcloud:
       host: nextcloud.${domain}
       datadir: /var/www/html/data
