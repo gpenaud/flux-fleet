@@ -8,7 +8,7 @@ spec:
   dependsOn:
     # - name: infrastructure
     - name: infrastructure-controller-storage
-    - name: infrastructure-controller-ingress
+    - name: infrastructure-controller-ingress-traefik
     - name: infrastructure-controller-database
     - name: infrastructure-controller-certificate
     - name: infrastructure-controller-authentication
