@@ -68,7 +68,7 @@ spec:
     secrets:
       existingSecret: alterconso
     config:
-      port: "8080"
+      port: "80"
       debug: false
 
       # db_host et db_port sont injectés par le configmap selon database.embedded
