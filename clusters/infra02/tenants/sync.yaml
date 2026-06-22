@@ -6,7 +6,15 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure
+    # - name: infrastructure
+    - name: infrastructure-controller-storage
+    - name: infrastructure-controller-ingress
+    - name: infrastructure-controller-database
+    - name: infrastructure-controller-certificate
+    - name: infrastructure-controller-authentication
+    - name: infrastructure-controller-reflector
+    - name: infrastructure-controller-tenant
+    - name: infrastructure-controller-workflow
   interval: 1h
   retryInterval: 2m
   timeout: 5m
