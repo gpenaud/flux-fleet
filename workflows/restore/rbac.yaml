@@ -1,4 +1,10 @@
 
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: restore-runner
+  namespace: ${tenant}-${application}
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -33,4 +39,17 @@ rules:
     verbs:
       - create
       - patch
- 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: restore-runner
+  namespace: ${tenant}-${application}
+subjects:
+  - kind: ServiceAccount
+    name: restore-runner
+    namespace: ${tenant}-${application}
+roleRef:
+  kind: Role
+  name: restore-runner
+  apiGroup: rbac.authorization.k8s.io
