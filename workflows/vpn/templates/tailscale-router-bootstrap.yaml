@@ -53,7 +53,7 @@ spec:
           test -n "${HS_USER_ID}"   # garde-fou : pas d'ID = on n'avance pas
 
           # 3) clé éphémère + reusable + taguée (jamais exposée en param Argo)
-          KEY=$(hs preauthkeys create --user "${HS_USER_ID}" \
+          KEY=$(hs preauthkeys create --user "$HS_USER_ID" \
                   --reusable --ephemeral --tags tag:k8s-router \
                   --expiration 24h -o json | jq -r '.key')
           test -n "${KEY}"
