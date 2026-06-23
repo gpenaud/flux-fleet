@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn: 
-    - name: infrastructure-controller-vpn-subnet-router-bootstrap
+    - name: workflow-vpn-runs
   interval: 1h
   retryInterval: 2m
   timeout: 5m
