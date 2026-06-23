@@ -6,6 +6,14 @@ metadata:
 spec:
   serviceAccountName: ts-router-bootstrap
   entrypoint: bootstrap
+  arguments:
+    parameters:
+      - name: namespace
+        value: controller-vpn
+      - name: headscale_user_name
+        value: gpenaud
+      - name: authkey_name
+        value: tailscale-authkey
   templates:
     - name: bootstrap
       script:
@@ -14,44 +22,43 @@ spec:
           - bash
         source: |
           set -euo pipefail
-          NS=controller-vpn
-          HS_USER_NAME="gpenaud"
-          ROUTER_DEPLOY=tailscale-subnet-router
-          AUTHKEY_SECRET=tailscale-authkey
+          NAMESPACE={{workflow.parameters.namespace}}
+          HS_USER_NAME={{workflow.parameters.headscale_user_name}}
+          AUTHKEY_SECRET={{workflow.parameters.authkey_name}}
 
-          HS_POD=$(kubectl -n "$NS" get pod \
+          HS_POD=$(kubectl -n "${NAMESPACE}" get pod \
             -l app.kubernetes.io/name=headscale \
             -o jsonpath='{.items[0].metadata.name}')
 
-          hs() { kubectl -n "$NS" exec "$HS_POD" -- headscale "$@"; }
+          hs() { kubectl -n "${NAMESPACE}" exec "$HS_POD" -- headscale "$@"; }
 
           # liste robuste : selon la version, sortie = array nu OU {"users":[...]}
           users_json() { hs users list -o json; }
           resolve_id() {
-            users_json | jq -r --arg n "$HS_USER_NAME" \
+            users_json | jq -r --arg n "${HS_USER_NAME}" \
               '(if type=="array" then . else .users end)[]
                | select(.name==$n) | .id'
           }
 
           # 1) user idempotent : on ne crée que s'il est absent
           if [ -z "$(resolve_id)" ]; then
-            echo "user '$HS_USER_NAME' absent -> création"
-            hs users create "$HS_USER_NAME"
+            echo "user '${HS_USER_NAME}' absent -> création"
+            hs users create "${HS_USER_NAME}"
           else
-            echo "user '$HS_USER_NAME' déjà présent -> skip"
+            echo "user '${HS_USER_NAME}' déjà présent -> skip"
           fi
 
           # 2) résolution nom -> ID numérique (ce qu'attend --user)
           HS_USER_ID="$(resolve_id)"
-          test -n "$HS_USER_ID"   # garde-fou : pas d'ID = on n'avance pas
+          test -n "${HS_USER_ID}"   # garde-fou : pas d'ID = on n'avance pas
 
           # 3) clé éphémère + reusable + taguée (jamais exposée en param Argo)
-          KEY=$(hs preauthkeys create --user "$HS_USER_ID" \
+          KEY=$(hs preauthkeys create --user "${HS_USER_ID}" \
                   --reusable --ephemeral --tags tag:k8s-router \
                   --expiration 24h -o json | jq -r '.key')
-          test -n "$KEY"
+          test -n "${KEY}"
 
           # 4) Secret + rollout
-          kubectl -n "$NS" create secret generic "$AUTHKEY_SECRET" \
-            --from-literal=TS_AUTHKEY="$KEY" \
+          kubectl -n "${NAMESPACE}" create secret generic "${AUTHKEY_SECRET}" \
+            --from-literal=TS_AUTHKEY="${KEY}" \
             --dry-run=client -o yaml | kubectl apply -f -

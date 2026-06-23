@@ -1,0 +1,8 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - tailscale-router-bootstrap.yaml
+  - rbacs/serviceaccount.yaml
+  - rbacs/rolebinding.yaml
+  - rbacs/role.yaml

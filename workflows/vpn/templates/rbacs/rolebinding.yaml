@@ -1,0 +1,32 @@
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ts-bootstrap-headscale
+  namespace: controller-vpn
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: ts-bootstrap-headscale}
+subjects:
+  - {kind: ServiceAccount, name: ts-router-bootstrap, namespace: controller-vpn}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ts-bootstrap-router
+  namespace: controller-vpn
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: ts-bootstrap-router}
+subjects:
+  - {kind: ServiceAccount, name: ts-router-bootstrap, namespace: controller-vpn}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ts-bootstrap-executor
+  namespace: controller-vpn
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ts-bootstrap-executor
+subjects:
+  - kind: ServiceAccount
+    name: ts-router-bootstrap
+    namespace: controller-vpn

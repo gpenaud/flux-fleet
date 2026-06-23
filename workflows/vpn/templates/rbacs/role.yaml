@@ -1,0 +1,42 @@
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ts-bootstrap-executor
+  namespace: controller-vpn
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ts-bootstrap-headscale
+  namespace: controller-vpn
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [pods/exec]
+    verbs: [create]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ts-bootstrap-router
+  namespace: controller-vpn
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get, create, patch]
+  - apiGroups: ["apps"]
+    resources: [deployments]
+    verbs: [get, list, patch]
+  - apiGroups: ["apps"]
+    resources: [replicasets]
+    verbs: [get, list]      # rollout status
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]      # rollout status
