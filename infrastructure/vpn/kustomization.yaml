@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - headscale.yaml
-  - ../../workflows/vpn
+  - ../../workflows/vpn/templates
+  - ../../workflows/vpn/workflows
