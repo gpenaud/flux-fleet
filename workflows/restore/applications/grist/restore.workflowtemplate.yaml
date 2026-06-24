@@ -67,10 +67,12 @@ spec:
                 - name: source_bucket
                   value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
 
-          - name: wait-restore
-            template: wait-restore
+          - name: wait-for-k8up-restore
+            templateRef:
+              name: wait-for-k8up-restore
+              template: main
             dependencies: 
-              - create-restore
+              - create-k8up-restore
             arguments:
               parameters:
                 - name: namespace
@@ -83,6 +85,8 @@ spec:
             templateRef:
               name: scale
               template: main
+            dependencies: 
+              - wait-for-k8up-restore
             arguments:
               parameters:
                 - name: replicas
