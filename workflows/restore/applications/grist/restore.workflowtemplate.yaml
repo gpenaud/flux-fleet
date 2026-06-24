@@ -82,7 +82,7 @@ spec:
                 - name: namespace
                   value: "${tenant}-${application}"
                 - name: restore_name
-                  value: "{{tasks.create-restore.outputs.parameters.restore-name}}"
+                  value: "{{tasks.create-k8up-restore.outputs.parameters.restore-name}}"
        
           - name: scale-up
             when: "{{workflow.parameters.workload-name}} != ''"
