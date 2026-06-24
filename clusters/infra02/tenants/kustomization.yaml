@@ -11,7 +11,7 @@ resources:
   - ../../../tenants/shared/components/subdomain/sync.yaml
   - ../../../tenants/shared/applications/production/wordpress/sync.yaml
   # cluster-scoped workflows
-  - ../../../workflows/restore/steps/sync.yaml
+  - ../../../workflows/restore/base/steps/sync.yaml
 
   ############
   # Le Portail
