@@ -56,9 +56,9 @@ spec:
           KEY=$(hs preauthkeys create --user "$HS_USER_ID" \
                   --reusable --ephemeral --tags tag:k8s-router \
                   --expiration 24h -o json | jq -r '.key')
-          test -n "${KEY}"
+          test -n "$KEY"
 
           # 4) Secret + rollout
           kubectl -n "$NAMESPACE" create secret generic "$AUTHKEY_SECRET" \
-            --from-literal=TS_AUTHKEY="${KEY}" \
+            --from-literal=TS_AUTHKEY="$KEY" \
             --dry-run=client -o yaml | kubectl apply -f -
