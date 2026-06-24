@@ -11,7 +11,7 @@ resources:
   - ../../../tenants/shared/components/subdomain/sync.yaml
   - ../../../tenants/shared/applications/production/wordpress/sync.yaml
   # cluster-scoped workflows
-  - ../../../workflows/restore/sync.yaml
+  - ../../../workflows/restore/steps/sync.yaml
 
   ############
   # Le Portail
@@ -31,7 +31,7 @@ resources:
   ###################
   # Ferme Du jointout
   ###################
-  
+
   - ../../../tenants/ferme-du-jointout/sync.yaml
   # zone & subdomain creation 
   - ../../../tenants/ferme-du-jointout/components/subdomain/sync.yaml
