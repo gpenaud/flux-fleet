@@ -2,7 +2,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - steps/create-k8up-restore.clusterworkflowtemplate.yaml
-  - steps/resolve-snapshot-id.clusterworkflowtemplate.yaml
-  - steps/scale.clusterworkflowtemplate.yaml
-  - steps/wait-for-k8up-restore.clusterworkflowtemplate.yaml
+  - create-k8up-restore.clusterworkflowtemplate.yaml
+  - resolve-snapshot-id.clusterworkflowtemplate.yaml
+  - scale.clusterworkflowtemplate.yaml
+  - wait-for-k8up-restore.clusterworkflowtemplate.yaml
