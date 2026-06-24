@@ -10,9 +10,8 @@ spec:
   entrypoint: main
   arguments:
     parameters:
-      - name: path
-      - name: pvc
-      - name: cluster_source
+      - name: snapshot_path
+      - name: backup_source_cluster
         value: "${cluster}"
       - name: workload-kind
         value: "deployment"
@@ -27,150 +26,69 @@ spec:
       dag:
         tasks:
           - name: scale-down
-            template: scale
-            arguments:
-              parameters: 
-                - name: replicas 
-                  value: "0"
             when: "{{workflow.parameters.workload-name}} != ''"
-          - name: resolve-id
-            template: resolve-id
-            dependencies: 
-              - scale-down
-          - name: create-restore
-            template: create-restore
-            dependencies: 
-              - resolve-id
+            templateRef:
+              name: scale
+              template: main
             arguments:
               parameters:
-                - name: snapshot
-                  value: "{{tasks.resolve-id.outputs.parameters.snapshot-id}}"
+                - name: replicas
+                  value: "0"
+                - name: workload-name
+                  value: "${application}"
+
+          - name: resolve-snapshot-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+            dependencies: 
+              - scale-down
+            arguments:
+              parameters:
+                - name: snapshot_path
+                  value: "{{workflow.parameters.snapshot_path}}" 
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"
+
+          - name: create-k8up-restore
+            templateRef:
+              name: create-k8up-restore
+              template: main
+            dependencies: 
+              - resolve-snapshot-id
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_target_pvc
+                  value: "${application}"
+                - name: snapshot_id
+                  value: "{{tasks.resolve-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+
           - name: wait-restore
             template: wait-restore
             dependencies: 
               - create-restore
             arguments:
               parameters:
-                - name: name
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_name
                   value: "{{tasks.create-restore.outputs.parameters.restore-name}}"
+       
           - name: scale-up
-            template: scale
-            dependencies:
-              - wait-restore
+            when: "{{workflow.parameters.workload-name}} != ''"
+            templateRef:
+              name: scale
+              template: main
             arguments:
               parameters:
                 - name: replicas
                   value: "1"
-            when: "{{workflow.parameters.workload-name}} != ''"
+                - name: workload-name
+                  value: "${application}"
 
-    - name: resolve-id
-      script:
-        image: restic/restic:latest
-        command:
-          - sh
-        source: |
-          set -euo pipefail
-          ID=$(restic snapshots --json --latest 1 --path "{{workflow.parameters.path}}" \
-            | jq -r '.[0].short_id')
-          if [ -z "$ID" ] || [ "$ID" = "null" ]; then
-            echo "aucun snapshot pour {{workflow.parameters.path}}" >&2
-            exit 1
-          fi
-          echo "resolved snapshot: $ID" >&2
-          printf '%s' "$ID" > /tmp/snapshot-id
-        env:
-          - name: RESTIC_REPOSITORY
-            value: "s3:https://s3.${s3_region}.io.cloud.ovh.net/alter-it-{{workflow.parameters.cluster_source}}-backup-${tenant}-${application}"
-          - name: RESTIC_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: k8up-credentials
-                key: RESTIC_PASSWORD
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: k8up-credentials
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: k8up-credentials
-                key: AWS_SECRET_ACCESS_KEY
-      outputs:
-        parameters:
-          - name: snapshot-id
-            valueFrom:
-              path: /tmp/snapshot-id
 
-    - name: create-restore
-      inputs:
-        parameters:
-          - name: snapshot
-      resource:
-        action: create
-        manifest: |
-          apiVersion: k8up.io/v1
-          kind: Restore
-          metadata:
-            generateName: argo-restore-
-            namespace: ${tenant}-${application}
-          spec:
-            podSecurityContext:
-              runAsUser: 1001
-              fsGroup: 1001
-              fsGroupChangePolicy: OnRootMismatch
-            snapshot: "{{inputs.parameters.snapshot}}"
-            restoreMethod:
-              folder:
-                claimName: "{{workflow.parameters.pvc}}"
-            backend:
-              repoPasswordSecretRef:
-                name: k8up-credentials
-                key: RESTIC_PASSWORD
-              s3:
-                endpoint: https://s3.${s3_region}.io.cloud.ovh.net
-                bucket: alter-it-{{workflow.parameters.cluster_source}}-backup-${tenant}-${application}
-                accessKeyIDSecretRef:
-                  name: k8up-credentials
-                  key: AWS_ACCESS_KEY_ID
-                secretAccessKeySecretRef:
-                  name: k8up-credentials
-                  key: AWS_SECRET_ACCESS_KEY
-      outputs:
-        parameters:
-          - name: restore-name
-            valueFrom:
-              jsonPath: '{.metadata.name}'
 
-    - name: wait-restore
-      inputs:
-        parameters:
-          - name: name
-      script:
-        image: bitnami/kubectl:latest
-        command: 
-          - bash
-        source: |
-          set -euo pipefail
-          kubectl wait --for=condition=Completed \
-            restore/{{inputs.parameters.name}} \
-            -n ${tenant}-${application} --timeout=1800s
-          reason=$(kubectl get restore/{{inputs.parameters.name}} \
-            -n ${tenant}-${application} \
-            -o jsonpath='{.status.conditions[?(@.type=="Completed")].reason}')
-          echo "restore reason: $reason"
-          [ "$reason" = "Succeeded" ] || { echo "restore failed"; exit 1; }
-
-    - name: scale
-      inputs:
-        parameters: 
-          - name: replicas
-      resource:
-        action: patch
-        mergeStrategy: merge
-        flags:
-          - "{{workflow.parameters.workload-kind}}"
-          - "{{workflow.parameters.workload-name}}"
-        manifest: |
-          spec:
-            replicas: {{inputs.parameters.replicas}}

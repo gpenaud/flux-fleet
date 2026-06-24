@@ -1,0 +1,24 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: scale
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      inputs:
+        parameters: 
+          - name: replicas
+          - name: workload-name
+          - name: workload-kind
+            value: "deployment"
+      resource:
+        action: patch
+        mergeStrategy: merge
+        flags:
+          - "{{inputs.parameters.workload-kind}}"
+          - "{{inputs.parameters.workload-name}}"
+        manifest: |
+          spec:
+            replicas: {{inputs.parameters.replicas}}

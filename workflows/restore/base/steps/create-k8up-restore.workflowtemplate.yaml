@@ -1,0 +1,50 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: create-k8up-restore
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: namespace
+          - name: restore_target_pvc
+          - name: snapshot_id
+          - name: source_bucket
+      resource:
+        action: create
+        manifest: |
+          apiVersion: k8up.io/v1
+          kind: Restore
+          metadata:
+            generateName: argo-restore-
+            namespace: {{inputs.parameters.namespace}}
+          spec:
+            podSecurityContext:
+              runAsUser: 1001
+              fsGroup: 1001
+              fsGroupChangePolicy: OnRootMismatch
+            snapshot: "{{inputs.parameters.snapshot_id}}"
+            restoreMethod:
+              folder:
+                claimName: "{{inputs.parameters.restore_target_pvc}}"
+            backend:
+              repoPasswordSecretRef:
+                name: k8up-credentials
+                key: RESTIC_PASSWORD
+              s3:
+                endpoint: https://s3.sbg.io.cloud.ovh.net
+                bucket: "{{inputs.parameters.source_bucket}}"
+                accessKeyIDSecretRef:
+                  name: k8up-credentials
+                  key: AWS_ACCESS_KEY_ID
+                secretAccessKeySecretRef:
+                  name: k8up-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+      outputs:
+        parameters:
+          - name: restore-name
+            valueFrom:
+              jsonPath: '{.metadata.name}'

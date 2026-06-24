@@ -1,0 +1,50 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: resolve-snapshot-id
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: snapshot_path
+          - name: source_bucket
+      script:
+        image: restic/restic:latest
+        command:
+          - sh
+        source: |
+          set -euo pipefail
+          ID=$(restic snapshots --json --latest 1 --path "{{inputs.parameters.snapshot_path}}" \
+            | jq -r '.[0].short_id')
+          if [ -z "$ID" ] || [ "$ID" = "null" ]; then
+            echo "aucun snapshot pour {{inputs.parameters.snapshot_path}}" >&2
+            exit 1
+          fi
+          echo "resolved snapshot: $ID" >&2
+          printf '%s' "$ID" > /tmp/snapshot-id
+        env:
+          - name: RESTIC_REPOSITORY
+            value: "s3:https://s3.sbg.io.cloud.ovh.net/{{inputs.parameters.source_bucket}}"
+          - name: RESTIC_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: RESTIC_PASSWORD
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: AWS_SECRET_ACCESS_KEY
+      outputs:
+        parameters:
+          - name: snapshot-id
+            valueFrom:
+              path: /tmp/snapshot-id
