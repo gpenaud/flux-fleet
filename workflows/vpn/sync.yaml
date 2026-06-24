@@ -16,6 +16,10 @@ spec:
   path: ./workflows/vpn/base
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
   postBuild:
     substituteFrom:
       - kind: ConfigMap
@@ -39,6 +43,10 @@ spec:
   path: ./workflows/vpn/runs
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
   postBuild:
     substituteFrom:
       - kind: ConfigMap

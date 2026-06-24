@@ -15,6 +15,10 @@ spec:
   path: ./workflows/restore/base
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
   postBuild:
     substituteFrom:
       - kind: ConfigMap
