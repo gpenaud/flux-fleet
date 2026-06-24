@@ -1,0 +1,13 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: tailscale-subrouter-bootstrap-
+  namespace: controller-vpn
+spec:
+  workflowTemplateRef:
+    name: tailscale-router-bootstrap
+  arguments:
+    parameters:
+      - name: headscale_user_name
+        value: gpenaud
