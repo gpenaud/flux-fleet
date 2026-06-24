@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: tailscale-subrouter-bootstrap-
+  name: tailscale-subrouter-bootstrap
   namespace: controller-vpn
 spec:
   workflowTemplateRef:
