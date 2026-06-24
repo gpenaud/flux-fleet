@@ -9,6 +9,8 @@ resources:
   # zone & subdomain creation 
   - ../../../tenants/shared/components/subdomain/sync.yaml
   - ../../../tenants/shared/applications/production/wordpress/sync.yaml
+  # common workflows
+  - ../../../workflows/restore
 
   ### 
   # Le Portail

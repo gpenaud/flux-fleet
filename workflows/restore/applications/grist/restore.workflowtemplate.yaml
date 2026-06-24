@@ -30,6 +30,7 @@ spec:
             templateRef:
               name: scale
               template: main
+              clusterScope: true
             arguments:
               parameters:
                 - name: replicas
@@ -41,6 +42,7 @@ spec:
             templateRef:
               name: resolve-snapshot-id
               template: main
+              clusterScope: true
             dependencies: 
               - scale-down
             arguments:
@@ -54,6 +56,7 @@ spec:
             templateRef:
               name: create-k8up-restore
               template: main
+              clusterScope: true
             dependencies: 
               - resolve-snapshot-id
             arguments:
@@ -71,6 +74,7 @@ spec:
             templateRef:
               name: wait-for-k8up-restore
               template: main
+              clusterScope: true
             dependencies: 
               - create-k8up-restore
             arguments:
@@ -85,6 +89,7 @@ spec:
             templateRef:
               name: scale
               template: main
+              clusterScope: true
             dependencies: 
               - wait-for-k8up-restore
             arguments:
