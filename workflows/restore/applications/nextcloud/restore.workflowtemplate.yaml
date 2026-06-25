@@ -19,7 +19,7 @@ spec:
       - name: database-dump-pvc
         value: "${application}-nextcloud-db-dump"
       - name: cluster_source
-        value: "${cluster}"
+        value: infra01
       - name: workload-kind
         value: "deployment"
       - name: workload-name
@@ -60,6 +60,8 @@ spec:
               parameters: 
                 - name: snapshot_path
                   value: "{{workflow.parameters.data-path}}"
+                - name: source_bucket
+                  value: "{{workflow.parameters.cluster_source}}"
             dependencies: 
               - scale-down
 
@@ -96,6 +98,8 @@ spec:
               parameters: 
                 - name: snapshot_path
                   value: "/{{workflow.parameters.database-dump-filename}}"
+                - name: source_bucket
+                  value: "{{workflow.parameters.cluster_source}}"
             dependencies: 
               - scale-down
 
