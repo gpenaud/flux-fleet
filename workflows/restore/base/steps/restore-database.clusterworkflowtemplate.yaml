@@ -1,0 +1,32 @@
+
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: restore-database
+spec:
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: database-dump-pvc
+          - name: dump-file
+          - name: db-host
+      container:
+        image: mysql:8
+        command: [sh, -c]
+        args:
+          - |
+            set -e
+            mysql -h "{{inputs.parameters.db-host}}" \
+              -u "$DB_USER" -p"$DB_PASS" \
+              < /restore/{{inputs.parameters.dump-file}}
+        env:
+          - name: DB_USER
+            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootUser } }
+          - name: DB_PASS
+            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootPassword } }
+        volumeMounts:
+          - name: "{{inputs.parameters.database-dump-pvc}}"
+            mountPath: /restore
+            readOnly: true
