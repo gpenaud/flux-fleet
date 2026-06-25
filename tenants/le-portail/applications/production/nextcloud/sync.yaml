@@ -20,7 +20,9 @@ spec:
     provider: sops
     secretRef:
       name: sops-age-private-key
-  postBuild:
+  postBuild:    
+    substitute:
+      application: nextcloud
     substituteFrom:
       - kind: ConfigMap
         name: cluster-vars
