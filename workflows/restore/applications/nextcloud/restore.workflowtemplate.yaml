@@ -37,7 +37,10 @@ spec:
       dag:
         tasks:
           - name: scale-down
-            template: scale
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
             arguments:
               parameters: 
                 - name: replicas 
@@ -47,7 +50,10 @@ spec:
           # restore data
 
           - name: resolve-data-snapshot-id
-            template: resolve-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+              clusterScope: true
             arguments:
               parameters: 
                 - name: path 
@@ -56,7 +62,10 @@ spec:
               - scale-down
 
           - name: create-data-restore
-            template: create-restore
+            templateRef:
+              name: create-k8up-restore
+              template: main
+              clusterScope: true
             dependencies: 
               - resolve-data-snapshot-id
             arguments:
@@ -65,7 +74,10 @@ spec:
                   value: "{{tasks.resolve-data-snapshot-id.outputs.parameters.snapshot-id}}"
           
           - name: wait-data-restore
-            template: wait-restore
+            templateRef:
+              name: wait-for-k8up-restore
+              template: main
+              clusterScope: true
             dependencies: 
               - create-data-restore
             arguments:
@@ -74,7 +86,10 @@ spec:
                   value: "{{tasks.create-data-restore.outputs.parameters.restore-name}}"
 
           - name: resolve-database-dump-snapshot-id
-            template: resolve-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+              clusterScope: true
             arguments:
               parameters: 
                 - name: path 
@@ -83,7 +98,10 @@ spec:
               - scale-down
 
           - name: create-database-dump-restore
-            template: create-restore
+            templateRef:
+              name: create-k8up-restore
+              template: main
+              clusterScope: true
             dependencies: 
               - resolve-database-dump-snapshot-id
             arguments:
@@ -94,7 +112,10 @@ spec:
                   value: "{{workflow.parameters.database-dump-pvc}}"
 
           - name: wait-for-database-dump-restore
-            template: wait-restore
+            templateRef:
+              name: wait-for-k8up-restore
+              template: main
+              clusterScope: true
             dependencies: 
               - create-database-dump-restore
             arguments:
@@ -103,7 +124,10 @@ spec:
                   value: "{{tasks.create-database-dump-restore.outputs.parameters.restore-name}}"
               
           - name: inject-database-dump
-            template: restore-database
+            templateRef:
+              name: restore-database
+              template: main
+              clusterScope: true
             dependencies: 
               - wait-for-database-dump-restore
             arguments:
@@ -116,7 +140,10 @@ spec:
                   value: "mysql-version-8-lts.controller-database.svc.cluster.local"
 
           - name: scale-up
-            template: scale
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
             dependencies:
               - wait-for-database-dump-restore
             arguments:
