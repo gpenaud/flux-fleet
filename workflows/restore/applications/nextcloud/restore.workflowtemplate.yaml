@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: restore-pvc
+  name: restore
   namespace: ${tenant}-${application}
 spec:
   podGC:
