@@ -58,7 +58,7 @@ spec:
               clusterScope: true
             arguments:
               parameters: 
-                - name: path 
+                - name: snapshot_path
                   value: "{{workflow.parameters.data-path}}"
             dependencies: 
               - scale-down
@@ -94,7 +94,7 @@ spec:
               clusterScope: true
             arguments:
               parameters: 
-                - name: path 
+                - name: snapshot_path
                   value: "/{{workflow.parameters.database-dump-filename}}"
             dependencies: 
               - scale-down
