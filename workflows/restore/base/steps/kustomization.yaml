@@ -6,3 +6,4 @@ resources:
   - resolve-snapshot-id.clusterworkflowtemplate.yaml
   - scale.clusterworkflowtemplate.yaml
   - wait-for-k8up-restore.clusterworkflowtemplate.yaml
+  - restore-database.clusterworkflowtemplate.yaml
