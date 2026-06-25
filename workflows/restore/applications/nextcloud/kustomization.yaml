@@ -5,4 +5,4 @@ resources:
   - ../../base/rbac/serviceaccount.yaml
   - ../../base/rbac/role.yaml
   - ../../base/rbac/rolebinding.yaml
-  - workflowtemplate.yaml
+  - restore.workflowtemplate.yaml
