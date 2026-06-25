@@ -45,6 +45,8 @@ spec:
               parameters: 
                 - name: replicas 
                   value: "0"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
             when: "{{workflow.parameters.workload-name}} != ''"
         
           # restore data
@@ -150,4 +152,6 @@ spec:
               parameters:
                 - name: replicas
                   value: "1"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
             when: "{{workflow.parameters.workload-name}} != ''"
