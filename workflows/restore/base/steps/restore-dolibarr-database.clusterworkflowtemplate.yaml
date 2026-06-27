@@ -16,7 +16,7 @@ spec:
           - name: verify
             value: "true"
       script:
-        image: mariadb:11.4
+        image: mysql:8
         command: [bash]
         env:
           - name: DB
@@ -33,27 +33,27 @@ spec:
           set -euo pipefail
 
           HOST='{{inputs.parameters.db-host}}'
-          DUMP="/dump/{{inputs.parameters.dump-file}}"
+          USER='{{inputs.parameters.db-user}}'
+          DUMP="/dump/{{inputs.parameters.dump-filename}}"
 
           echo ">> Dump attendu : $DUMP"
           test -s "$DUMP" || { echo "ERREUR: dump absent ou vide: $DUMP"; exit 1; }
 
-          echo ">> Import dans '$DB' sur '$HOST' (FK/UNIQUE checks désactivés le temps du chargement)"
+          echo ">> Import dans '$DB' sur '$HOST' (FK/UNIQUE checks off le temps du chargement)"
           { printf 'SET FOREIGN_KEY_CHECKS=0;\nSET UNIQUE_CHECKS=0;\n'; cat "$DUMP"; } \
-            | mariadb --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
+            | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
           echo ">> Import terminé sans erreur."
 
           if [ '{{inputs.parameters.verify}}' = 'true' ]; then
-            echo ">> Validation : CHECK TABLE sur toutes les tables de base"
-            CHECKS=$(mariadb --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB" -e \
+            echo ">> Validation : CHECK TABLE"
+            CHECKS=$(mysql --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB" -e \
               "SELECT CONCAT('CHECK TABLE \`', table_name, '\`;')
                  FROM information_schema.tables
                 WHERE table_schema='$DB' AND table_type='BASE TABLE';")
-            RES=$(printf '%s\n' "$CHECKS" | mariadb --host="$HOST" --user="$USER" -N "$DB")
+            RES=$(printf '%s\n' "$CHECKS" | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB")
             printf '%s\n' "$RES"
             if printf '%s\n' "$RES" | grep -vw 'OK' | grep -q .; then
-              echo ">> ERREUR: au moins une table n'est pas OK au CHECK."
-              exit 1
+              echo ">> ERREUR: au moins une table KO au CHECK."; exit 1
             fi
             echo ">> Toutes les tables sont OK."
           fi
