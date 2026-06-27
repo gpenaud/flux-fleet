@@ -115,11 +115,6 @@ spec:
             dependencies: 
               - scale-down
 
-          - name: namespace
-          - name: restore_target_pvc
-          - name: snapshot_id
-          - name: source_bucket
-
           - name: create-database-dump-restore
             templateRef:
               name: create-k8up-restore
