@@ -16,8 +16,6 @@ spec:
         value: "/data/${application}-nextcloud"
       - name: data-pvc
         value: "${application}-nextcloud"
-      - name: database-dump-pvc
-        value: "${application}-nextcloud-db-dump"
       - name: backup_source_cluster
         value: infra01
       - name: workload-kind
@@ -30,7 +28,7 @@ spec:
         claimName: ${application}-nextcloud
   volumeClaimTemplates:
     - metadata:
-        name: ${application}-nextcloud-db-dump
+        name: db-dump
       spec:
         accessModes: ["ReadWriteOnce"]
         storageClassName: longhorn
@@ -127,7 +125,7 @@ spec:
                 - name: namespace
                   value: "${tenant}-${application}"
                 - name: restore_target_pvc
-                  value: "{{workflow.parameters.database-dump-pvc}}"
+                  value: "{{workflow.name}}-db-dump"
                 - name: snapshot_id
                   value: "{{tasks.resolve-database-dump-snapshot-id.outputs.parameters.snapshot-id}}"
                 - name: source_bucket
@@ -157,7 +155,7 @@ spec:
             arguments:
               parameters:
                 - name: database-dump-pvc
-                  value: "{{workflow.parameters.database-dump-pvc}}"
+                  value: "{{workflow.name}}-db-dump"
                 - name: dump-file
                   value: "{{workflow.parameters.database-dump-filename}}"
                 - name: db-host
