@@ -113,7 +113,7 @@ spec:
                 - name: snapshot_path
                   value: "/{{workflow.parameters.database-dump-filename}}"
                 - name: source_bucket
-                  value: "{{workflow.parameters.cluster_source}}"
+                  value: "{{workflow.parameters.backup_source_cluster}}"
             dependencies: 
               - scale-down
 
