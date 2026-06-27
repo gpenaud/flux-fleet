@@ -24,8 +24,6 @@ spec:
         value: "deployment"
       - name: workload-name
         value: ""
-        
-      - name: snapshot_path
       - name: backup_source_cluster
         value: "${cluster}"
       - name: workload-kind
