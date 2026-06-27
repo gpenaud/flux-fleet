@@ -11,7 +11,7 @@ resources:
   - ingressroute.yaml
   - secrets.enc.yaml
   # workflows
-  # - ../../../../../../workflows/restore/applications/wordpress
+  - ../../../../../../workflows/restore/applications/wordpress
 
 patches:
   - target:
