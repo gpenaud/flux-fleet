@@ -10,17 +10,17 @@ spec:
   entrypoint: main
   arguments:
     parameters:
-      - name: database-dump-filename
+      - name: snapshot-db-dump-file
         value: ${tenant}-${application}-nextcloud-db-dump.sql
-      - name: data-path
+      - name: snapshot-data-path
         value: "/data/${application}-nextcloud"
-      - name: data-pvc
+      - name: data-pvc-name
         value: "${application}-nextcloud"
       - name: db-secret-name
         value: "${application}"
       - name: db-secret-database-key
         value: "mariadb-database"
-      - name: backup_source_cluster
+      - name: backup-cluster-source
         value: infra01
       - name: workload-kind
         value: "deployment"
@@ -64,9 +64,9 @@ spec:
             arguments:
               parameters: 
                 - name: snapshot_path
-                  value: "{{workflow.parameters.data-path}}"
+                  value: "{{workflow.parameters.snapshot-data-path}}"
                 - name: source_bucket
-                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
             dependencies: 
               - scale-down
 
@@ -82,11 +82,11 @@ spec:
                 - name: namespace
                   value: "${tenant}-${application}"
                 - name: restore_target_pvc
-                  value: "{{workflow.parameters.data-pvc}}"
+                  value: "{{workflow.parameters.data-pvc-name}}"
                 - name: snapshot_id
                   value: "{{tasks.resolve-data-snapshot-id.outputs.parameters.snapshot-id}}"
                 - name: source_bucket
-                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
 
           - name: wait-for-data-restore
             templateRef:
@@ -110,9 +110,9 @@ spec:
             arguments:
               parameters: 
                 - name: snapshot_path
-                  value: "/{{workflow.parameters.database-dump-filename}}"
+                  value: "/{{workflow.parameters.snapshot-db-dump-file}}"
                 - name: source_bucket
-                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
             dependencies: 
               - scale-down
 
@@ -133,7 +133,7 @@ spec:
                 - name: snapshot_id
                   value: "{{tasks.resolve-database-dump-snapshot-id.outputs.parameters.snapshot-id}}"
                 - name: source_bucket
-                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
 
           - name: wait-for-database-dump-restore
             templateRef:
@@ -159,7 +159,7 @@ spec:
             arguments:
               parameters:
                 - name: dump-file
-                  value: "{{workflow.parameters.database-dump-filename}}"
+                  value: "{{workflow.parameters.snapshot-db-dump-file}}"
                 - name: db-host
                   value: "mysql-version-8-lts.controller-database.svc.cluster.local"
                 - name: db-secret-name
