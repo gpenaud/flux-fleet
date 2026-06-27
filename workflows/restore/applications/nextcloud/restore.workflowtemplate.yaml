@@ -115,6 +115,11 @@ spec:
             dependencies: 
               - scale-down
 
+          - name: namespace
+          - name: restore_target_pvc
+          - name: snapshot_id
+          - name: source_bucket
+
           - name: create-database-dump-restore
             templateRef:
               name: create-k8up-restore
@@ -124,10 +129,14 @@ spec:
               - resolve-database-dump-snapshot-id
             arguments:
               parameters:
-                - name: snapshot-id
-                  value: "{{tasks.resolve-database-dump-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: namespace
+                  value: "${tenant}-${application}"
                 - name: restore_target_pvc
                   value: "{{workflow.parameters.database-dump-pvc}}"
+                - name: snapshot_id
+                  value: "{{tasks.resolve-database-dump-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
 
           - name: wait-for-database-dump-restore
             templateRef:
