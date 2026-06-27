@@ -151,7 +151,7 @@ spec:
               
           - name: inject-database-dump
             templateRef:
-              name: restore-database
+              name: restore-dolibarr-database
               template: main
               clusterScope: true
             dependencies: 

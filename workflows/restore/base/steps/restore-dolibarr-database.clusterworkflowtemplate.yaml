@@ -1,0 +1,57 @@
+
+
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: restore-dolibarr-database
+spec:
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: dump-file
+          - name: db-host
+          - name: db-secret-name
+          - name: db-secret-database-key 
+      script:
+        image: mariadb:11.4
+        command: [bash]
+        env:
+          - name: DB
+            valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
+          - name: USER
+            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootUser } }
+          - name: PASSWORD
+            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootPassword } }
+        volumeMounts:
+          - name: db-dump                 # volume fourni par le Workflow appelant
+            mountPath: /dump
+            readOnly: true
+        source: |
+          set -euo pipefail
+
+          HOST='{{inputs.parameters.db-host}}'
+          DUMP="/dump/{{inputs.parameters.dump-file}}"
+
+          echo ">> Dump attendu : $DUMP"
+          test -s "$DUMP" || { echo "ERREUR: dump absent ou vide: $DUMP"; exit 1; }
+
+          echo ">> Import dans '$DB' sur '$HOST' (FK/UNIQUE checks désactivés le temps du chargement)"
+          { printf 'SET FOREIGN_KEY_CHECKS=0;\nSET UNIQUE_CHECKS=0;\n'; cat "$DUMP"; } \
+            | mariadb --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
+          echo ">> Import terminé sans erreur."
+
+          if [ '{{inputs.parameters.verify}}' = 'true' ]; then
+            echo ">> Validation : CHECK TABLE sur toutes les tables de base"
+            CHECKS=$(mariadb --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB" -e \
+              "SELECT CONCAT('CHECK TABLE \`', table_name, '\`;')
+                 FROM information_schema.tables
+                WHERE table_schema='$DB' AND table_type='BASE TABLE';")
+            RES=$(printf '%s\n' "$CHECKS" | mariadb --host="$HOST" --user="$USER" -N "$DB")
+            printf '%s\n' "$RES"
+            if printf '%s\n' "$RES" | grep -vw 'OK' | grep -q .; then
+              echo ">> ERREUR: au moins une table n'est pas OK au CHECK."
+              exit 1
+            fi
+            echo ">> Toutes les tables sont OK."
+          fi
