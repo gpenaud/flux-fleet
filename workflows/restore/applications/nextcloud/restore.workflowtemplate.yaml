@@ -18,8 +18,16 @@ spec:
         value: "${application}-nextcloud"
       - name: database-dump-pvc
         value: "${application}-nextcloud-db-dump"
-      - name: cluster_source
+      - name: backup_source_cluster
         value: infra01
+      - name: workload-kind
+        value: "deployment"
+      - name: workload-name
+        value: ""
+        
+      - name: snapshot_path
+      - name: backup_source_cluster
+        value: "${cluster}"
       - name: workload-kind
         value: "deployment"
       - name: workload-name
@@ -61,7 +69,7 @@ spec:
                 - name: snapshot_path
                   value: "{{workflow.parameters.data-path}}"
                 - name: source_bucket
-                  value: "{{workflow.parameters.cluster_source}}"
+                  value: "{{workflow.parameters.backup_source_cluster}}"
             dependencies: 
               - scale-down
 
@@ -74,9 +82,17 @@ spec:
               - resolve-data-snapshot-id
             arguments:
               parameters:
-                - name: snapshot-id
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_target_pvc
+                  value: "${application}"
+                - name: snapshot_id
                   value: "{{tasks.resolve-data-snapshot-id.outputs.parameters.snapshot-id}}"
-          
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+
+
+
           - name: wait-data-restore
             templateRef:
               name: wait-for-k8up-restore
