@@ -154,8 +154,6 @@ spec:
               - wait-for-database-dump-restore
             arguments:
               parameters:
-                - name: database-dump-pvc
-                  value: "{{workflow.name}}-db-dump"
                 - name: dump-file
                   value: "{{workflow.parameters.database-dump-filename}}"
                 - name: db-host

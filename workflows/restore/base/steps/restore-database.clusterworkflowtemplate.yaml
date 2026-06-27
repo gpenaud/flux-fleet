@@ -9,7 +9,6 @@ spec:
     - name: main
       inputs:
         parameters:
-          - name: database-dump-pvc
           - name: dump-file
           - name: db-host
       container:
@@ -27,6 +26,6 @@ spec:
           - name: DB_PASS
             valueFrom: { secretKeyRef: { name: mysql-operator, key: rootPassword } }
         volumeMounts:
-          - name: "{{inputs.parameters.database-dump-pvc}}"
+          - name: "db-dump"
             mountPath: /restore
             readOnly: true
