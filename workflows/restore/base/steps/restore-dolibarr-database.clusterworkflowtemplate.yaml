@@ -12,7 +12,9 @@ spec:
           - name: dump-file
           - name: db-host
           - name: db-secret-name
-          - name: db-secret-database-key 
+          - name: db-secret-database-key
+          - name: verify
+            value: "true"
       script:
         image: mariadb:11.4
         command: [bash]
