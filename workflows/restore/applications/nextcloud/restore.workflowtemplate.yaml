@@ -98,7 +98,9 @@ spec:
               - create-data-restore
             arguments:
               parameters:
-                - name: name
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_name
                   value: "{{tasks.create-data-restore.outputs.parameters.restore-name}}"
 
           - name: resolve-database-dump-snapshot-id
@@ -142,7 +144,9 @@ spec:
               - create-database-dump-restore
             arguments:
               parameters:
-                - name: name
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_name
                   value: "{{tasks.create-database-dump-restore.outputs.parameters.restore-name}}"
               
           - name: inject-database-dump
