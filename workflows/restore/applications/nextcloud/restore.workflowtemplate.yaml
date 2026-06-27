@@ -89,8 +89,6 @@ spec:
                 - name: source_bucket
                   value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
 
-
-
           - name: wait-data-restore
             templateRef:
               name: wait-for-k8up-restore
