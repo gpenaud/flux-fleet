@@ -28,10 +28,15 @@ spec:
     - name: ${application}-data
       persistentVolumeClaim:
         claimName: ${application}-nextcloud
-    - name: ${application}-db-dump
-      persistentVolumeClaim:
-        claimName: ${application}-nextcloud-db-dump
-    - 
+  volumeClaimTemplates:
+    - metadata:
+        name: ${application}-nextcloud-db-dump
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 2Gi
   templates:
     - name: main
       dag:
