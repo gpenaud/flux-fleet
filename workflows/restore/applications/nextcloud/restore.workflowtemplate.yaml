@@ -173,7 +173,7 @@ spec:
               template: main
               clusterScope: true
             dependencies:
-              - wait-for-database-dump-restore
+              - inject-database-dump
             arguments:
               parameters:
                 - name: replicas

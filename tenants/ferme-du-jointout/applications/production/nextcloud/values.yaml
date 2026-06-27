@@ -37,6 +37,7 @@ spec:
             ],
             'overwrite.cli.url' => 'https://nextcloud.${domain}',
             'overwriteprotocol' => 'https',
+            'dbhost' => 'mysql-version-8-lts.controller-database.svc.cluster.local',
           );
       existingSecret:
         enabled: true
