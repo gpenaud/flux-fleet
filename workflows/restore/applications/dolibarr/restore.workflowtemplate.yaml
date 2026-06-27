@@ -1,0 +1,183 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: restore
+  namespace: ${tenant}-${application}
+spec:
+  podGC:
+    strategy: OnWorkflowSuccess
+  serviceAccountName: restore-runner
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: snapshot-db-dump-file
+        value: ${tenant}-${application}-db-dump.sql
+      - name: snapshot-data-path
+        value: "/data/${application}"
+      - name: data-pvc-name
+        value: "${application}"
+      - name: db-secret-name
+        value: "${application}"
+      - name: db-secret-database-key
+        value: "mariadb-database"
+      - name: backup-cluster-source
+        value: infra01
+      - name: workload-kind
+        value: "deployment"
+      - name: workload-name
+        value: "${application}"
+  volumes:
+    - name: ${application}-data
+      persistentVolumeClaim:
+        claimName: ${application}
+  volumeClaimTemplates:
+    - metadata:
+        name: db-dump
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 2Gi
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: scale-down
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
+            arguments:
+              parameters: 
+                - name: replicas 
+                  value: "0"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"
+
+          - name: resolve-data-snapshot-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+              clusterScope: true
+            arguments:
+              parameters: 
+                - name: snapshot_path
+                  value: "{{workflow.parameters.snapshot-data-path}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
+            dependencies: 
+              - scale-down
+
+          - name: create-data-restore
+            templateRef:
+              name: create-k8up-restore
+              template: main
+              clusterScope: true
+            dependencies: 
+              - resolve-data-snapshot-id
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_target_pvc
+                  value: "{{workflow.parameters.data-pvc-name}}"
+                - name: snapshot_id
+                  value: "{{tasks.resolve-data-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
+
+          - name: wait-for-data-restore
+            templateRef:
+              name: wait-for-k8up-restore
+              template: main
+              clusterScope: true
+            dependencies: 
+              - create-data-restore
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_name
+                  value: "{{tasks.create-data-restore.outputs.parameters.restore-name}}"
+
+          - name: resolve-database-dump-snapshot-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+              clusterScope: true
+            arguments:
+              parameters: 
+                - name: snapshot_path
+                  value: "/{{workflow.parameters.snapshot-db-dump-file}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
+            dependencies: 
+              - scale-down
+
+          - name: create-database-dump-restore
+            templateRef:
+              name: create-k8up-restore
+              template: main
+              clusterScope: true
+            dependencies: 
+              - resolve-database-dump-snapshot-id
+              - wait-for-data-restore
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_target_pvc
+                  value: "{{workflow.name}}-db-dump"
+                - name: snapshot_id
+                  value: "{{tasks.resolve-database-dump-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
+
+          - name: wait-for-database-dump-restore
+            templateRef:
+              name: wait-for-k8up-restore
+              template: main
+              clusterScope: true
+            dependencies: 
+              - create-database-dump-restore
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_name
+                  value: "{{tasks.create-database-dump-restore.outputs.parameters.restore-name}}"
+              
+          - name: inject-database-dump
+            templateRef:
+              name: restore-database
+              template: main
+              clusterScope: true
+            dependencies: 
+              - wait-for-database-dump-restore
+            arguments:
+              parameters:
+                - name: dump-file
+                  value: "{{workflow.parameters.snapshot-db-dump-file}}"
+                - name: db-host
+                  value: "mysql-version-8-lts.controller-database.svc.cluster.local"
+                - name: db-secret-name
+                  value: "{{workflow.parameters.db-secret-name}}"
+                - name: db-secret-database-key
+                  value: "{{workflow.parameters.db-secret-database-key}}"
+
+          - name: scale-up
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
+            dependencies:
+              - inject-database-dump
+            arguments:
+              parameters:
+                - name: replicas
+                  value: "1"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"

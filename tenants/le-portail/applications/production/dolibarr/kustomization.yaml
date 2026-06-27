@@ -9,6 +9,8 @@ resources:
   - ../../../../../applications/dolibarr/components/init
   - ../../../../../applications/dolibarr/components/backup
   - secrets.enc.yaml
+  # workflows
+  - ../../../../../workflows/restore/applications/dolibarr
 
 patches:
   - target:
