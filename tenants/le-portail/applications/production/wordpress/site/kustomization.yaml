@@ -5,13 +5,13 @@ kind: Kustomization
 namespace: ${tenant}-wordpress-site
 
 resources:
-  - ../../../../../applications/wordpress
-  - ../../../../../applications/wordpress/components/init
-  - ../../../../../applications/wordpress/components/backup
+  - ../../../../../../applications/wordpress
+  - ../../../../../../applications/wordpress/components/init
+  - ../../../../../../applications/wordpress/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
   # workflows
-  - ../../../../../workflows/restore/applications/wordpress
+  - ../../../../../../workflows/restore/applications/wordpress
 
 patches:
   - target:
