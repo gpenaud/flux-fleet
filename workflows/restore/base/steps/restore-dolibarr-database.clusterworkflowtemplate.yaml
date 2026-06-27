@@ -38,10 +38,17 @@ spec:
           echo ">> Dump attendu : $DUMP"
           test -s "$DUMP" || { echo "ERREUR: dump absent ou vide: $DUMP"; exit 1; }
 
-          echo ">> Import dans '$DB' sur '$HOST' (FK/UNIQUE checks off le temps du chargement)"
+          echo ">> Reset de '$DB' : drop de toutes les tables existantes"
+          { echo 'SET FOREIGN_KEY_CHECKS=0;';
+            mysql --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB" -e \
+              "SELECT CONCAT('DROP TABLE IF EXISTS \`', table_name, '\`;')
+                 FROM information_schema.tables
+                WHERE table_schema='$DB' AND table_type='BASE TABLE';"; } \
+          | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
+
+          echo ">> Import dans '$DB' (base vide, FK/UNIQUE off le temps du chargement)"
           { printf 'SET FOREIGN_KEY_CHECKS=0;\nSET UNIQUE_CHECKS=0;\n'; cat "$DUMP"; } \
-            | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
-          echo ">> Import terminé sans erreur."
+          | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
 
           if [ '{{inputs.parameters.verify}}' = 'true' ]; then
             echo ">> Validation : CHECK TABLE"
