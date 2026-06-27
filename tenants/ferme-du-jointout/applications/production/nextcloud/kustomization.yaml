@@ -10,6 +10,8 @@ resources:
   - ../../../../../applications/nextcloud/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
+  # workflows
+  - ../../../../../workflows/restore/applications/nextcloud
 
 patches:
   - target:
