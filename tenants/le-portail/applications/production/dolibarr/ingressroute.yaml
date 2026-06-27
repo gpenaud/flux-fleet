@@ -4,6 +4,10 @@ kind: IngressRoute
 metadata:
   name: dolibarr
   namespace: ${tenant}-dolibarr
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: dolibarr.${domain},compta.${domain}
+    external-dns.alpha.kubernetes.io/target: ${domain}
+    external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
