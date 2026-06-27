@@ -80,7 +80,7 @@ spec:
                 - name: namespace
                   value: "${tenant}-${application}"
                 - name: restore_target_pvc
-                  value: "${application}"
+                  value: "{{workflow.parameters.data-pvc}}"
                 - name: snapshot_id
                   value: "{{tasks.resolve-data-snapshot-id.outputs.parameters.snapshot-id}}"
                 - name: source_bucket
