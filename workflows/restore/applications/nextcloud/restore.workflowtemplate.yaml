@@ -22,10 +22,6 @@ spec:
         value: infra01
       - name: workload-kind
         value: "deployment"
-      - name: backup_source_cluster
-        value: "${cluster}"
-      - name: workload-kind
-        value: "deployment"
       - name: workload-name
         value: "${application}"
   volumes:
