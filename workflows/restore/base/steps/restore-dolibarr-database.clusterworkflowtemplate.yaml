@@ -33,8 +33,7 @@ spec:
           set -euo pipefail
 
           HOST='{{inputs.parameters.db-host}}'
-          USER='{{inputs.parameters.db-user}}'
-          DUMP="/dump/{{inputs.parameters.dump-filename}}"
+          DUMP="/dump/{{inputs.parameters.dump-file}}"
 
           echo ">> Dump attendu : $DUMP"
           test -s "$DUMP" || { echo "ERREUR: dump absent ou vide: $DUMP"; exit 1; }
