@@ -11,6 +11,8 @@ spec:
         parameters:
           - name: dump-file
           - name: db-host
+          - name: db-secret-name
+          - name: db-secret-database-key 
       container:
         image: mysql:8
         command: [sh, -c]
@@ -19,8 +21,10 @@ spec:
             set -e
             mysql -h "{{inputs.parameters.db-host}}" \
               -u "$DB_USER" -p"$DB_PASS" \
-              < /restore/{{inputs.parameters.dump-file}}
+              $DB_NAME < /restore/{{inputs.parameters.dump-file}}
         env:
+          - name: DB_NAME
+            valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
           - name: DB_USER
             valueFrom: { secretKeyRef: { name: mysql-operator, key: rootUser } }
           - name: DB_PASS
