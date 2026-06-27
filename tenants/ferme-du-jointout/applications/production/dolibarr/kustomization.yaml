@@ -10,6 +10,8 @@ resources:
   - ../../../../../applications/dolibarr/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
+  # workflows
+  - ../../../../../workflows/restore/applications/dolibarr
 
 patches:
   - target:
