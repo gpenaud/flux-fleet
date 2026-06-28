@@ -32,7 +32,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: mariadb-operator
-        namespace: flux-system
+        namespace: controller-database
   values:
     certController:
       enabled: false
