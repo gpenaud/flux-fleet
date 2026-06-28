@@ -3,8 +3,8 @@ kind: Kustomization
  
 resources:
   # storage controller - longhorn
-  - ../../../infrastructure/storage/crds/sync.yaml
-  - ../../../infrastructure/storage/sync.yaml
+  - ../../../infrastructure/storage/longhorn/crds/sync.yaml
+  - ../../../infrastructure/storage/longhorn/sync.yaml
   # cni controller - cilium
   - ../../../infrastructure/cni/cilium/sync.yaml
   # ingress controller - traefik
