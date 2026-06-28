@@ -7,7 +7,7 @@ metadata:
 spec:
   dependsOn:
     # - name: infrastructure
-    - name: infrastructure-controller-storage-longhorn
+    - name: infrastructure-controller-storage-local-path
     - name: infrastructure-controller-ingress-traefik
     - name: infrastructure-controller-database
     - name: infrastructure-controller-certificate

@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-storage-longhorn
+    - name: - name: infrastructure-controller-storage-local-path
   interval: 1h
   retryInterval: 2m
   timeout: 5m
