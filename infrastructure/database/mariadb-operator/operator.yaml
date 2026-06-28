@@ -39,4 +39,4 @@ spec:
     cert-manager:
       enabled: true
     metrics:
-      enabled: true
+      enabled: false
