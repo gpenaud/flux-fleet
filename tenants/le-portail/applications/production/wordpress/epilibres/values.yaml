@@ -17,6 +17,9 @@ spec:
       database: epilibres
       existingSecret: wordpress
     wordpressPlugins: []
+    extraEnvVars:
+      - name: WORDPRESS_SKIP_BOOTSTRAP
+        value: "true"
     service:
       type: ClusterIP
     persistence:
