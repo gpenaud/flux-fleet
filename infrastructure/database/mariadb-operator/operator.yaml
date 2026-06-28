@@ -35,9 +35,13 @@ spec:
         namespace: controller-database
   values:
     certController:
-      enabled: false
-    cert-manager:
       enabled: true
+    cert-manager:
+      enabled: false
+    webhook:
+      cert:
+        certManager:
+          enabled: false
     metrics:
       enabled: false
       serviceMonitor:
