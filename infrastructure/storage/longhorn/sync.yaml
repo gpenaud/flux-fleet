@@ -12,7 +12,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/storage/longhorn
+  path: ./infrastructure/storage/local-path
   prune: true
   wait: true
   decryption:

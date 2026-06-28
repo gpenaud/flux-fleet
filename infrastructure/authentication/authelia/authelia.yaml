@@ -15,7 +15,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: longhorn
+  storageClassName: local-path
   resources:
     requests:
       storage: 1Gi
@@ -62,7 +62,7 @@ spec:
     # ================================================================
     persistence:
       enabled: true
-      storageClass: longhorn
+      storageClass: local-path
       size: '1Gi'
       accessModes:
         - 'ReadWriteOnce'

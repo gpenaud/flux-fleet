@@ -73,7 +73,7 @@ spec:
           memory: 512Mi
       persistence:
         enabled: true
-        storageClass: longhorn
+        storageClass: local-path
         size: 10Gi
         accessModes:
           - ReadWriteOnce

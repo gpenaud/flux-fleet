@@ -69,6 +69,6 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 10Gi
-        storageClass: longhorn
+        storageClass: local-path
         globalMounts:
           - path: /persist

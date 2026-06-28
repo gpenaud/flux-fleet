@@ -25,7 +25,7 @@ spec:
       type: ClusterIP
     persistence:
       enabled: true
-      storageClass: longhorn
+      storageClass: local-path
       size: 10Gi
     ingress:
       enabled: false

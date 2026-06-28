@@ -18,7 +18,7 @@ spec:
     database:
       persistentVolume:
         enabled: true
-        storageClass: longhorn
+        storageClass: local-path
         capacity:
           storage: 2Gi
   valuesFrom:

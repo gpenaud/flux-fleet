@@ -2,31 +2,31 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: longhorn
+  name: local-path
   namespace: controller-storage
 spec:
   interval: 24h
-  url: https://charts.longhorn.io
+  url: https://charts.local-path.io
 
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: longhorn
+  name: local-path
   namespace: controller-storage
 spec:
   interval: 30m
   chart:
     spec:
-      chart: longhorn
+      chart: local-path
       version: "v1.x"
       sourceRef:
         kind: HelmRepository
-        name: longhorn
+        name: local-path
         namespace: controller-storage
   values:
     defaultSettings:
-      defaultDataPath: /var/lib/longhorn
+      defaultDataPath: /var/lib/local-path
       backupTarget: ""
       snapshotDataIntegrity: disabled
       autoCleanupSystemGeneratedSnapshot: true

@@ -9,7 +9,7 @@ metadata:
     k8up.io/backup: "true"
 spec:
   accessModes: [ReadWriteOnce]
-  storageClassName: longhorn
+  storageClassName: local-path
   resources:
     requests:
       storage: 10Gi
