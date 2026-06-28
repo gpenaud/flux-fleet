@@ -8,7 +8,7 @@ spec:
     wordpressExistingSecret: wordpress
     wordpressEmail: dugrainamoudre@${domain}
     wordpressSkipInstall: true
-    wordpressOverrideDatabaseSettings: true
+    overrideDatabaseSettings: true
     mariadb:
       enabled: false
     externalDatabase:
