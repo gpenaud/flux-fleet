@@ -7,9 +7,9 @@ resources:
   # - ../../../infrastructure/storage/local-path/sync.yaml
   # storage controller - local-path
   - ../../../infrastructure/storage/local-path/sync.yaml
-  # # databases controller - mysql operator
-  # - ../../../infrastructure/database/sync.yaml
-  # - ../../../infrastructure/database/clusters/high-availability/sync.yaml
+  # databases controller - mysql operator
+  - ../../../infrastructure/database/mysql-operator/sync.yaml
+  - ../../../infrastructure/database/mysql-operator/clusters/high-availability/sync.yaml
   # # cni controller - cilium
   # - ../../../infrastructure/cni/cilium/sync.yaml
   # # ingress controller - traefik
