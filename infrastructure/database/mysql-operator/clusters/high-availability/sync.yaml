@@ -1,18 +1,18 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-database-innodbcluster
+  name: infrastructure-controller-database-mysql-operator-innodbcluster
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-database
+    - name: infrastructure-controller-database-mysql-operator
   interval: 1h
   retryInterval: 2m
   timeout: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/database/clusters/high-availability
+  path: ./infrastructure/database/mysql-operator/clusters/high-availability
   prune: true
   wait: true
   decryption:
