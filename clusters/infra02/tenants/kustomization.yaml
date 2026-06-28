@@ -27,7 +27,7 @@ resources:
   - ../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
   - ../../../tenants/le-portail/applications/production/alterconso/sync.yaml 
   - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
-  # - ../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
+  - ../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
   # - ../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml
 
   ###################
