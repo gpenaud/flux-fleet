@@ -8,6 +8,7 @@ spec:
     wordpressExistingSecret: wordpress
     wordpressEmail: epilibres@${domain}
     wordpressHostname: epilibres.${domain}
+    wordpressSkipInstall: true
     mariadb:
       enabled: false
     externalDatabase:
@@ -17,9 +18,6 @@ spec:
       database: epilibres
       existingSecret: wordpress
     wordpressPlugins: []
-    extraEnvVars:
-      - name: WORDPRESS_SKIP_BOOTSTRAP
-        value: "true"
     service:
       type: ClusterIP
     persistence:

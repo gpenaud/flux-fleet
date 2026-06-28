@@ -7,6 +7,7 @@ spec:
     wordpressUsername: le-portail
     wordpressExistingSecret: wordpress
     wordpressEmail: dugrainamoudre@${domain}
+    wordpressSkipInstall: true
     mariadb:
       enabled: false
     externalDatabase:
@@ -16,9 +17,6 @@ spec:
       database: lp-wp-site
       existingSecret: wordpress
     wordpressPlugins: []
-    extraEnvVars:
-      - name: WORDPRESS_SKIP_BOOTSTRAP
-        value: "true"
     service:
       type: ClusterIP
     persistence:
