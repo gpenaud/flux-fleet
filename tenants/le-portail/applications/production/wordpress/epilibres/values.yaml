@@ -7,6 +7,7 @@ spec:
     wordpressUsername: epilibres
     wordpressExistingSecret: wordpress
     wordpressEmail: epilibres@${domain}
+    wordpressHostname: epilibres.${domain}
     mariadb:
       enabled: false
     externalDatabase:
