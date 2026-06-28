@@ -9,6 +9,7 @@ spec:
     wordpressEmail: epilibres@${domain}
     wordpressHostname: epilibres.${domain}
     wordpressSkipInstall: true
+    wordpressOverrideDatabaseSettings: true
     mariadb:
       enabled: false
     externalDatabase:
