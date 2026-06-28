@@ -1,0 +1,42 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: controller-database
+
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: mariadb-operator
+  namespace: controller-database
+spec:
+  type: oci
+  interval: 1h
+  url: oci://ghcr.io/mariadb-operator/charts
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mariadb-operator
+  namespace: controller-database
+spec:
+  interval: 1h
+  dependsOn:
+    - name: mariadb-operator-crds
+  chart:
+    spec:
+      chart: mariadb-operator
+      version: "26.6.0"
+      sourceRef:
+        kind: HelmRepository
+        name: mariadb-operator
+        namespace: flux-system
+  values:
+    certController:
+      enabled: false
+    cert-manager:
+      enabled: true
+    metrics:
+      enabled: true

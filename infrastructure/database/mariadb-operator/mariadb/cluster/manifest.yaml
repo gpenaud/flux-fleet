@@ -1,0 +1,39 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb
+  namespace: controller-database
+spec:
+  image: mariadb:11.4
+
+  rootPasswordSecretKeyRef:
+    name: database
+    key: mariadb-root
+
+  replicas: 3
+  galera:
+    enabled: true
+
+  affinity:
+    antiAffinityEnabled: true
+
+  storage:
+    size: 10Gi
+    storageClassName: local-path
+
+  service:
+    type: ClusterIP
+
+  myCnf: |
+    [mariadb]
+    character_set_server=utf8mb4
+    collation_server=utf8mb4_unicode_ci
+    innodb_file_per_table=1
+    max_connections=200
+    # Nextcloud recommande READ-COMMITTED. C'est un réglage GLOBAL qui
+    # s'appliquerait aussi à WordPress/Dolibarr (compatibles). Décommente
+    # si tu veux l'imposer à l'échelle de l'instance mutualisée :
+    # transaction_isolation=READ-COMMITTED
+
+  metrics:
+    enabled: true
