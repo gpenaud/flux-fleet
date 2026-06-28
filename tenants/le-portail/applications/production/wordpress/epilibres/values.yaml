@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: le-portail-epilibres
+  name: wordpress
 spec:
   values:
     wordpressUsername: epilibres
