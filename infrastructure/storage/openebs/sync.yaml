@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-storage-openebs-prepare-vg
+  name: infrastructure-controller-storage-openebs
   namespace: flux-system
 spec:
   interval: 1h
@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/storage/openebs/prepare-vg
+  path: ./infrastructure/storage/openebs
   prune: true
   wait: true
   decryption:
@@ -27,18 +27,18 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-storage-openebs
+  name: infrastructure-controller-storage-openebs-storage-class
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-storage-openebs-prepare-vg
+    - name: infrastructure-controller-storage-openebs
   interval: 1h
   retryInterval: 2m
   timeout: 5m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/storage/openebs
+  path: ./infrastructure/storage/openebs/storage-class
   prune: true
   wait: true
   decryption:

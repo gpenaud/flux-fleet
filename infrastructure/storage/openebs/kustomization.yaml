@@ -6,4 +6,5 @@ namespace: controller-storage
 
 resources:
   - namespace.yaml
+  - prepare-vg.yaml
   - openebs.yaml

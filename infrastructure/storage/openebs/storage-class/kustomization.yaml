@@ -5,4 +5,4 @@ kind: Kustomization
 namespace: controller-storage
 
 resources:
-  - daemonset.yaml
+  - lvm.yaml
