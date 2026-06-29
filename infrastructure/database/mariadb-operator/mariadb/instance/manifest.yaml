@@ -15,7 +15,7 @@ spec:
     antiAffinityEnabled: true
   storage:
     size: 10Gi
-    storageClassName: local-path
+    storageClassName: openebs-lvm
   service:
     type: ClusterIP
   podSecurityContext:
