@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-database-mariadb-cluster
+  name: infrastructure-controller-database-cluster
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-database-mariadb-operator
+    - name: infrastructure-controller-database
   interval: 1h
   retryInterval: 2m
   timeout: 5m
