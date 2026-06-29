@@ -1,22 +1,22 @@
 # ============================================================================
-#  PRÉPARATION DU VOLUME GROUP — version auto-découvrante
+#  PRÉPARATION DU VOLUME GROUP — version auto-découvrante (garde-fou corrigé)
 #
 #  OpenEBS LVM ne crée PAS le Volume Group : il découpe dedans. Ce VG doit
 #  exister sur chaque nœud AVANT que le CSI provisionne. Ce DaemonSet le crée,
 #  une fois par nœud, de façon idempotente.
 #
 #  Pas de paramètre par nœud : chaque pod DÉCOUVRE localement le volume Hetzner
-#  dédié (glob /dev/disk/by-id/scsi-0HC_Volume_*). Le même manifeste marche sur
-#  tous les nœuds, présents et futurs — aucun device-id à renseigner.
+#  dédié (glob /dev/disk/by-id/scsi-0HC_Volume_*).
 #
-#  ── PRÉREQUIS TALOS (machine config / OpenTofu, AVANT) ──
-#  1. Extension lvm2 dans l'image Talos (déjà dans ton schematic).
-#  2. EXACTEMENT UN volume Hetzner de données attaché par nœud,
-#     en automount=false et NON formaté (block device brut pour LVM).
+#  ── CORRECTIF GARDE-FOU ──
+#  L'ancien test `if blkid <dev>` donnait des FAUX POSITIFS : sans util-linux,
+#  le blkid de busybox ne renvoie pas exit=2 sur un device vierge, et le test
+#  concluait à tort "signature présente". On installe désormais util-linux ET
+#  on teste le TYPE (chaîne vide = vierge) au lieu du code retour brut.
 #
-#  ── INVARIANT DE SÛRETÉ ──
-#  L'auto-découverte suppose UN SEUL volume Hetzner par nœud. Si un nœud en a
-#  plusieurs, le choix serait ambigu -> le script REFUSE d'agir (garde-fou).
+#  ── PRÉREQUIS TALOS ──
+#  1. Extension lvm2 dans l'image Talos.
+#  2. EXACTEMENT UN volume Hetzner de données par nœud, automount=false, non formaté.
 # ============================================================================
 apiVersion: apps/v1
 kind: DaemonSet
@@ -34,7 +34,6 @@ spec:
       labels:
         app: vg-prep
     spec:
-      # Si tous tes noeuds ne portent pas un volume de donnees, restreins ici :
       # nodeSelector:
       #   node.kubernetes.io/storage: "lvm"
       hostPID: true
@@ -42,7 +41,7 @@ spec:
         - name: vg-prep
           image: alpine:3.20
           securityContext:
-            privileged: true        # acces device-mapper / LVM de l'hote
+            privileged: true
           env:
             - name: VG_NAME
               value: "vg-openebs"
@@ -51,7 +50,9 @@ spec:
             - -c
             - |
               set -eu
-              apk add --no-cache lvm2 >/dev/null 2>&1 || true
+              # util-linux pour un blkid au comportement standard (exit=2 / TYPE vide
+              # sur device vierge), lvm2 pour pvcreate/vgcreate.
+              apk add --no-cache lvm2 util-linux >/dev/null 2>&1 || true
 
               # Idempotent : si le VG existe deja, ne touche a rien.
               if vgs "$VG_NAME" >/dev/null 2>&1; then
@@ -60,7 +61,6 @@ spec:
               fi
 
               # --- Auto-decouverte du volume Hetzner dedie ---
-              # Les volumes Hetzner apparaissent sous scsi-0HC_Volume_*.
               set +e
               MATCHES=$(ls /dev/disk/by-id/scsi-0HC_Volume_* 2>/dev/null)
               set -e
@@ -81,12 +81,13 @@ spec:
               DATA_DISK=$(printf '%s\n' "$MATCHES" | head -1)
               echo ">> Volume de donnees detecte : $DATA_DISK"
 
-              # Securite : refuser si le device porte deja un filesystem ou des
-              # partitions (signe qu'on ne vise PAS un disque vierge dedie LVM).
-              if blkid "$DATA_DISK" >/dev/null 2>&1; then
-                echo "ERREUR: $DATA_DISK porte deja un filesystem/signature."
-                echo "Attendu : volume brut (automount=false, non formate)."
-                echo "Garde-fou : on n'agit pas."
+              # Garde-fou CORRIGE : on teste le TYPE de signature, pas le code
+              # retour brut de blkid. Chaine vide = device vierge => on agit.
+              # Un type reel (ext4, xfs, LVM2_member, etc.) => on refuse.
+              FSTYPE=$(blkid -o value -s TYPE "$DATA_DISK" 2>/dev/null || true)
+              if [ -n "$FSTYPE" ]; then
+                echo "ERREUR: $DATA_DISK porte une signature de type '$FSTYPE'."
+                echo "Attendu : volume brut. Garde-fou : on n'agit pas."
                 exec sleep infinity
               fi
 
