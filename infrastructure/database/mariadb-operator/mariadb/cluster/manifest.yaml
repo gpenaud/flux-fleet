@@ -20,6 +20,9 @@ spec:
     storageClassName: local-path
   service:
     type: ClusterIP
+  podSecurityContext:
+    fsGroup: 999
+    fsGroupChangePolicy: "OnRootMismatch"
   myCnf: |
     [mariadb]
     character_set_server=utf8mb4
