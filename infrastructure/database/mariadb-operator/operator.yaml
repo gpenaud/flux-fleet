@@ -34,6 +34,9 @@ spec:
         name: mariadb-operator
         namespace: controller-database
   values:
+    storage:
+      size: 20Gi
+      storageClassName: local-path
     certController:
       enabled: true
     cert-manager:
