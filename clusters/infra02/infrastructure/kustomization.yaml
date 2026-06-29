@@ -7,9 +7,9 @@ resources:
   # - ../../../infrastructure/storage/local-path/sync.yaml
   # storage controller - local-path
   - ../../../infrastructure/storage/openebs/sync.yaml
-  # databases controller - mariadb operator
-  - ../../../infrastructure/database/mariadb-operator/sync.yaml
-  - ../../../infrastructure/database/mariadb-operator/mariadb/cluster/sync.yaml
+  # # databases controller - mariadb operator
+  # - ../../../infrastructure/database/mariadb-operator/sync.yaml
+  # - ../../../infrastructure/database/mariadb-operator/mariadb/cluster/sync.yaml
   # # cni controller - cilium
   # - ../../../infrastructure/cni/cilium/sync.yaml
   # # ingress controller - traefik
