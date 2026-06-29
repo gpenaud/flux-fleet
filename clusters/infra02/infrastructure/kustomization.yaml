@@ -1,12 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
  
-resources:
+resources: []
   # # storage controller - local-path
   # - ../../../infrastructure/storage/local-path/crds/sync.yaml
   # - ../../../infrastructure/storage/local-path/sync.yaml
-  # storage controller - local-path
-  - ../../../infrastructure/storage/openebs/sync.yaml
+  # # storage controller - local-path
+  # - ../../../infrastructure/storage/openebs/sync.yaml
   # # databases controller - mariadb operator
   # - ../../../infrastructure/database/mariadb-operator/sync.yaml
   # - ../../../infrastructure/database/mariadb-operator/mariadb/cluster/sync.yaml
