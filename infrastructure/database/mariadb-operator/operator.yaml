@@ -36,7 +36,7 @@ spec:
   values:
     storage:
       size: 20Gi
-      storageClassName: local-path
+      storageClassName: ${storage_class}
     certController:
       enabled: true
     cert-manager:

@@ -68,7 +68,7 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: local-path
+              storageClassName: ${storage_class}
               accessModes:
                 - ReadWriteOnce
               resources:
@@ -104,7 +104,7 @@ spec:
         storage:
           volumeClaimTemplate:
             spec:
-              storageClassName: local-path
+              storageClassName: ${storage_class}
               accessModes:
                 - ReadWriteOnce
               resources:

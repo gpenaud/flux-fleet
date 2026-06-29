@@ -73,7 +73,7 @@ spec:
           memory: 512Mi
       persistence:
         enabled: true
-        storageClass: local-path
+        storageClass: ${storage_class}
         size: 10Gi
         accessModes:
           - ReadWriteOnce

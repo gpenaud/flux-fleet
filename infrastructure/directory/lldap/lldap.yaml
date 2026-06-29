@@ -61,7 +61,7 @@ spec:
       enabled: true
       size: 1Gi
       accessModes: ["ReadWriteOnce"]
-      storageClass: local-path
+      storageClass: ${storage_class}
       annotations:
         # Pour que k8up backup ce PVC, voir Schedule k8up plus bas
         k8up.io/backup: "true"

@@ -31,7 +31,7 @@ spec:
   values:
     persistence:
       enabled: true
-      storageClassName: local-path
+      storageClassName: ${storage_class}
       size: 5Gi
       accessModes:
         - ReadWriteOnce

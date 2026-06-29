@@ -88,7 +88,7 @@ spec:
         type: pvc
         accessMode: ReadWriteOnce
         size: 1Gi
-        storageClass: local-path
+        storageClass: ${storage_class}
         retain: true
         # mountPath par défaut : /etc/headscale (laissé tel quel)
       run:
