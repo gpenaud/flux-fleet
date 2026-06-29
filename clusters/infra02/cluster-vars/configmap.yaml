@@ -15,3 +15,4 @@ data:
   cluster_endpoint_ip: 46.225.39.175
   internal_service_cidr: 10.96.0.0/12
   internal_service_ip: 10.96.0.100
+  storage_class: openebs-lvm
