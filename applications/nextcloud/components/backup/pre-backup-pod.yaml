@@ -6,7 +6,7 @@ metadata:
   annotations:
     k8up.io/backup: "true"
 spec:
-  backupCommand: sh -c 'mysqldump --no-tablespaces --skip-set-charset --set-gtid-purged=OFF --single-transaction -h mysql-version-8-lts.controller-database.svc.cluster.local -u $NEXTCLOUD_MYSQL_USER -p"$NEXTCLOUD_MYSQL_PASSWORD" $NEXTCLOUD_MYSQL_DATABASE'
+  backupCommand: sh -c 'mysqldump --no-tablespaces --skip-set-charset --set-gtid-purged=OFF --single-transaction -h mariadb.controller-database.svc.cluster.local -u $NEXTCLOUD_MYSQL_USER -p"$NEXTCLOUD_MYSQL_PASSWORD" $NEXTCLOUD_MYSQL_DATABASE'
   fileExtension: .sql
   pod:
     spec:

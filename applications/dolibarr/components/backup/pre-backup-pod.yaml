@@ -8,7 +8,7 @@ metadata:
   annotations:
     k8up.io/backup: "true"
 spec:
-  backupCommand: sh -c 'mysqldump --add-drop-table --set-gtid-purged=OFF --no-tablespaces --single-transaction --hex-blob --init-command="SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\"" -h mysql-version-8-lts.controller-database.svc.cluster.local -u $DOLIBARR_MYSQL_USER -p"$DOLIBARR_MYSQL_PASSWORD" $DOLIBARR_MYSQL_DATABASE'
+  backupCommand: sh -c 'mysqldump --add-drop-table --set-gtid-purged=OFF --no-tablespaces --single-transaction --hex-blob --init-command="SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\"" -h mariadb.controller-database.svc.cluster.local -u $DOLIBARR_MYSQL_USER -p"$DOLIBARR_MYSQL_PASSWORD" $DOLIBARR_MYSQL_DATABASE'
   fileExtension: .sql
   pod:
     spec:
