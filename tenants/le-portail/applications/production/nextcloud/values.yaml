@@ -20,7 +20,7 @@ spec:
         passwordKey: mariadb-password
     persistence:
       enabled: true
-      storageClass: local-path
+      storageClass: ${storage_class}
       accessMode: ReadWriteOnce
       size: 5Gi
     nextcloud:

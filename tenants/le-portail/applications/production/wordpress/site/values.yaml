@@ -21,7 +21,7 @@ spec:
       type: ClusterIP
     persistence:
       enabled: true
-      storageClass: local-path
+      storageClass: ${storage_class}
       size: 10Gi
     ingress:
       enabled: false
