@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: - name: infrastructure-controller-storage-local-path
+    - name: infrastructure-controller-storage
     - name: infrastructure-controller-dns-crds
   interval: 1h
   retryInterval: 2m
