@@ -25,7 +25,6 @@ patches:
           }
   - target:
       kind: Namespace
-      name: controller-storage
     patch: |-
       - op: add
         path: /metadata/labels/pod-security.kubernetes.io~1enforce
