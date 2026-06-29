@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: - name: infrastructure-controller-storage-local-path-crds
+  name: - name: infrastructure-controller-storage-crds
   namespace: flux-system
 spec:
   interval: 1h
@@ -10,6 +10,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/storage/local-path/crds
+  path: ./infrastructure/storage/longhorn/crds
   prune: true
   wait: true
