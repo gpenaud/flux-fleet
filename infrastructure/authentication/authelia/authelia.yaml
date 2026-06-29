@@ -6,19 +6,19 @@ metadata:
 spec:
   interval: 24h
   url: https://charts.authelia.com
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: authelia-storage
-  namespace: controller-authentication
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: ${storage_class}
-  resources:
-    requests:
-      storage: 1Gi
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: authelia-storage
+#   namespace: controller-authentication
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName: ${storage_class}
+#   resources:
+#     requests:
+#       storage: 1Gi
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -39,7 +39,19 @@ spec:
 
   install:
     remediation:
-      retries: 3
+      retries: 3---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: authelia-storage
+#   namespace: controller-authentication
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName: ${storage_class}
+#   resources:
+#     requests:
+#       storage: 1Gi
   upgrade:
     remediation:
       retries: 3
@@ -58,7 +70,7 @@ spec:
           value: "Europe/Paris"
 
     # ================================================================
-    # Persistence : PVC Longhorn pour SQLite
+    # Persistence : PVC pour SQLite
     # ================================================================
     persistence:
       enabled: true
