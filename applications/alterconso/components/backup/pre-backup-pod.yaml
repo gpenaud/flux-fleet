@@ -4,7 +4,7 @@ kind: PreBackupPod
 metadata:
   name: pre-backup
   labels:
-    reflector/mysql-operator: "true"
+    reflector/database: "true"
   annotations:
     k8up.io/backup: "true"
 spec:

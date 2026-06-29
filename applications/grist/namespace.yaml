@@ -8,5 +8,5 @@ metadata:
     alter-it.eu/app: "grist"
     alter-it.eu/managed-by: "fluxcd"
     reflector/k8up-credentials: "true"
-    reflector/mysql-operator: "true"
+    reflector/database: "true"
     reflector/grist-oidc-client-secret: "true"

@@ -4,7 +4,7 @@ kind: Job
 metadata:
   name: init-create-database
   labels:
-    reflector/mysql-operator: "true"
+    reflector/database: "true"
   annotations:
     "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": hook-succeeded

@@ -5,7 +5,7 @@ metadata:
   name: init-db
   namespace: ${tenant}-dolibarr
   labels:
-    reflector/mysql-operator: "true"
+    reflector/database: "true"
   annotations:
     kustomize.toolkit.fluxcd.io/force: "enabled"
 spec:

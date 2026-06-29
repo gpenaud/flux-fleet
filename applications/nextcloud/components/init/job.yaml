@@ -4,7 +4,7 @@ kind: Job
 metadata:
   name: init-db
   labels:
-    reflector/mysql-operator: "true"
+    reflector/database: "true"
   annotations:
     kustomize.toolkit.fluxcd.io/force: "enabled"
 spec:
