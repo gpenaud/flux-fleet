@@ -19,8 +19,8 @@ spec:
             - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-operator
-                  key: rootPassword
+                  name: database
+                  key: mariadb-root
             - name: NEXTCLOUD_MYSQL_USER
               valueFrom:
                 secretKeyRef:
