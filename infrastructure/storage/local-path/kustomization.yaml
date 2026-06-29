@@ -23,15 +23,12 @@ patches:
               }
             ]
           }
-  - target:
+  - patch: |-
+      apiVersion: v1
       kind: Namespace
-    patch: |-
-      - op: add
-        path: /metadata/labels/pod-security.kubernetes.io~1enforce
-        value: privileged
-      - op: add
-        path: /metadata/labels/pod-security.kubernetes.io~1warn
-        value: privileged
-      - op: add
-        path: /metadata/labels/pod-security.kubernetes.io~1audit
-        value: privileged
+      metadata:
+        name: local-path-storage
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/warn: privileged
+          pod-security.kubernetes.io/audit: privileged
