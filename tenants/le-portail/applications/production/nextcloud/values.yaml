@@ -11,7 +11,7 @@ spec:
     externalDatabase:
       enabled: true
       type: mysql
-      host: mysql-version-8-lts.controller-database.svc.cluster.local:6446
+      host: mariadb.controller-database.svc.cluster.local:6446
       database: lp-nextcloud
       existingSecret:
         enabled: true

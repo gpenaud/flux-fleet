@@ -11,7 +11,7 @@ spec:
     externalDatabase:
       enabled: true
       type: mysql
-      host: mysql-version-8-lts.controller-database.svc.cluster.local:6446
+      host: mariadb.controller-database.svc.cluster.local:6446
       database: fdj-nextcloud
       existingSecret:
         enabled: true
@@ -37,7 +37,7 @@ spec:
             ],
             'overwrite.cli.url' => 'https://nextcloud.${domain}',
             'overwriteprotocol' => 'https',
-            'dbhost' => 'mysql-version-8-lts.controller-database.svc.cluster.local',
+            'dbhost' => 'mariadb.controller-database.svc.cluster.local',
           );
       existingSecret:
         enabled: true

@@ -47,7 +47,7 @@ spec:
     database:
       # ─── Mode external ────────────────────────────────────────────────────────
       external:
-        host: mysql-version-8-lts.controller-database.svc.cluster.local
+        host: mariadb.controller-database.svc.cluster.local
         port: "3306"
       init:
         enabled: true
