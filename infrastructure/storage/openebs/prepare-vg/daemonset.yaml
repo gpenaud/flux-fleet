@@ -1,0 +1,111 @@
+# ============================================================================
+#  PRÉPARATION DU VOLUME GROUP — version auto-découvrante
+#
+#  OpenEBS LVM ne crée PAS le Volume Group : il découpe dedans. Ce VG doit
+#  exister sur chaque nœud AVANT que le CSI provisionne. Ce DaemonSet le crée,
+#  une fois par nœud, de façon idempotente.
+#
+#  Pas de paramètre par nœud : chaque pod DÉCOUVRE localement le volume Hetzner
+#  dédié (glob /dev/disk/by-id/scsi-0HC_Volume_*). Le même manifeste marche sur
+#  tous les nœuds, présents et futurs — aucun device-id à renseigner.
+#
+#  ── PRÉREQUIS TALOS (machine config / OpenTofu, AVANT) ──
+#  1. Extension lvm2 dans l'image Talos (déjà dans ton schematic).
+#  2. EXACTEMENT UN volume Hetzner de données attaché par nœud,
+#     en automount=false et NON formaté (block device brut pour LVM).
+#
+#  ── INVARIANT DE SÛRETÉ ──
+#  L'auto-découverte suppose UN SEUL volume Hetzner par nœud. Si un nœud en a
+#  plusieurs, le choix serait ambigu -> le script REFUSE d'agir (garde-fou).
+# ============================================================================
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: vg-prep
+  namespace: controller-storage
+  labels:
+    app: vg-prep
+spec:
+  selector:
+    matchLabels:
+      app: vg-prep
+  template:
+    metadata:
+      labels:
+        app: vg-prep
+    spec:
+      # Si tous tes noeuds ne portent pas un volume de donnees, restreins ici :
+      # nodeSelector:
+      #   node.kubernetes.io/storage: "lvm"
+      hostPID: true
+      containers:
+        - name: vg-prep
+          image: alpine:3.20
+          securityContext:
+            privileged: true        # acces device-mapper / LVM de l'hote
+          env:
+            - name: VG_NAME
+              value: "vg-openebs"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              apk add --no-cache lvm2 >/dev/null 2>&1 || true
+
+              # Idempotent : si le VG existe deja, ne touche a rien.
+              if vgs "$VG_NAME" >/dev/null 2>&1; then
+                echo "VG $VG_NAME deja present - rien a faire."
+                exec sleep infinity
+              fi
+
+              # --- Auto-decouverte du volume Hetzner dedie ---
+              # Les volumes Hetzner apparaissent sous scsi-0HC_Volume_*.
+              set +e
+              MATCHES=$(ls /dev/disk/by-id/scsi-0HC_Volume_* 2>/dev/null)
+              set -e
+              COUNT=$(printf '%s\n' "$MATCHES" | grep -c . || true)
+
+              if [ "$COUNT" -eq 0 ]; then
+                echo "ERREUR: aucun volume Hetzner (scsi-0HC_Volume_*) sur ce noeud."
+                echo "Verifie l'attachement du volume de donnees."
+                exec sleep infinity
+              fi
+              if [ "$COUNT" -gt 1 ]; then
+                echo "ERREUR: plusieurs volumes Hetzner detectes - choix ambigu :"
+                printf '%s\n' "$MATCHES"
+                echo "Garde-fou : on n'agit pas. Attache UN SEUL volume de donnees."
+                exec sleep infinity
+              fi
+
+              DATA_DISK=$(printf '%s\n' "$MATCHES" | head -1)
+              echo ">> Volume de donnees detecte : $DATA_DISK"
+
+              # Securite : refuser si le device porte deja un filesystem ou des
+              # partitions (signe qu'on ne vise PAS un disque vierge dedie LVM).
+              if blkid "$DATA_DISK" >/dev/null 2>&1; then
+                echo "ERREUR: $DATA_DISK porte deja un filesystem/signature."
+                echo "Attendu : volume brut (automount=false, non formate)."
+                echo "Garde-fou : on n'agit pas."
+                exec sleep infinity
+              fi
+
+              echo ">> Creation PV/VG sur $DATA_DISK ..."
+              pvcreate -ff -y "$DATA_DISK"
+              vgcreate "$VG_NAME" "$DATA_DISK"
+              echo ">> VG $VG_NAME cree."
+
+              exec sleep infinity
+          volumeMounts:
+            - name: dev
+              mountPath: /dev
+            - name: lvm
+              mountPath: /etc/lvm
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: lvm
+          hostPath:
+            path: /etc/lvm
+            type: DirectoryOrCreate
