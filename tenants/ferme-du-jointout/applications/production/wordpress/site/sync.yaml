@@ -1,0 +1,32 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tenant-ferme-du-jointout-wordpress-site
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: tenant-ferme-du-jointout
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./tenants/ferme-du-jointout/applications/production/wordpress/site
+  prune: true
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    substitute:
+      application: wordpress-site
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
+      - kind: ConfigMap
+        name: tenant-ferme-du-jointout-vars
+        optional: false
