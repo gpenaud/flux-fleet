@@ -7,6 +7,7 @@ spec:
     wordpressUsername: le-portail
     wordpressExistingSecret: wordpress
     wordpressEmail: dugrainamoudre@${domain}
+    wordpressHostname: www.${domain}
     overrideDatabaseSettings: true
     mariadb:
       enabled: false
