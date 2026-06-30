@@ -21,10 +21,8 @@ spec:
         env:
           - name: DB
             valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
-          - name: USER
-            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootUser } }
           - name: PASSWORD
-            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootPassword } }
+            valueFrom: { secretKeyRef: { name: database, key: mariadb-root } }
         volumeMounts:
           - name: db-dump                 # volume fourni par le Workflow appelant
             mountPath: /dump
@@ -40,23 +38,23 @@ spec:
 
           echo ">> Reset de '$DB' : drop de toutes les tables existantes"
           { echo 'SET FOREIGN_KEY_CHECKS=0;';
-            mysql --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB" -e \
+            mysql --host="$HOST" --user="root" --password="$PASSWORD" -N "$DB" -e \
               "SELECT CONCAT('DROP TABLE IF EXISTS \`', table_name, '\`;')
                  FROM information_schema.tables
                 WHERE table_schema='$DB' AND table_type='BASE TABLE';"; } \
-          | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
+          | mysql --host="$HOST" --user="root" --password="$PASSWORD" "$DB"
 
           echo ">> Import dans '$DB' (base vide, FK/UNIQUE off le temps du chargement)"
           { printf 'SET FOREIGN_KEY_CHECKS=0;\nSET UNIQUE_CHECKS=0;\n'; cat "$DUMP"; } \
-          | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" "$DB"
+          | mysql --host="$HOST" --user="root" --password="$PASSWORD" "$DB"
 
           if [ '{{inputs.parameters.verify}}' = 'true' ]; then
             echo ">> Validation : CHECK TABLE"
-            CHECKS=$(mysql --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB" -e \
+            CHECKS=$(mysql --host="$HOST" --user="root" --password="$PASSWORD" -N "$DB" -e \
               "SELECT CONCAT('CHECK TABLE \`', table_name, '\`;')
                  FROM information_schema.tables
                 WHERE table_schema='$DB' AND table_type='BASE TABLE';")
-            RES=$(printf '%s\n' "$CHECKS" | mysql --host="$HOST" --user="$USER" --password="$PASSWORD" -N "$DB")
+            RES=$(printf '%s\n' "$CHECKS" | mysql --host="$HOST" --user="root" --password="$PASSWORD" -N "$DB")
             printf '%s\n' "$RES"
             if printf '%s\n' "$RES" | grep -vw 'OK' | grep -q .; then
               echo ">> ERREUR: au moins une table KO au CHECK."; exit 1

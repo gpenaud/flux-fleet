@@ -20,15 +20,13 @@ spec:
           - |
             set -e
             mysql -h "{{inputs.parameters.db-host}}" \
-              -u "$DB_USER" -p"$DB_PASS" \
+              -u "root" -p"$DB_PASS" \
               $DB_NAME < /restore/{{inputs.parameters.dump-file}}
         env:
           - name: DB_NAME
             valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
-          - name: DB_USER
-            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootUser } }
           - name: DB_PASS
-            valueFrom: { secretKeyRef: { name: mysql-operator, key: rootPassword } }
+            valueFrom: { secretKeyRef: { name: database, key: mariadb-root } }
         volumeMounts:
           - name: "db-dump"
             mountPath: /restore
