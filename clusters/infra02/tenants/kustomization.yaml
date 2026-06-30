@@ -28,7 +28,7 @@ resources:
   - ../../../tenants/le-portail/applications/production/alterconso/sync.yaml 
   # - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
   - ../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
-  # - ../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml
+  - ../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml
 
   ###################
   # Ferme Du jointout
@@ -41,4 +41,4 @@ resources:
   # applications
   - ../../../tenants/ferme-du-jointout/applications/production/dolibarr/sync.yaml
   - ../../../tenants/ferme-du-jointout/applications/production/nextcloud/sync.yaml
-  # - ../../../tenants/ferme-du-jointout/applications/production/wordpress/sync.yaml
+  - ../../../tenants/ferme-du-jointout/applications/production/wordpress/site/sync.yaml
