@@ -18,9 +18,9 @@ spec:
         source: |
           set -euo pipefail
           kubectl wait --for=condition=Completed \
-            restore/{{inputs.parameters.restore_name}} \
+            restores.k8up.io/{{inputs.parameters.restore_name}} \
             -n {{inputs.parameters.namespace}} --timeout=1800s
-          reason=$(kubectl get restore/{{inputs.parameters.restore_name}} \
+          reason=$(kubectl get restores.k8up.io/{{inputs.parameters.restore_name}} \
             -n {{inputs.parameters.namespace}} \
             -o jsonpath='{.status.conditions[?(@.type=="Completed")].reason}')
           echo "restore reason: $reason"
