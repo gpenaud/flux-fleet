@@ -1,0 +1,9 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-la-bergeronnette-vars
+  namespace: flux-system
+data:
+  tenant: la-bergeronnette
+  domain: ${domain_prefix}labergeronnette.org

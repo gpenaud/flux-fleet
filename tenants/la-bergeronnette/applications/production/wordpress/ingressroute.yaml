@@ -1,0 +1,17 @@
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ${tenant}-wordpress
+  namespace: shared-wordpress
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`wordpress.${domain}`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: wordpress
+          port: 80
+  tls:
+    secretName: wildcard.${domain}

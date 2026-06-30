@@ -1,0 +1,30 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tenant-la-bergeronnette-wordpress
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: tenant-shared-wordpress
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./tenants/la-bergeronnette/applications/production/wordpress
+  prune: true
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
+      - kind: ConfigMap
+        name: tenant-la-bergeronnette-vars
+        optional: false
