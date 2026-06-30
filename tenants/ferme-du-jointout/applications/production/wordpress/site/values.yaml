@@ -6,7 +6,7 @@ spec:
   values:
     wordpressUsername: admin
     wordpressExistingSecret: wordpress
-    wordpressEmail: contact@${tenant_domain}
+    wordpressEmail: contact@${domain}
     wordpressHostname: www.${domain}
     overrideDatabaseSettings: true
     mariadb:
