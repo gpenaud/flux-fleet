@@ -42,3 +42,14 @@ resources:
   - ../../../tenants/ferme-du-jointout/applications/production/dolibarr/sync.yaml
   - ../../../tenants/ferme-du-jointout/applications/production/nextcloud/sync.yaml
   - ../../../tenants/ferme-du-jointout/applications/production/wordpress/site/sync.yaml
+
+  ##################
+  # La Bergeronnette
+  ##################
+
+  - ../../../tenants/la-bergeronnette/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/la-bergeronnette/components/subdomain/sync.yaml
+  - ../../../tenants/la-bergeronnette/components/authentication/sync.yaml
+  # applications
+  - ../../../tenants/la-bergeronnette/applications/production/wordpress/site/sync.yaml
