@@ -4,14 +4,13 @@ metadata:
   name: wordpress
 spec:
   values:
+    image:
+      debug: true
     wordpressUsername: ferme-du-jointout
     wordpressExistingSecret: wordpress
     wordpressEmail: contact@${domain}
     wordpressHostname: www.${domain}
     overrideDatabaseSettings: true
-    extraEnvVars:
-      - name: BITNAMI_DEBUG
-        value: "true"
     mariadb:
       enabled: false
     externalDatabase:
