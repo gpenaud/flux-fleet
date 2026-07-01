@@ -29,7 +29,7 @@ resources:
   # - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
   - ../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
   - ../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml
-  # - ../../../tenants/le-portail/applications/production/wordpress/jardinsvedas/sync.yaml
+  - ../../../tenants/le-portail/applications/production/wordpress/jardinsvedas/sync.yaml
 
   ###################
   # Ferme Du jointout
