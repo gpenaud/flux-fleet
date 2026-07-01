@@ -7,14 +7,14 @@ metadata:
 spec:
   dependsOn:
     # - name: infrastructure
-    - name: infrastructure-controller-storage
-    - name: infrastructure-controller-ingress-traefik
-    - name: infrastructure-controller-database
-    - name: infrastructure-controller-certificate
-    - name: infrastructure-controller-authentication-authelia
-    - name: infrastructure-controller-reflector
-    - name: infrastructure-controller-tenant
-    - name: infrastructure-controller-workflow
+    - name: infrastructure-storage
+    - name: infrastructure-ingress-traefik
+    - name: infrastructure-database
+    - name: infrastructure-certificate
+    - name: infrastructure-authentication-authelia
+    - name: infrastructure-reflector
+    - name: infrastructure-tenant
+    - name: infrastructure-workflow
   interval: 1h
   retryInterval: 2m
   timeout: 5m
