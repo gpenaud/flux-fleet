@@ -9,6 +9,8 @@ spec:
     wordpressEmail: jardinsvedas@${domain}
     wordpressHostname: jardinsvedas.${domain}
     overrideDatabaseSettings: true
+    image:
+      debug: true
     mariadb:
       enabled: false
     externalDatabase:
