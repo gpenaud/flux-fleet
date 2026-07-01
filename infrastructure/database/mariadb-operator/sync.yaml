@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-database
+  name: infrastructure-database
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-storage
+    - name: infrastructure-storage
   interval: 1h
   retryInterval: 2m
   timeout: 5m
@@ -29,11 +29,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-database-operator-crds
+  name: infrastructure-database-operator-crds
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-database
+    - name: infrastructure-database
   interval: 1h
   retryInterval: 2m
   timeout: 5m

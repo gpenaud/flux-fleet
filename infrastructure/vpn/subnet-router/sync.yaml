@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-vpn-subnet-router
+  name: infrastructure-vpn-subnet-router
   namespace: flux-system
 spec:
   dependsOn: 

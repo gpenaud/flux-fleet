@@ -1,11 +1,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infrastructure-controller-dns-endpoints
+  name: infrastructure-dns-endpoints
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure-controller-dns
+    - name: infrastructure-dns
   interval: 1h
   retryInterval: 2m
   timeout: 5m
