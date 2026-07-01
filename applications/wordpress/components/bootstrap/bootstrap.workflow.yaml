@@ -1,0 +1,9 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ${tenant}-${application}-bootstrap-
+  namespace: ${tenant}-${application}
+spec:
+  workflowTemplateRef:
+    name: restore
