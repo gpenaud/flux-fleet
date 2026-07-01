@@ -22,10 +22,10 @@ resources:
   - ../../../tenants/le-portail/components/subdomain/sync.yaml
   - ../../../tenants/le-portail/components/authentication/sync.yaml
   # applications
-  - ../../../tenants/le-portail/applications/production/dolibarr/sync.yaml
+  # - ../../../tenants/le-portail/applications/production/dolibarr/sync.yaml
   - ../../../tenants/le-portail/applications/production/grist/sync.yaml
   - ../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
-  - ../../../tenants/le-portail/applications/production/alterconso/sync.yaml 
+  # - ../../../tenants/le-portail/applications/production/alterconso/sync.yaml
   # - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
   - ../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
   - ../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml
