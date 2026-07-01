@@ -12,6 +12,7 @@ resources:
   - secrets.enc.yaml
   # workflows
   - ../../../../../workflows/restore/applications/dolibarr
+  - ../../../../../applications/dolibarr/components/bootstrap
 
 patches:
   - target:

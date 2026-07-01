@@ -5,3 +5,4 @@ resources:
   - cluster-vars/sync.yaml
   - infrastructure/sync.yaml
   - tenants/sync.yaml
+  - workflows/sync.yaml
