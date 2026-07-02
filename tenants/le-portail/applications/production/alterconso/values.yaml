@@ -55,7 +55,7 @@ spec:
         # Secret externe (typiquement géré via SOPS hors-chart) qui contient
         # les credentials admin nécessaires aux CREATE/GRANT.
         # Doit avoir les clés rootUser et rootPassword.
-        adminSecret: "mysql-operator"
+        adminSecret: "database"
         # Le Job tourne ~5 secondes — quelques requêtes SQL. Resources minimales.
         resources:
           requests:
