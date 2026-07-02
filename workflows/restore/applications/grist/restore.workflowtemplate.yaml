@@ -48,7 +48,7 @@ spec:
               - scale-down
             arguments:
               parameters:
-                - name: snapshot-data-path
+                - name: snapshot_path
                   value: "{{workflow.parameters.snapshot-data-path}}" 
                 - name: source_bucket
                   value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"
