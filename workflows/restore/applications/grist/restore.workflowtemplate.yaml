@@ -10,9 +10,10 @@ spec:
   entrypoint: main
   arguments:
     parameters:
-      - name: snapshot_path
-      - name: backup_source_cluster
-        value: "${cluster}"
+      - name: snapshot-data-path
+        value: "/data/${application}-data"
+      - name: backup-cluster-source
+        value: infra01
       - name: workload-kind
         value: "deployment"
       - name: workload-name
@@ -47,10 +48,10 @@ spec:
               - scale-down
             arguments:
               parameters:
-                - name: snapshot_path
-                  value: "{{workflow.parameters.snapshot_path}}" 
+                - name: snapshot-data-path
+                  value: "{{workflow.parameters.snapshot-data-path}}" 
                 - name: source_bucket
-                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"
 
           - name: create-k8up-restore
             templateRef:
@@ -68,7 +69,7 @@ spec:
                 - name: snapshot_id
                   value: "{{tasks.resolve-snapshot-id.outputs.parameters.snapshot-id}}"
                 - name: source_bucket
-                  value: "alter-it-{{workflow.parameters.backup_source_cluster}}-backup-${tenant}-${application}"          
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
 
           - name: wait-for-k8up-restore
             templateRef:
