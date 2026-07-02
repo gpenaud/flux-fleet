@@ -6,15 +6,15 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    # - name: infrastructure
-    - name: infrastructure-storage
-    - name: infrastructure-ingress-traefik
-    - name: infrastructure-database
-    - name: infrastructure-certificate
-    - name: infrastructure-authentication-authelia
-    - name: infrastructure-reflector
-    - name: infrastructure-tenant
-    - name: infrastructure-workflow
+    - name: infrastructure
+    # - name: infrastructure-storage
+    # - name: infrastructure-ingress-traefik
+    # - name: infrastructure-database
+    # - name: infrastructure-certificate
+    # - name: infrastructure-authentication-authelia
+    # - name: infrastructure-reflector
+    # - name: infrastructure-tenant
+    # - name: infrastructure-workflow
   interval: 1h
   retryInterval: 2m
   timeout: 5m
