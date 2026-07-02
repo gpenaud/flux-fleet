@@ -6,5 +6,6 @@ includes:
   reconcile:      ./tools/tasks/reconcile.yml
   database:       ./tools/tasks/database.yml
   backup:         ./tools/tasks/backup.yml
+  package:        ./tools/tasks/package.yml
   restore:        ./tools/tasks/restore.yml
   vpn:            ./tools/tasks/vpn.yml

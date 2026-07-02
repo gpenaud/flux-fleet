@@ -1,0 +1,15 @@
+version: '3'
+
+env:
+  chart_path: /home/gpenaud/work/alterconso/deploy/helm
+  repo_path: oci://ghcr.io/gpenaud/charts
+
+tasks:
+  helm:alterconso:
+    desc: Package a new alterconso Helm chart version
+    cmds:
+      - |
+        helm package ${chart_path}/alterconso --destination ${chart_path}
+        latest=$(ls ${chart_path}/alterconso-*.tgz | sort -V | tail -n1)
+        helm push ${latest} ${repo_path}
+    silent: true
