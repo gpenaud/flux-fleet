@@ -1,0 +1,36 @@
+version: '3'
+
+tasks:
+  ferme-du-jointout:
+    desc: 'Restore ferme-du-jointout tenant from a backup through argo worflow (optional shortcut: task restore:all)'
+    cmds:
+      - argo submit -n ferme-du-jointout-dolibarr --from workflowtemplate/restore
+      - argo submit -n ferme-du-jointout-nextcloud --from workflowtemplate/restore
+      - argo submit -n ferme-du-jointout-wordpress-site --from workflowtemplate/restore
+    silent: false
+
+  la-bergeronnette:
+    desc: 'Restore la-bergeronnette tenant from a backup through argo worflow (optional shortcut: task restore:all)'
+    cmds:
+      - argo submit -n la-bergeronnette-wordpress-site --from workflowtemplate/restore
+    silent: false
+
+  le-portail:
+    desc: 'Restore le-portail tenant from a backup through argo worflow (optional shortcut: task restore:all)'
+    cmds:
+      # - argo submit -n le-portail-alterconso --from workflowtemplate/restore
+      - argo submit -n le-portail-dolibarr --from workflowtemplate/restore
+      - argo submit -n le-portail-grist --from workflowtemplate/restore
+      - argo submit -n le-portail-nextcloud --from workflowtemplate/restore
+      - argo submit -n le-portail-wordpress-site --from workflowtemplate/restore
+      - argo submit -n le-portail-wordpress-epilibres --from workflowtemplate/restore
+      # - argo submit -n le-portail-wordpress-jardinsvedas --from workflowtemplate/restore
+    silent: false
+
+  all:
+    desc: 'Restore all tenants from a backup through argo worflow (optional shortcut: task restore:all)'
+    cmds:
+      - task restore:ferme-du-jointout
+      - task restore:la-bergeronnette
+      - task restore:le-portail
+    silent: false
