@@ -86,19 +86,16 @@ spec:
                   value: "{{tasks.create-k8up-restore.outputs.parameters.restore-name}}"
        
           - name: scale-up
-            when: "{{workflow.parameters.workload-name}} != ''"
             templateRef:
               name: scale
               template: main
               clusterScope: true
-            dependencies: 
+            dependencies:
               - wait-for-k8up-restore
             arguments:
               parameters:
                 - name: replicas
                   value: "1"
                 - name: workload-name
-                  value: "${application}"
-
-
-
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"
