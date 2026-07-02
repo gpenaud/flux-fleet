@@ -17,7 +17,7 @@ spec:
       - name: workload-kind
         value: "deployment"
       - name: workload-name
-        value: ""
+        value: "${application}"
   volumes:
     - name: ${application}-data
       persistentVolumeClaim:
