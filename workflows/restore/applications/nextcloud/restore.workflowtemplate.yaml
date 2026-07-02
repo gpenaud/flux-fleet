@@ -161,7 +161,7 @@ spec:
                 - name: dump-file
                   value: "{{workflow.parameters.snapshot-db-dump-file}}"
                 - name: db-host
-                  value: "mysql-version-8-lts.controller-database.svc.cluster.local"
+                  value: "mariadb.controller-database.svc.cluster.local"
                 - name: db-secret-name
                   value: "{{workflow.parameters.db-secret-name}}"
                 - name: db-secret-database-key
