@@ -27,17 +27,17 @@ spec:
       dag:
         tasks:
           - name: scale-down
-            when: "{{workflow.parameters.workload-name}} != ''"
             templateRef:
               name: scale
               template: main
               clusterScope: true
             arguments:
-              parameters:
-                - name: replicas
+              parameters: 
+                - name: replicas 
                   value: "0"
                 - name: workload-name
-                  value: "${application}"
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"
 
           - name: resolve-snapshot-id
             templateRef:
