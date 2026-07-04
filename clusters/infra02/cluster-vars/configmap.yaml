@@ -16,3 +16,4 @@ data:
   internal_service_cidr: 10.96.0.0/12
   internal_service_ip: 10.96.0.100
   storage_class: openebs-lvm
+  cilium_operator_replicas: 1

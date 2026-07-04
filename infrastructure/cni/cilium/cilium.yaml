@@ -92,7 +92,7 @@ spec:
 
     # HA opérateur (le bootstrap avait 1 replica)
     operator:
-      replicas: 2
+      replicas: ${cilium_operator_replicas}
 
     # Hubble — observabilité, utile pour valider le pattern B plus tard
     hubble:
