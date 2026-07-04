@@ -9,7 +9,7 @@ resources:
   - ../../../infrastructure/storage/openebs/sync.yaml
   # databases controller - mariadb operator
   - ../../../infrastructure/database/mariadb-operator/sync.yaml
-  - ../../../infrastructure/database/mariadb-operator/mariadb/cluster/sync.yaml
+  - ../../../infrastructure/database/mariadb-operator/mariadb/instance/sync.yaml
   # cni controller - cilium
   - ../../../infrastructure/cni/cilium/sync.yaml
   # ingress controller - traefik
