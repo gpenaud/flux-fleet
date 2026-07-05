@@ -6,6 +6,8 @@ metadata:
 spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
+  podConfigRef:
+    name: podconfig
   backend:
     repoPasswordSecretRef:
       name: k8up-credentials
