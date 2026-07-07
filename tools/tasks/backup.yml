@@ -1,14 +1,149 @@
 version: '3'
 
+env:
+  ALTERCONSO_TOOLS_PATH: /home/gpenaud/work/alterconso/tools
+  ALTERCONSO_DUMPS_PATH: /tmp/restic-le-portail-alterconso/2011e88c
+
 tasks:
-  restic:list:
-    desc: 'List restic snapshots (optional shortcut: task restic:list -- 21)'
+  list:infra01:
+    desc: 'List restic snapshots from infra01(optional shortcut: task backup:list -- 21)'
     cmds:
-      - python3 tools/scripts/restic-snapshots.py --list {{.CLI_ARGS}}
+      - python3 tools/scripts/restic-snapshots.py --list {{.CLI_ARGS}} --cluster infra01
     silent: false
 
-  restic:download:
-    desc: 'Download latest restic backup to /tmp (optional shortcut: task restic:download -- 21)'
+  list:infra02:
+    desc: 'List restic snapshots from infra02 (optional shortcut: task backup:list -- 21)'
     cmds:
-      - python3 tools/scripts/restic-snapshots.py --download {{.CLI_ARGS}}
+      - python3 tools/scripts/restic-snapshots.py --list {{.CLI_ARGS}} --cluster infra02
     silent: false
+
+  download:infra01:
+    desc: 'Download latest restic backup to /tmp (optional shortcut: task backup:download -- 21)'
+    cmds:
+      - python3 tools/scripts/restic-snapshots.py --download {{.CLI_ARGS}} --cluster infra01
+    silent: false
+
+  download:infra02:
+    desc: 'Download latest restic backup to /tmp (optional shortcut: task backup:download -- 21)'
+    cmds:
+      - python3 tools/scripts/restic-snapshots.py --download {{.CLI_ARGS}} --cluster infra02
+    silent: false
+
+  download:infra01:alterconso:
+    desc: 'Download latest restic backup of alterconso tenant to /tmp (optional shortcut: task backup:alterconso -- 21)'
+    cmds:
+      - task backup:download:infra01 -- 21
+    silent: false
+
+  download:infra02:alterconso:
+    desc: 'Download latest restic backup of alterconso tenant to /tmp (optional shortcut: task backup:alterconso -- 21)'
+    cmds:
+      - task backup:download:infra02 -- 21
+    silent: false
+
+  tenant:infra01:le-portail:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: application:infra01:le-portail:wordpress-site
+      - task: application:infra01:le-portail:wordpress-epilibres
+      - task: application:infra01:le-portail:grist
+      - task: application:infra01:le-portail:dolibarr
+
+  tenant:infra01:ferme-du-jointout:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: application:infra01:ferme-du-jointout:wordpress-site
+      - task: application:infra01:ferme-du-jointout:nextcloud
+      - task: application:infra01:ferme-du-jointout:dolibarr
+
+  tenant:infra01:la-bergeronnette:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: application:infra01:la-bergeronnette:wordpress-site
+
+  infra01:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: tenant:infra01:le-portail
+      - task: tenant:infra01:ferme-du-jointout
+      - task: tenant:infra01:la-bergeronnette
+
+  tenant:infra02:le-portail:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: application:infra02:le-portail:wordpress-site
+      - task: application:infra02:le-portail:wordpress-epilibres
+      - task: application:infra02:le-portail:grist
+      - task: application:infra02:le-portail:dolibarr
+
+  tenant:infra02:ferme-du-jointout:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: application:infra02:ferme-du-jointout:wordpress-site
+      - task: application:infra02:ferme-du-jointout:nextcloud
+      - task: application:infra02:ferme-du-jointout:dolibarr
+
+  tenant:infra02:la-bergeronnette:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: application:infra02:la-bergeronnette:wordpress-site
+
+  infra02:
+    desc: 'Create a backup for a specific tenant for a specific cluster'
+    silent: false
+    cmds:
+      - task: tenant:infra02:le-portail
+      - task: tenant:infra02:ferme-du-jointout
+      - task: tenant:infra02:la-bergeronnette
+
+  application:*:*:*:
+    desc: 'Create a backup for a specific tenant and application for a specific cluster'
+    silent: false
+    vars:
+      CLUSTER: '{{index .MATCH 0}}'
+      TENANT:  '{{index .MATCH 1}}'
+      APPLICATION: '{{index .MATCH 2}}'
+    requires:
+      vars: [CLUSTER, APPLICATION, TENANT]
+    cmds:
+      - task: .create-backup-resource
+        vars:
+          BACKUP_SOURCE_CLUSTER: '{{.CLUSTER}}'
+          TENANT: '{{.TENANT}}'
+          APPLICATION: '{{.APPLICATION}}'
+
+  .create-backup-resource:
+    internal: true
+    silent: false
+    desc: 'Create backup resource'
+    cmds:
+      - kubectl --context admin@{{.BACKUP_SOURCE_CLUSTER}} --namespace {{.TENANT}}-{{.APPLICATION}} delete backup {{.APPLICATION}} --ignore-not-found
+      - |
+        kubectl --context admin@{{.BACKUP_SOURCE_CLUSTER}} apply -f - <<EOF
+        apiVersion: k8up.io/v1
+        kind: Backup
+        metadata:
+          name: {{.APPLICATION}}
+          namespace: {{.TENANT}}-{{.APPLICATION}}
+        spec:
+          backend:
+            repoPasswordSecretRef:
+              key: RESTIC_PASSWORD
+              name: k8up-credentials
+            s3:
+              accessKeyIDSecretRef:
+                key: AWS_ACCESS_KEY_ID
+                name: k8up-credentials
+              bucket: alter-it-{{.BACKUP_SOURCE_CLUSTER}}-backup-{{.TENANT}}-{{.APPLICATION}}
+              endpoint: https://s3.sbg.io.cloud.ovh.net
+              secretAccessKeySecretRef:
+                key: AWS_SECRET_ACCESS_KEY
+                name: k8up-credentials
+        EOF
