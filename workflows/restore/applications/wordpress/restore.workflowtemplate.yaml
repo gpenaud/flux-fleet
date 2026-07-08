@@ -17,7 +17,7 @@ spec:
       - name: data-pvc-name
         value: "wordpress"
       - name: db-secret-name
-        value: "wordpress"
+        value: "${application}"
       - name: db-secret-database-key
         value: "mariadb-database"
       - name: backup-cluster-source
