@@ -34,7 +34,7 @@ spec:
       retries: 3
   values:
     k8up:
-      skipWithoutAnnotation: true
+      skipWithoutAnnotation: false
       envVars:
         - name: BACKUP_ENABLE_RWO_VOLUMES
           value: "true"
