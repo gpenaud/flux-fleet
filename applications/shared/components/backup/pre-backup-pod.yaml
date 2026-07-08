@@ -27,14 +27,14 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: ${application}
-                  key: MYSQL_USER
+                  key: mariadb-user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: ${application}
-                  key: MYSQL_PASSWORD
+                  key: mariadb-password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
                   name: ${application}
-                  key: MYSQL_DATABASE
+                  key: mariadb-database
