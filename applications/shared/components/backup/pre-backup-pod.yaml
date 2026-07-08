@@ -26,15 +26,15 @@ spec:
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: alterconso
+                  name: ${application}
                   key: MYSQL_USER
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: alterconso
+                  name: ${application}
                   key: MYSQL_PASSWORD
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: alterconso
+                  name: ${application}
                   key: MYSQL_DATABASE
