@@ -1,5 +1,3 @@
-
-
 apiVersion: argoproj.io/v1alpha1
 kind: ClusterWorkflowTemplate
 metadata:
@@ -12,23 +10,34 @@ spec:
           - name: dump-file
           - name: db-host
           - name: db-secret-name
-          - name: db-secret-database-key 
+          - name: db-secret-database-key
+          - name: fix-mysql-collations
+            value: "true"
       container:
-        image: mariadb:11.4          # ← au lieu de mysql:8
-        command: [sh, -c]
+        image: mariadb:11.4
+        command: [bash, -c]
         args:
           - |
-            set -e
-            mariadb -h "{{inputs.parameters.db-host}}" \
-              -u "root" -p"$DB_PASS" \
-              --default-character-set=utf8mb4 \
-              "$DB_NAME" < /restore/{{inputs.parameters.dump-file}}
-        env:
-          - name: DB_NAME
-            valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
-          - name: DB_PASS
-            valueFrom: { secretKeyRef: { name: database, key: mariadb-root } }
-        volumeMounts:
-          - name: "db-dump"
-            mountPath: /restore
-            readOnly: true
+            set -euo pipefail
+            DUMP="/restore/{{inputs.parameters.dump-file}}"
+            test -s "$DUMP" || { echo "ERREUR: dump absent ou vide: $DUMP"; exit 1; }
+
+            if [ "{{inputs.parameters.fix-mysql-collations}}" = "true" ]; then
+              echo ">> fix collations MySQL→MariaDB ACTIVÉ (snapshot pré-migration)"
+              sed -E 's/utf8mb4_unicode_520_ci/utf8mb4_unicode_ci/g;
+                      s/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g' "$DUMP" \
+                | mariadb -h "{{inputs.parameters.db-host}}" -u root -p"$DB_PASS" \
+                    --default-character-set=utf8mb4 "$DB_NAME"
+            else
+              mariadb -h "{{inputs.parameters.db-host}}" -u root -p"$DB_PASS" \
+                --default-character-set=utf8mb4 "$DB_NAME" < "$DUMP"
+            fi
+      env:
+        - name: DB_NAME
+          valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
+        - name: DB_PASS
+          valueFrom: { secretKeyRef: { name: database, key: mariadb-root } }
+      volumeMounts:
+        - name: "db-dump"
+          mountPath: /restore
+          readOnly: true
