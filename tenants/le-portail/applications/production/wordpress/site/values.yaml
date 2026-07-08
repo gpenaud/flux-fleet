@@ -16,7 +16,7 @@ spec:
       port: 3306
       user: le-portail
       database: lp-wp-site
-      existingSecret: wordpress
+      existingSecret: ${application}
     wordpressPlugins: []
     service:
       type: ClusterIP

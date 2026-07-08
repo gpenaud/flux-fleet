@@ -16,7 +16,7 @@ spec:
       port: 3306
       user: epilibres
       database: epilibres
-      existingSecret: wordpress
+      existingSecret: ${application}
     wordpressPlugins: []
     service:
       type: ClusterIP

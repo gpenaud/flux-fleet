@@ -18,7 +18,7 @@ spec:
       port: 3306
       user: la-bergeronnette
       database: lb-site
-      existingSecret: wordpress
+      existingSecret: ${application}
     wordpressPlugins: []
     service:
       type: ClusterIP
