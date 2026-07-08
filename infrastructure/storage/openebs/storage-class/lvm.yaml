@@ -9,7 +9,8 @@ provisioner: local.csi.openebs.io
 parameters:
   storage: "lvm"
   volgroup: "vg-openebs"
-  fsType: "ext4"
+  fsType: "xfs"
+  shared: "yes"
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 allowVolumeExpansion: true
