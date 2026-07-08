@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Gère les snapshots restic d'un tenant/stack sur le bucket alter-it-infra01-backup-*.
+Gère les snapshots restic d'un tenant/stack sur le bucket alter-it-<cluster>-backup-*.
 
 Usage :
     python3 restic-snapshots.py --list
     python3 restic-snapshots.py --list --json
     python3 restic-snapshots.py --download
+    python3 restic-snapshots.py --list --cluster infra02
 
 Raccourci tenant+stack : 2 chiffres (position dans le menu).
     python3 restic-snapshots.py --list 21        # tenant 2 (le-portail), stack 1 (alterconso)
@@ -20,7 +21,7 @@ import subprocess
 import sys
 
 S3_ENDPOINT = "https://s3.sbg.io.cloud.ovh.net"
-BUCKET_PREFIX = "alter-it-infra01-backup-"
+DEFAULT_CLUSTER = "infra01"
 K8UP_SECRET = "k8up-credentials"
 DOWNLOAD_ROOT = "/tmp"
 
@@ -30,6 +31,11 @@ STACKS: dict[str, list[str]] = {
     "le-portail": ["alterconso", "dolibarr", "grist", "wordpress-epilibres", "wordpress-site"],
     "la-bergeronnette": ["wordpress-site"],
 }
+
+
+def bucket_prefix_for(cluster: str) -> str:
+    """Construit le préfixe de bucket pour un cluster donné."""
+    return f"alter-it-{cluster}-backup-"
 
 
 def pick(prompt: str, options: list[str]) -> str:
@@ -102,7 +108,7 @@ def resolve_shortcut(code: str) -> tuple[str, str]:
     return tenant, stacks[s_idx]
 
 
-def select_repo(shortcut: str | None) -> tuple[str, dict[str, str]]:
+def select_repo(shortcut: str | None, cluster: str) -> tuple[str, dict[str, str]]:
     """Sélection tenant/stack (raccourci ou menu interactif) + préparation de l'env restic."""
     if shortcut:
         tenant, stack = resolve_shortcut(shortcut)
@@ -111,8 +117,9 @@ def select_repo(shortcut: str | None) -> tuple[str, dict[str, str]]:
         if stack is None:
             stack = pick(f"Stack dans {tenant} ?", STACKS[tenant])
     namespace = f"{tenant}-{stack}"
-    bucket = f"{BUCKET_PREFIX}{namespace}"
+    bucket = f"{bucket_prefix_for(cluster)}{namespace}"
     print("\nCible :")
+    print(f"  cluster   : {cluster}")
     print(f"  tenant    : {tenant}")
     print(f"  stack     : {stack}")
     print(f"  namespace : {namespace}")
@@ -120,8 +127,8 @@ def select_repo(shortcut: str | None) -> tuple[str, dict[str, str]]:
     return namespace, build_env(namespace, bucket)
 
 
-def run_list(as_json: bool, shortcut: str | None) -> int:
-    _, env = select_repo(shortcut)
+def run_list(as_json: bool, shortcut: str | None, cluster: str) -> int:
+    _, env = select_repo(shortcut, cluster)
     cmd = ["restic", "snapshots"]
     if as_json:
         cmd.append("--json")
@@ -129,8 +136,8 @@ def run_list(as_json: bool, shortcut: str | None) -> int:
     return subprocess.run(cmd, env=env).returncode
 
 
-def run_download(shortcut: str | None) -> int:
-    namespace, env = select_repo(shortcut)
+def run_download(shortcut: str | None, cluster: str) -> int:
+    namespace, env = select_repo(shortcut, cluster)
 
     print(f"\n→ restic snapshots --json")
     out = subprocess.run(
@@ -180,6 +187,12 @@ def main() -> int:
     )
     parser.add_argument("--json", action="store_true", help="(--list) Sortie JSON brute de restic")
     parser.add_argument(
+        "--cluster",
+        default=DEFAULT_CLUSTER,
+        metavar="NAME",
+        help=f"Cluster ciblé ; préfixe de bucket alter-it-<cluster>-backup- (défaut: {DEFAULT_CLUSTER})",
+    )
+    parser.add_argument(
         "code",
         nargs="?",
         help="Raccourci tenant+stack à 2 chiffres (ex: 21 = tenant 2, stack 1). Sinon, menu interactif.",
@@ -188,8 +201,8 @@ def main() -> int:
 
     try:
         if args.list:
-            return run_list(args.json, args.code)
-        return run_download(args.code)
+            return run_list(args.json, args.code, args.cluster)
+        return run_download(args.code, args.cluster)
     except ValueError as e:
         print(f"\n✗ {e}", file=sys.stderr)
         return 2

@@ -124,9 +124,9 @@ tasks:
     silent: false
     desc: 'Create backup resource'
     cmds:
-      - kubectl --context admin@{{.BACKUP_SOURCE_CLUSTER}} --namespace {{.TENANT}}-{{.APPLICATION}} delete backup {{.APPLICATION}} --ignore-not-found
+      - kubectl --context admin@{{.BACKUP_SOURCE_CLUSTER}} --namespace {{.TENANT}}-{{.APPLICATION}} delete backups.k8up.io {{.APPLICATION}} --ignore-not-found
       - |
-        kubectl --context admin@{{.BACKUP_SOURCE_CLUSTER}} apply -f - <<EOF
+        kubectl --context admin@{{.BACKUP_SOURCE_CLUSTER}} --namespace {{.TENANT}}-{{.APPLICATION}} apply -f - <<EOF
         apiVersion: k8up.io/v1
         kind: Backup
         metadata:
