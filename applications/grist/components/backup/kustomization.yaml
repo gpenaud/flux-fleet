@@ -4,8 +4,8 @@ kind: Kustomization
 
 resources:
   - pod-config.yaml
-  - schedule.yaml
-  - ../../../shared/components/backup/pre-backup-pod.yaml
+  - pre-backup-pod.yaml
+  - ../../../shared/components/backup/schedule.yaml
 
 patches:
   - target:
