@@ -14,14 +14,15 @@ spec:
           - name: db-secret-name
           - name: db-secret-database-key 
       container:
-        image: mysql:8
+        image: mariadb:11.4          # ← au lieu de mysql:8
         command: [sh, -c]
         args:
           - |
             set -e
-            mysql -h "{{inputs.parameters.db-host}}" \
+            mariadb -h "{{inputs.parameters.db-host}}" \
               -u "root" -p"$DB_PASS" \
-              $DB_NAME < /restore/{{inputs.parameters.dump-file}}
+              --default-character-set=utf8mb4 \
+              "$DB_NAME" < /restore/{{inputs.parameters.dump-file}}
         env:
           - name: DB_NAME
             valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
