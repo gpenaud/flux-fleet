@@ -24,17 +24,17 @@ spec:
             - name: NEXTCLOUD_MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: nextcloud
+                  name: ${application}
                   key: mariadb-username
             - name: NEXTCLOUD_MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: nextcloud
+                  name: ${application}
                   key: mariadb-password
             - name: NEXTCLOUD_MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: nextcloud
+                  name: ${application}
                   key: mariadb-database
           command:
             - sh

@@ -25,17 +25,17 @@ spec:
             - name: WORDPRESS_MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: wordpress
+                  name: ${application}
                   key: mariadb-user
             - name: WORDPRESS_MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: wordpress
+                  name: ${application}
                   key: mariadb-password
             - name: WORDPRESS_MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: wordpress
+                  name: ${application}
                   key: mariadb-database
           command:
             - sh

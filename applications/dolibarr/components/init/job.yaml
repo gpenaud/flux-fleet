@@ -25,17 +25,17 @@ spec:
             - name: DOLIBARR_MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: dolibarr
+                  name: ${application}
                   key: mariadb-user
             - name: DOLIBARR_MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: dolibarr
+                  name: ${application}
                   key: mariadb-password
             - name: DOLIBARR_MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: dolibarr
+                  name: ${application}
                   key: mariadb-database
           command:
             - sh
