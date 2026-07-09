@@ -15,6 +15,15 @@ spec:
             value: "true"
       container:
         image: mariadb:11.4
+        volumeMounts:
+          - name: "db-dump"
+            mountPath: /restore
+            readOnly: true
+        env:
+          - name: DB_NAME
+            valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
+          - name: DB_PASS
+            valueFrom: { secretKeyRef: { name: database, key: mariadb-root } } 
         command: [bash, -c]
         args:
           - |
@@ -32,16 +41,3 @@ spec:
               mariadb -h "{{inputs.parameters.db-host}}" -u root -p"$DB_PASS" \
                 --default-character-set=utf8mb4 "$DB_NAME" < "$DUMP"
             fi
-      env:
-        - name: DB_NAME
-          valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
-        - name: DB_PASS
-          valueFrom: { secretKeyRef: { name: database, key: mariadb-root } }
-      volumes:
-        - name: db-dump
-          persistentVolumeClaim:
-            claimName: "{{workflow.name}}-db-dump"      
-      volumeMounts:
-        - name: "db-dump"
-          mountPath: /restore
-          readOnly: true
