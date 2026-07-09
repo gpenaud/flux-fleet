@@ -2,13 +2,25 @@ version: '3'
 
 tasks:
 
-  # all:from-infra01:
-  #   desc: 'Restore all tenants from a backup through argo worflow (optional shortcut: task restore:all)'
-  #   cmds:
-  #     - task: application:from:infra01:to:infra02:ferme-du-jointout
-  #     - task: application:from:infra01:to:infra02:la-bergeronnette
-  #     - task: application:from:infra01:to:infra02:le-portail
-  #   silent: false
+  all:from:*:to:*:
+    vars:
+      SOURCE_CLUSTER: '{{index .MATCH 0}}'
+      DESTINATION_CLUSTER: '{{index .MATCH 1}}'
+    requires:
+      vars: [SOURCE_CLUSTER, DESTINATION_CLUSTER]
+    desc: 'Restore all tenants from a backup through argo worflow (optional shortcut: task restore:all)'
+    cmds:
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:wordpress-site
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:wordpress-epilibres
+      # - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:alterconso
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:grist
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:dolibarr
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:ferme-du-jointout:wordpress-site
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:ferme-du-jointout:nextcloud
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:ferme-du-jointout:dolibarr
+      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:la-bergeronnette:wordpress-site
+
+    silent: false
 
   application:from:*:to:*:*:*:
     desc: 'Restore a backup for a specific tenant and application for a specific cluster'
