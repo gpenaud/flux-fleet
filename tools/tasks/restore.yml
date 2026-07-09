@@ -1,46 +1,27 @@
 version: '3'
 
 tasks:
-  to:*:from:*:
+
+  # all:from-infra01:
+  #   desc: 'Restore all tenants from a backup through argo worflow (optional shortcut: task restore:all)'
+  #   cmds:
+  #     - task: application:from:infra01:to:infra02:ferme-du-jointout
+  #     - task: application:from:infra01:to:infra02:la-bergeronnette
+  #     - task: application:from:infra01:to:infra02:le-portail
+  #   silent: false
+
+  application:from:*:to:*:*:*:
+    desc: 'Restore a backup for a specific tenant and application for a specific cluster'
+    silent: false
     vars:
-      DEST_CLUSTER: '{{index .MATCH 0}}'
-      SOURCE_CLUSTER: '{{index .MATCH 1}}'
-    desc: 'Restore tenant from a backup through argo worflow (optional shortcut: task restore:all)'
-    cmds: []
-      # - argo submit --context admin@infra02 -n le-portail-alterconso --from workflowtemplate/restore -p backup-cluster-source={{.SOURCE_CLUSTER}}
-      # - argo submit --context admin@infra02 -n le-portail-wordpress-jardinsvedas --from workflowtemplate/restore -p backup-cluster-source={{.SOURCE_CLUSTER}}
-
-  ferme-du-jointout:from-infra01:
-    desc: 'Restore ferme-du-jointout tenant from a backup through argo worflow (optional shortcut: task restore:all)'
+      SOURCE_CLUSTER: '{{index .MATCH 0}}'
+      DESTINATION_CLUSTER: '{{index .MATCH 1}}'
+      TENANT:  '{{index .MATCH 2}}'
+      APPLICATION: '{{index .MATCH 3}}'
+    requires:
+      vars: [SOURCE_CLUSTER, DESTINATION_CLUSTER, APPLICATION, TENANT]
     cmds:
-      - argo submit --context admin@infra02 -n ferme-du-jointout-dolibarr --from workflowtemplate/restore -p backup-cluster-source=infra01
-      - argo submit --context admin@infra02 -n ferme-du-jointout-nextcloud --from workflowtemplate/restore -p backup-cluster-source=infra01
-      - argo submit --context admin@infra02 -n ferme-du-jointout-wordpress-site --from workflowtemplate/restore -p backup-cluster-source=infra01
-    silent: false
-
-  la-bergeronnette:from-infra01:
-    desc: 'Restore la-bergeronnette tenant from a backup through argo worflow (optional shortcut: task restore:all)'
-    cmds:
-      - argo submit --context admin@infra02 -n la-bergeronnette-wordpress-site --from workflowtemplate/restore -p backup-cluster-source=infra01
-    silent: false
-
-  le-portail:from-infra01:
-    desc: 'Restore le-portail tenant from a backup through argo worflow (optional shortcut: task restore:all)'
-    cmds:
-      - argo submit --context admin@infra02 -n le-portail-dolibarr --from workflowtemplate/restore -p backup-cluster-source=infra01
-      - argo submit --context admin@infra02 -n le-portail-grist --from workflowtemplate/restore -p backup-cluster-source=infra01
-      - argo submit --context admin@infra02 -n le-portail-nextcloud --from workflowtemplate/restore -p backup-cluster-source=infra01
-      - argo submit --context admin@infra02 -n le-portail-wordpress-site --from workflowtemplate/restore -p backup-cluster-source=infra01
-      - argo submit --context admin@infra02 -n le-portail-wordpress-epilibres --from workflowtemplate/restore -p backup-cluster-source=infra01
-    silent: false
-
-  all:from-infra01:
-    desc: 'Restore all tenants from a backup through argo worflow (optional shortcut: task restore:all)'
-    cmds:
-      - task restore:ferme-du-jointout:from-infra01
-      - task restore:la-bergeronnette:from-infra01
-      - task restore:le-portail:from-infra01
-    silent: false
+      - argo submit --context admin@{{.DESTINATION_CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} --from workflowtemplate/restore -p backup-cluster-source='{{.SOURCE_CLUSTER}}'
 
   alterconso:transform:
     desc: 'Transform alterconso database from Haxe to Go (internal task)'
@@ -101,4 +82,4 @@ tasks:
     cmds:
       - task: alterconso:transform
       - task: alterconso:import
-    silent: true  
+    silent: true
