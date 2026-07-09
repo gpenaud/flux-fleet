@@ -11,6 +11,8 @@ spec:
     --default-character-set=utf8mb4
     --single-transaction
     --hex-blob
+    --quick
+    --max-allowed-packet=1G
     -h mariadb.controller-database.svc.cluster.local
     -u "$DB_USER"
     -p"$DB_PASSWORD"
