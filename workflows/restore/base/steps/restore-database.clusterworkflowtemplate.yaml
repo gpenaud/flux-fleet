@@ -37,6 +37,10 @@ spec:
           valueFrom: { secretKeyRef: { name: "{{inputs.parameters.db-secret-name}}", key: "{{inputs.parameters.db-secret-database-key}}" } }
         - name: DB_PASS
           valueFrom: { secretKeyRef: { name: database, key: mariadb-root } }
+      volumes:
+        - name: db-dump
+          persistentVolumeClaim:
+            claimName: "{{workflow.name}}-db-dump"      
       volumeMounts:
         - name: "db-dump"
           mountPath: /restore
