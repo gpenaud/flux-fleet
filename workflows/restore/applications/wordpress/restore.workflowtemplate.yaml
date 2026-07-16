@@ -11,7 +11,7 @@ spec:
   arguments:
     parameters:
       - name: snapshot-db-dump-file
-        value: ${tenant}-${application}-wordpress-db-dump.sql
+        value: ${tenant}-${application}-db-dump.sql
       - name: snapshot-data-path
         value: "/data/wordpress"
       - name: data-pvc-name
