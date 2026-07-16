@@ -16,7 +16,7 @@ spec:
       existingSecret:
         enabled: true
         secretName: nextcloud
-        usernameKey: mariadb-username
+        usernameKey: mariadb-user
         passwordKey: mariadb-password
     persistence:
       enabled: true
@@ -42,7 +42,7 @@ spec:
       existingSecret:
         enabled: true
         secretName: nextcloud
-        usernameKey: nextcloud-username
+        usernameKey: nextcloud-user
         passwordKey: nextcloud-password
     ingress:
       enabled: false
