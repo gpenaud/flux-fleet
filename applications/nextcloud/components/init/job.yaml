@@ -25,7 +25,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: ${application}
-                  key: mariadb-username
+                  key: mariadb-user
             - name: NEXTCLOUD_MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
