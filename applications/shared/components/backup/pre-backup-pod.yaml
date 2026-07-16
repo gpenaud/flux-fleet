@@ -2,7 +2,7 @@
 apiVersion: k8up.io/v1
 kind: PreBackupPod
 metadata:
-  name: pre-backup
+  name: ${application}
   annotations:
     k8up.io/backup: "true"
 spec:

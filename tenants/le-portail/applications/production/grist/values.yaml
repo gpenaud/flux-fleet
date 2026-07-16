@@ -72,3 +72,5 @@ spec:
         storageClass: ${storage_class}
         globalMounts:
           - path: /persist
+        annotations:
+          k8up.io/backup: "false"
