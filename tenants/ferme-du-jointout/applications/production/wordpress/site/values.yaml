@@ -8,7 +8,7 @@ spec:
       debug: true
     wordpressUsername: ferme-du-jointout
     wordpressExistingSecret: wordpress
-    wordpressEmail: contact@${domain}
+    wordpressEmail: contact@jardinsvedas.com
     wordpressHostname: www.${domain}
     overrideDatabaseSettings: true
     mariadb:
