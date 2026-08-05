@@ -26,6 +26,16 @@ spec:
       size: 7Gi
     ingress:
       enabled: false
+    readinessProbe:
+      httpGet:
+        path: /wp-login.php
+        port: http
+        scheme: HTTP
+        httpHeaders:
+          - name: Host
+            value: epilibres.${domain}
+          - name: X-Forwarded-Proto
+            value: https
     resourcesPreset: "none"
     resources:
       requests:
