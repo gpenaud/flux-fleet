@@ -1,0 +1,9 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-jardins-vedas-vars
+  namespace: flux-system
+data:
+  tenant: jardins-vedas
+  domain: ${domain_prefix}jardinsvedas.com

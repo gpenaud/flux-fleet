@@ -1,0 +1,30 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tenant-jardins-vedas-components-authentication
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: tenant-jardins-vedas
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./tenants/jardins-vedas/components/authentication
+  prune: true
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
+      - kind: ConfigMap
+        name: tenant-jardins-vedas-vars
+        optional: false
