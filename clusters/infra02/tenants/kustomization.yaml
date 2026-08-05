@@ -54,3 +54,14 @@ resources:
   - ../../../tenants/la-bergeronnette/components/authentication/sync.yaml
   # applications
   - ../../../tenants/la-bergeronnette/applications/production/wordpress/site/sync.yaml
+
+  ###############
+  # Jardins Vedas
+  ###############
+
+  - ../../../tenants/jardins-vedas/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/jardins-vedas/components/subdomain/sync.yaml
+  - ../../../tenants/jardins-vedas/components/authentication/sync.yaml
+  # applications
+  - ../../../tenants/jardins-vedas/applications/production/wordpress/site/sync.yaml
