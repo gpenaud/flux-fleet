@@ -96,6 +96,26 @@ spec:
             dnsZones:
               - "labergeronnette.org"
               - "*.labergeronnette.org"
+      - dns01:
+          webhook:
+            groupName: acme.alter-it.eu
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              authenticationMethod: application
+              applicationKeyRef:
+                name: ovh-dns-zone-jardinsvedas-com
+                key: applicationKey
+              applicationSecretRef:
+                name: ovh-dns-zone-jardinsvedas-com
+                key: applicationSecret
+              applicationConsumerKeyRef:
+                name: ovh-dns-zone-jardinsvedas-com
+                key: applicationConsumerKey
+        selector:
+            dnsZones:
+              - "jardinsvedas.com"
+              - "*.jardinsvedas.com"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -194,3 +214,23 @@ spec:
             dnsZones:
               - "labergeronnette.org"
               - "*.labergeronnette.org"
+      - dns01:
+          webhook:
+            groupName: acme.alter-it.eu
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              authenticationMethod: application
+              applicationKeyRef:
+                name: ovh-dns-zone-jardinsvedas-com
+                key: applicationKey
+              applicationSecretRef:
+                name: ovh-dns-zone-jardinsvedas-com
+                key: applicationSecret
+              applicationConsumerKeyRef:
+                name: ovh-dns-zone-jardinsvedas-com
+                key: applicationConsumerKey
+        selector:
+            dnsZones:
+              - "jardinsvedas.com"
+              - "*.jardinsvedas.com"
