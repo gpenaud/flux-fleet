@@ -1,7 +1,10 @@
 version: '3'
 
-tasks:
+env:
+  ALTERCONSO_PATH: work/le-portail/alterconso
+  ALTERCONSO_DB_DUMP_PATH: '/tmp/restic-le-portail-alterconso/*'
 
+tasks:
   all:from:*:to:*:
     vars:
       SOURCE_CLUSTER: '{{index .MATCH 0}}'
@@ -38,9 +41,7 @@ tasks:
   alterconso:transform:
     desc: 'Transform alterconso database from Haxe to Go (internal task)'
     cmds:
-      - task: backup:download
-        vars:
-          CLI_ARGS: 21
+      - task: :backup:download:infra01:alterconso
       - |
         docker run -d \
           --name alterconso-import-from-haxe-to-go \
@@ -58,35 +59,19 @@ tasks:
           mysql -ualterconso -pchangeme -e 'SELECT 1' alterconso_haxe_import >/dev/null 2>&1; do
           sleep 1
         done
-      - $ALTERCONSO_TOOLS_PATH/import-haxe.sh $ALTERCONSO_DUMPS_PATH/le-portail-alterconso-db-dump.sql
+      - ${HOME}/${ALTERCONSO_PATH}/tools/import-haxe.sh ${ALTERCONSO_DB_DUMP_PATH}/le-portail-alterconso-db-dump.sql
       - docker rm -f alterconso-import-from-haxe-to-go
-      - sleep 5
+      - rm -rf /tmp/restic-le-portail-alterconso
     silent: true
 
   alterconso:import:
+    vars:
+      MYSQL_PASSWORD:
+        sh: sops --ignore-mac -d "tenants/le-portail/applications/production/alterconso/secrets.enc.yaml" | yq '.stringData["DB_PASSWORD"] | select(. != null)'
     desc: 'Import transformed alterconso database into Mariadb'
     cmds:
       - |
-        LOCAL_PORT=3306
-        kubectl -n controller-database port-forward svc/mariadb "${LOCAL_PORT}:3306" &
-        PF_PID=$!
-
-        # Nettoyage garanti, quelle que soit la sortie (succès, erreur, Ctrl-C)
-        trap 'kill "${PF_PID}" 2>/dev/null || true' EXIT
-
-        # Readiness : on poll le port local jusqu'à ce qu'il accepte une connexion TCP
-        for i in {1..30}; do
-          if bash -c "echo > /dev/tcp/127.0.0.1/${LOCAL_PORT}" 2>/dev/null; then
-            break
-          fi
-          # le port-forward est-il encore vivant ? (le pod a pu crasher)
-          kill -0 "${PF_PID}" 2>/dev/null || { echo "port-forward mort"; exit 1; }
-          sleep 0.5
-        done
-
-        # --- ton travail ici : le tunnel est ouvert ---
-        mysql -h 127.0.0.1 -u alterconso -p"frayanadele71!" lp-alterconso  < ~/work/alterconso/import-go.sql
-        # --- fin ; le trap EXIT tue le tunnel automatiquement ---
+        kubectl exec --context admin@infra02 -i -n controller-database mariadb-0 -- mariadb -u alterconso -p"{{.MYSQL_PASSWORD}}" lp-alterconso < ${HOME}/${ALTERCONSO_PATH}/import-go.sql
     silent: true
 
   alterconso:process:
