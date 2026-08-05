@@ -8,6 +8,11 @@ spec:
   entryPoints:
     - websecure
   routes:
+    - match: Host(`${domain}`)
+      kind: Rule
+      services:
+        - name: wordpress
+          port: 80
     - match: Host(`www.${domain}`)
       kind: Rule
       services:
