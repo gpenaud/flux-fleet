@@ -18,8 +18,7 @@ spec:
       port: 3306
       user: ferme-du-jointout
       database: fdj-wp-site
-      # existingSecret: ${application}
-      existingSecret: toto
+      existingSecret: ${application}
     wordpressPlugins: []
     service:
       type: ClusterIP
