@@ -10,7 +10,6 @@ spec:
     wordpressExistingSecret: wordpress
     wordpressEmail: contact@fermedujointout.fr
     wordpressHostname: www.${domain}
-    # wordpressSkipInstall: true
     overrideDatabaseSettings: true
     mariadb:
       enabled: false
@@ -19,7 +18,8 @@ spec:
       port: 3306
       user: ferme-du-jointout
       database: fdj-wp-site
-      existingSecret: ${application}
+      # existingSecret: ${application}
+      existingSecret: toto
     wordpressPlugins: []
     service:
       type: ClusterIP
