@@ -10,6 +10,7 @@ spec:
     wordpressExistingSecret: wordpress
     wordpressEmail: contact@fermedujointout.fr
     wordpressHostname: www.${domain}
+    wordpressSkipInstall: true
     overrideDatabaseSettings: true
     mariadb:
       enabled: false
