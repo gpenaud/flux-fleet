@@ -11,7 +11,7 @@
 endpoint: ovh-eu
 
 # Clé applicative OVH. Peut aussi être passée via OVH_APPLICATION_KEY (recommandé).
-# application_key: "xxxxxxxxxxxx"
+application_key: "2c5ab7c0b5c0cb97"
 
 # URL de redirection après validation manuelle. Mets ce que tu veux,
 # c'est juste pour fermer la boucle visuelle dans le navigateur.
@@ -44,3 +44,6 @@ domains:
 
   - name: labergeronnette.org
     description: "Tenant labergeronnette (services applicatifs)"
+
+  - name: jardinsvedas.com
+    description: "Tenant jardinsvedas (services applicatifs)"
