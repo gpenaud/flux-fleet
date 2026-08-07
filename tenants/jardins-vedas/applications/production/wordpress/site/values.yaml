@@ -16,7 +16,8 @@ spec:
       port: 3306
       user: jardinsvedas
       database: jv-site
-      existingSecret: ${application}
+      # existingSecret: ${application}
+      existingSecret: test
     wordpressPlugins: []
     service:
       type: ClusterIP
