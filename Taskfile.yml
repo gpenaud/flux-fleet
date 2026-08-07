@@ -1,11 +1,14 @@
 version: '3'
 
 includes:
+  # global scope
   infrastructure: ./tools/tasks/infrastructure.yml
-  cluster:        ./tools/tasks/cluster.yml
-  reconcile:      ./tools/tasks/reconcile.yml
-  database:       ./tools/tasks/database.yml
-  backup:         ./tools/tasks/backup.yml
-  package:        ./tools/tasks/package.yml
-  restore:        ./tools/tasks/restore.yml
-  vpn:            ./tools/tasks/vpn.yml
+  package: ./tools/tasks/package.yml
+
+  # cluster scope
+  infra01:
+    taskfile: ./tools/tasks/cluster.yml
+    vars: { CLUSTER: infra01, VPN_DOMAIN: vpn.infra01.alter-it.eu }
+  infra02:
+    taskfile: ./tools/tasks/cluster.yml
+    vars: { CLUSTER: infra02, VPN_DOMAIN: vpn.staging.infra02.alter-it.eu }

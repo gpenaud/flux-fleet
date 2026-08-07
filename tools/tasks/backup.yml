@@ -5,113 +5,68 @@ env:
   ALTERCONSO_DUMPS_PATH: /tmp/restic-le-portail-alterconso/2011e88c
 
 tasks:
-  list:infra01:
+  list:
     desc: 'List restic snapshots from infra01(optional shortcut: task backup:list -- 21)'
     cmds:
-      - python3 tools/scripts/restic-snapshots.py --list {{.CLI_ARGS}} --cluster infra01
+      - python3 ../../tools/scripts/restic-snapshots.py --list {{.CLI_ARGS}} --cluster {{.CLUSTER}}
     silent: false
 
-  list:infra02:
-    desc: 'List restic snapshots from infra02 (optional shortcut: task backup:list -- 21)'
-    cmds:
-      - python3 tools/scripts/restic-snapshots.py --list {{.CLI_ARGS}} --cluster infra02
-    silent: false
-
-  download:infra01:
+  download:
     desc: 'Download latest restic backup to /tmp (optional shortcut: task backup:download -- 21)'
     cmds:
-      - python3 tools/scripts/restic-snapshots.py --download {{.CLI_ARGS}} --cluster infra01
+      - python3 ../../tools/scripts/restic-snapshots.py --download {{.CLI_ARGS}} --cluster {{.CLUSTER}}
     silent: false
 
-  download:infra02:
-    desc: 'Download latest restic backup to /tmp (optional shortcut: task backup:download -- 21)'
-    cmds:
-      - python3 tools/scripts/restic-snapshots.py --download {{.CLI_ARGS}} --cluster infra02
-    silent: false
-
-  download:infra01:alterconso:
+  download:alterconso:
     desc: 'Download latest restic backup of alterconso tenant to /tmp (optional shortcut: task backup:alterconso -- 21)'
     cmds:
-      - task backup:download:infra01 -- 21
+      - task {{.CLUSTER}}:backup:download -- 21
     silent: false
 
-  download:infra02:alterconso:
-    desc: 'Download latest restic backup of alterconso tenant to /tmp (optional shortcut: task backup:alterconso -- 21)'
-    cmds:
-      - task backup:download:infra02 -- 21
-    silent: false
-
-  tenant:infra01:le-portail:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
+  tenant:le-portail:
+    desc: 'Create a backup for le-portail apps for a specific cluster'
     silent: false
     cmds:
-      - task: application:infra01:le-portail:wordpress-site
-      - task: application:infra01:le-portail:wordpress-epilibres
-      - task: application:infra01:le-portail:grist
-      - task: application:infra01:le-portail:dolibarr
+      - task: application:le-portail:wordpress-site
+      - task: application:le-portail:wordpress-epilibres
+      - task: application:le-portail:grist
+      - task: application:le-portail:dolibarr
 
-  tenant:infra01:ferme-du-jointout:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
+  tenant:ferme-du-jointout:
+    desc: 'Create a backup for ferme-du-jointout apps for a specific cluster'
     silent: false
     cmds:
-      - task: application:infra01:ferme-du-jointout:wordpress-site
-      - task: application:infra01:ferme-du-jointout:nextcloud
-      - task: application:infra01:ferme-du-jointout:dolibarr
+      - task: application:ferme-du-jointout:wordpress-site
+      - task: application:ferme-du-jointout:nextcloud
+      - task: application:ferme-du-jointout:dolibarr
 
-  tenant:infra01:la-bergeronnette:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
+  tenant:la-bergeronnette:
+    desc: 'Create a backup for la-bergeronnette apps for a specific cluster'
     silent: false
     cmds:
-      - task: application:infra01:la-bergeronnette:wordpress-site
+      - task: application:la-bergeronnette:wordpress-site
 
-  infra01:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
+  tenant:jardins-vedas:
+    desc: 'Create a backup for jardins-vedas apps for a specific cluster'
     silent: false
     cmds:
-      - task: tenant:infra01:le-portail
-      - task: tenant:infra01:ferme-du-jointout
-      - task: tenant:infra01:la-bergeronnette
+      - task: application:jardins-vedas:wordpress-site
 
-  tenant:infra02:le-portail:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
+  all:
+    desc: 'Create a backup for all tenants'
     silent: false
     cmds:
-      - task: application:infra02:le-portail:wordpress-site
-      - task: application:infra02:le-portail:wordpress-epilibres
-      - task: application:infra02:le-portail:grist
-      - task: application:infra02:le-portail:dolibarr
+      - task: tenant:le-portail
+      - task: tenant:ferme-du-jointout
+      - task: tenant:la-bergeronnette
+      # - task: tenant:jardins-vedas
 
-  tenant:infra02:ferme-du-jointout:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
-    silent: false
-    cmds:
-      - task: application:infra02:ferme-du-jointout:wordpress-site
-      - task: application:infra02:ferme-du-jointout:nextcloud
-      - task: application:infra02:ferme-du-jointout:dolibarr
-
-  tenant:infra02:la-bergeronnette:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
-    silent: false
-    cmds:
-      - task: application:infra02:la-bergeronnette:wordpress-site
-
-  infra02:
-    desc: 'Create a backup for a specific tenant for a specific cluster'
-    silent: false
-    cmds:
-      - task: tenant:infra02:le-portail
-      - task: tenant:infra02:ferme-du-jointout
-      - task: tenant:infra02:la-bergeronnette
-
-  application:*:*:*:
+  application:*:*:
     desc: 'Create a backup for a specific tenant and application for a specific cluster'
     silent: false
     vars:
-      CLUSTER: '{{index .MATCH 0}}'
-      TENANT:  '{{index .MATCH 1}}'
-      APPLICATION: '{{index .MATCH 2}}'
-    requires:
-      vars: [CLUSTER, APPLICATION, TENANT]
+      TENANT:  '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
     cmds:
       - task: .create-backup-resource
         vars:

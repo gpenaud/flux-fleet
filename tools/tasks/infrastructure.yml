@@ -32,3 +32,52 @@ tasks:
         echo ${VM_ID}
         hapi vps snapshots create ${VM_ID}
     silent: true
+
+  recreate:flux:
+    desc: Force k3s local redeployment with flux
+    cmds:
+      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook -i ${ANSIBLE_PATH}/inventories/localhost/hosts.yml ${ANSIBLE_PATH}/playbooks/install-k3s-with-flux.yml --tags flux'
+    silent: true
+
+  recreate:lab:
+    desc: Force k3s local redeployment for lab
+    cmds:
+      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook -i ${ANSIBLE_PATH}/inventories/localhost/hosts.yml ${ANSIBLE_PATH}/playbooks/install-k3s-lab.yml'
+    silent: true
+
+  encrypt:
+    desc: Encrypt secrets with sops
+    cmds:
+      - |
+        #!/bin/bash
+        find . -name "secrets.yaml" ! -name "*.enc.yaml" | while read -r file; do
+
+          enc_file="${file%.yaml}.enc.yaml"
+
+          # Pas encore chiffré → chiffrer vers .enc.yaml
+          if [ ! -f "$enc_file" ]; then
+            echo "Chiffrement de $file → $enc_file..."
+            sops --encrypt "$file" > "$enc_file"
+            continue
+          fi
+
+          # Jamais commité → rechiffrer par sécurité
+          if ! git show HEAD:"$enc_file" &>/dev/null; then
+            echo "Jamais commité, chiffrement de $file → $enc_file..."
+            sops --encrypt "$file" > "$enc_file"
+            continue
+          fi
+
+          # Comparer le contenu déchiffré actuel vs dernier commit
+          current=$(cat "$file")
+          committed=$(git show HEAD:"$enc_file" | sops --decrypt --input-type yaml --output-type yaml /dev/stdin 2>/dev/null)
+
+          if [ "$current" = "$committed" ]; then
+            echo "Aucun changement, ignoré : $file"
+          else
+            echo "Contenu modifié, rechiffrement de $file → $enc_file..."
+            sops --encrypt "$file" > "$enc_file"
+          fi
+        done
+        exit 0
+    silent: true

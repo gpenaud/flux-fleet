@@ -1,47 +1,47 @@
 version: '3'
 
 env:
-  ALTERCONSO_PATH: work/le-portail/alterconso
+  ALTERCONSO_PATH: '{{.ROOT_DIR}}/../le-portail/alterconso'
   ALTERCONSO_DB_DUMP_PATH: '/tmp/restic-le-portail-alterconso/*'
 
 tasks:
-  all:from:*:to:*:
+  all:from:*:
     vars:
       SOURCE_CLUSTER: '{{index .MATCH 0}}'
-      DESTINATION_CLUSTER: '{{index .MATCH 1}}'
     requires:
-      vars: [SOURCE_CLUSTER, DESTINATION_CLUSTER]
+      vars: [SOURCE_CLUSTER]
     desc: 'Restore all tenants from a backup through argo worflow (optional shortcut: task restore:all)'
     cmds:
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:wordpress-site
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:wordpress-epilibres
-      # - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:alterconso
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:grist
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:le-portail:dolibarr
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:ferme-du-jointout:wordpress-site
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:ferme-du-jointout:nextcloud
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:ferme-du-jointout:dolibarr
-      - task: application:from:{{.SOURCE_CLUSTER}}:to:{{.DESTINATION_CLUSTER}}:la-bergeronnette:wordpress-site
-
+      - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:wordpress-site
+      - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:wordpress-epilibres
+      # - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:alterconso
+      - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:grist
+      - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:dolibarr
+      - task: application:from:{{.SOURCE_CLUSTER}}:ferme-du-jointout:wordpress-site
+      - task: application:from:{{.SOURCE_CLUSTER}}:ferme-du-jointout:nextcloud
+      - task: application:from:{{.SOURCE_CLUSTER}}:ferme-du-jointout:dolibarr
+      - task: application:from:{{.SOURCE_CLUSTER}}:la-bergeronnette:wordpress-site
+      # - task: application:from:{{.SOURCE_CLUSTER}}:jardins-vedas:wordpress-site
     silent: false
 
-  application:from:*:to:*:*:*:
-    desc: 'Restore a backup for a specific tenant and application for a specific cluster'
+  application:from:*:*:*:
+    desc: 'Restore a backup for a specific tenant and application from a specific cluster'
     silent: false
     vars:
       SOURCE_CLUSTER: '{{index .MATCH 0}}'
-      DESTINATION_CLUSTER: '{{index .MATCH 1}}'
-      TENANT:  '{{index .MATCH 2}}'
-      APPLICATION: '{{index .MATCH 3}}'
+      TENANT:  '{{index .MATCH 1}}'
+      APPLICATION: '{{index .MATCH 2}}'
     requires:
-      vars: [SOURCE_CLUSTER, DESTINATION_CLUSTER, APPLICATION, TENANT]
+      vars: [SOURCE_CLUSTER, APPLICATION, TENANT]
     cmds:
-      - argo submit --context admin@{{.DESTINATION_CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} --from workflowtemplate/restore -p backup-cluster-source='{{.SOURCE_CLUSTER}}'
+      - argo submit --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} --from workflowtemplate/restore -p backup-cluster-source='{{.SOURCE_CLUSTER}}'
 
   alterconso:transform:
     desc: 'Transform alterconso database from Haxe to Go (internal task)'
     cmds:
-      - task: :backup:download:infra01:alterconso
+      # NOTE: For now, we force on infra01 because data are here, but not for eternity
+      # - task: :{{.CLUSTER}}:backup:download:alterconso
+      - task -t {{.ROOT_DIR}}/Taskfile.yml infra01:backup:download:alterconso
       - |
         docker run -d \
           --name alterconso-import-from-haxe-to-go \
@@ -59,7 +59,7 @@ tasks:
           mysql -ualterconso -pchangeme -e 'SELECT 1' alterconso_haxe_import >/dev/null 2>&1; do
           sleep 1
         done
-      - ${HOME}/${ALTERCONSO_PATH}/tools/import-haxe.sh ${ALTERCONSO_DB_DUMP_PATH}/le-portail-alterconso-db-dump.sql
+      - ${ALTERCONSO_PATH}/tools/import-haxe.sh ${ALTERCONSO_DB_DUMP_PATH}/le-portail-alterconso-db-dump.sql
       - docker rm -f alterconso-import-from-haxe-to-go
       - rm -rf /tmp/restic-le-portail-alterconso
     silent: true
@@ -67,11 +67,11 @@ tasks:
   alterconso:import:
     vars:
       MYSQL_PASSWORD:
-        sh: sops --ignore-mac -d "tenants/le-portail/applications/production/alterconso/secrets.enc.yaml" | yq '.stringData["DB_PASSWORD"] | select(. != null)'
+        sh: sops --ignore-mac -d "{{.ROOT_DIR}}/tenants/le-portail/applications/production/alterconso/secrets.enc.yaml" | yq '.stringData["DB_PASSWORD"] | select(. != null)'
     desc: 'Import transformed alterconso database into Mariadb'
     cmds:
       - |
-        kubectl exec --context admin@infra02 -i -n controller-database mariadb-0 -- mariadb -u alterconso -p"{{.MYSQL_PASSWORD}}" lp-alterconso < ${HOME}/${ALTERCONSO_PATH}/import-go.sql
+        kubectl exec --context admin@{{.CLUSTER}} -i -n controller-database mariadb-0 -- mariadb -u alterconso -p"{{.MYSQL_PASSWORD}}" lp-alterconso < ${ALTERCONSO_PATH}/import-go.sql
     silent: true
 
   alterconso:process:

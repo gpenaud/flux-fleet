@@ -1,0 +1,404 @@
+version: '3'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Opérations Flux / Helm sur un cluster
+#
+# Inclus par cluster.yml avec CLUSTER → les tâches s'invoquent :
+#   task infra02:flux:reconcile:tenant:<tenant>:<app>
+#   task infra02:flux:reinstall:infrastructure:<service>
+#
+# Deux niveaux d'intervention, du plus doux au plus brutal :
+#
+#   reconcile  Relance le cycle. Débloque une release coincée en pending-*,
+#              dé-suspend, rafraîchit la source, court-circuite le backoff.
+#              L'état Helm est conservé (sauf FORCE=true).
+#
+#   reinstall  Efface TOUT l'état Helm et laisse Flux réinstaller depuis Git.
+#              À réserver aux cas où reconcile ne suffit pas : historique Helm
+#              corrompu, release fantôme, hooks bloqués.
+#
+# Toutes les commandes ciblent explicitement le contexte du cluster : sans ça,
+# un `task infra02:...` lancé avec infra01 comme contexte courant agirait sur le
+# mauvais cluster.
+# ─────────────────────────────────────────────────────────────────────────────
+
+vars:
+  KUBECTL: 'kubectl --context admin@{{.CLUSTER}}'
+  HELM: 'helm --kube-context admin@{{.CLUSTER}}'
+  FLUX: 'flux --context admin@{{.CLUSTER}}'
+
+  # Fonction shell partagée : pour une HelmRelease, résout le nom de la release
+  # Helm et le namespace où Helm stocke son état. storageNamespace prime, puis
+  # targetNamespace, puis le namespace de l'objet ; releaseName prime sur le nom
+  # de la HelmRelease. Sans ça, uninstall et `helm get values` cherchent au
+  # mauvais endroit dès qu'une HelmRelease utilise ces champs.
+  # Renseigne RELEASE_NAME et RELEASE_NS.
+  RESOLVE_RELEASE: |
+    resolve_release() {
+      _spec=$(kubectl --context admin@{{.CLUSTER}} get helmrelease -n "$2" "$1" \
+        -o jsonpath='{.spec.storageNamespace}{"\t"}{.spec.targetNamespace}{"\t"}{.spec.releaseName}')
+      _sns=$(echo "$_spec" | cut -f1)
+      _tns=$(echo "$_spec" | cut -f2)
+      _rel=$(echo "$_spec" | cut -f3)
+      RELEASE_NS="${_sns:-${_tns:-$2}}"
+      RELEASE_NAME="${_rel:-$1}"
+    }
+
+tasks:
+  # ───────────────────────────────────────────────────────────────────────────
+  # reconcile
+  # ───────────────────────────────────────────────────────────────────────────
+
+  reconcile:tenant:*:*:
+    desc: "Relance une Kustomization et son cycle Helm (FORCE=true pour repartir de zéro côté Helm)"
+    silent: true
+    vars:
+      TENANT: '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
+      NAMESPACE: '{{.TENANT}}-{{.APPLICATION}}'
+      KUSTOMIZATION: 'tenant-{{.TENANT}}-{{.APPLICATION}}'
+    requires:
+      vars: [TENANT, APPLICATION]
+    cmds:
+      - task: .reconcile
+        vars:
+          KUSTOMIZATION: '{{.KUSTOMIZATION}}'
+          NAMESPACE: '{{.NAMESPACE}}'
+          FORCE: '{{.FORCE | default "true"}}'
+          TIMEOUT: '{{.TIMEOUT | default "60s"}}'
+
+  reconcile:infrastructure:*:
+    desc: "Relance une Kustomization d'infrastructure et son cycle Helm"
+    silent: true
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+      KUSTOMIZATION: 'infrastructure-{{.SERVICE}}'
+      NAMESPACE: 'controller-{{.SERVICE}}'
+    requires:
+      vars: [SERVICE]
+    cmds:
+      - task: .reconcile
+        vars:
+          KUSTOMIZATION: '{{.KUSTOMIZATION}}'
+          NAMESPACE: '{{.NAMESPACE}}'
+          FORCE: '{{.FORCE | default "true"}}'
+          TIMEOUT: '{{.TIMEOUT | default "60s"}}'
+
+  .reconcile:
+    internal: true
+    silent: true
+    requires:
+      vars: [CLUSTER, KUSTOMIZATION, NAMESPACE]
+    vars:
+      FORCE: '{{.FORCE | default "false"}}'
+      TIMEOUT: '{{.TIMEOUT | default "60s"}}'
+    cmds:
+      # ---------------------------------------------------------------
+      # 1. Débloquer Helm — en premier, pas en fallback
+      # ---------------------------------------------------------------
+      - |
+        STUCK=$({{.KUBECTL}} get secret -n {{.NAMESPACE}} -l owner=helm \
+          -o jsonpath='{range .items[*]}{.metadata.name}={.metadata.labels.status}{"\n"}{end}' \
+          2>/dev/null | grep -E '=(pending-install|pending-upgrade|pending-rollback|uninstalling)' || true)
+
+        if [ -n "$STUCK" ] || [ "{{.FORCE}}" = "true" ]; then
+          [ -n "$STUCK" ] && { echo ">> Release bloquée :"; echo "$STUCK" | sed 's/^/   /'; }
+          [ "{{.FORCE}}" = "true" ] && echo ">> Cycle Helm forcé (FORCE=true)"
+
+          {{.KUBECTL}} delete secret -n {{.NAMESPACE}} -l owner=helm --ignore-not-found
+          # Le contrôleur peut tenir la transaction en mémoire.
+          # ATTENTION : ce redémarrage interrompt les opérations Helm en cours
+          # de TOUS les tenants, pas seulement celui-ci.
+          echo ">> Redémarrage du helm-controller (impact global sur le cluster)"
+          {{.KUBECTL}} rollout restart deploy/helm-controller -n flux-system
+          {{.KUBECTL}} rollout status deploy/helm-controller -n flux-system --timeout=120s
+        else
+          echo ">> Aucune release Helm bloquée."
+        fi
+
+      # ---------------------------------------------------------------
+      # 2. Dé-suspendre par patch — 'flux resume' attend Ready et bloque
+      # ---------------------------------------------------------------
+      # Note : ces commandes sont en blocs `|` et non en scalaires simples — un
+      # scalaire YAML commençant par `{{` serait lu comme une flow mapping.
+      - |
+        {{.KUBECTL}} patch kustomization -n flux-system {{.KUSTOMIZATION}} --type=merge -p '{"spec":{"suspend":false}}'
+      - |
+        {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o name 2>/dev/null | xargs -r -I{} \
+          {{.KUBECTL}} patch {} -n {{.NAMESPACE}} --type=merge -p '{"spec":{"suspend":false}}'
+
+      # ---------------------------------------------------------------
+      # 3. Source d'abord, sinon travail sur artefact en cache
+      # ---------------------------------------------------------------
+      - |
+        {{.FLUX}} reconcile source git flux-system
+
+      # ---------------------------------------------------------------
+      # 4. requestedAt court-circuite le backoff exponentiel
+      # ---------------------------------------------------------------
+      - |
+        {{.KUBECTL}} annotate kustomization -n flux-system {{.KUSTOMIZATION}} reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+      - |
+        {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o name 2>/dev/null | xargs -r -I{} \
+          {{.KUBECTL}} annotate {} -n {{.NAMESPACE}} reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+
+      # ---------------------------------------------------------------
+      # 5. Vérification + diagnostic
+      # ---------------------------------------------------------------
+      - task: .wait-helmreleases
+        vars: { NAMESPACE: '{{.NAMESPACE}}', KUSTOMIZATION: '{{.KUSTOMIZATION}}', TIMEOUT: '{{.TIMEOUT}}' }
+
+      - task: .show-values
+        vars: { NAMESPACE: '{{.NAMESPACE}}', ALL_VALUES: '{{.ALL_VALUES | default "false"}}' }
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # reinstall
+  # ───────────────────────────────────────────────────────────────────────────
+
+  reinstall:tenant:*:*:
+    desc: "Réinstalle complètement une HelmRelease de tenant (efface tout l'état Helm)"
+    silent: true
+    vars:
+      TENANT: '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
+      NAMESPACE: '{{.TENANT}}-{{.APPLICATION}}'
+      KUSTOMIZATION: 'tenant-{{.TENANT}}-{{.APPLICATION}}'
+    requires:
+      vars: [TENANT, APPLICATION]
+    cmds:
+      - task: .reinstall
+        vars:
+          NAMESPACE: '{{.NAMESPACE}}'
+          KUSTOMIZATION: '{{.KUSTOMIZATION}}'
+          TIMEOUT: '{{.TIMEOUT | default "300s"}}'
+
+  reinstall:infrastructure:*:
+    desc: "Réinstalle complètement une HelmRelease d'infrastructure (efface tout l'état Helm)"
+    silent: true
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+      KUSTOMIZATION: 'infrastructure-{{.SERVICE}}'
+      NAMESPACE: 'controller-{{.SERVICE}}'
+    requires:
+      vars: [SERVICE]
+    cmds:
+      - task: .reinstall
+        vars:
+          NAMESPACE: '{{.NAMESPACE}}'
+          KUSTOMIZATION: '{{.KUSTOMIZATION}}'
+          TIMEOUT: '{{.TIMEOUT | default "300s"}}'
+
+  .reinstall:
+    internal: true
+    silent: true
+    requires:
+      vars: [CLUSTER, NAMESPACE, KUSTOMIZATION]
+    vars:
+      TIMEOUT: '{{.TIMEOUT | default "300s"}}'
+    cmds:
+      # 0. Filet de sécurité — les defer s'exécutent quoi qu'il arrive, y compris
+      #    sur échec des étapes de nettoyage. Sans ça, un abandon en cours de
+      #    route laisse la Kustomization suspendue, sans que rien ne le signale :
+      #    le tenant cesse silencieusement d'être réconcilié.
+      #    Idempotent — sur le chemin nominal l'étape 5 a déjà dé-suspendu.
+      - defer: |
+          {{.KUBECTL}} patch kustomization -n flux-system {{.KUSTOMIZATION}} \
+            --type=merge -p '{"spec":{"suspend":false}}' >/dev/null 2>&1 || true
+          {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o name 2>/dev/null | xargs -r -I{} \
+            {{.KUBECTL}} patch {} -n {{.NAMESPACE}} --type=merge -p '{"spec":{"suspend":false}}' >/dev/null 2>&1 || true
+
+      # 1. Geler Flux — sinon il recrée pendant le nettoyage
+      - |
+        echo ">> Suspension"
+        {{.KUBECTL}} patch kustomization -n flux-system {{.KUSTOMIZATION}} \
+          --type=merge -p '{"spec":{"suspend":true}}'
+        {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o name 2>/dev/null | xargs -r -I{} \
+          {{.KUBECTL}} patch {} -n {{.NAMESPACE}} --type=merge -p '{"spec":{"suspend":true}}'
+
+      # 2. Tuer la transaction en cours — le contrôleur la tient en mémoire
+      - |
+        echo ">> Redémarrage du helm-controller (impact global sur le cluster)"
+        {{.KUBECTL}} rollout restart deploy/helm-controller -n flux-system
+        {{.KUBECTL}} rollout status deploy/helm-controller -n flux-system --timeout=120s
+
+      # 3. Effacer tout l'état Helm
+      #
+      #    L'état d'une release ne vit pas forcément dans le namespace de la
+      #    HelmRelease : storageNamespace prime, puis targetNamespace, puis le
+      #    namespace de l'objet. Même chose pour le nom : releaseName prime sur
+      #    le nom de la HelmRelease. Ignorer ces champs ferait passer l'uninstall
+      #    à côté de la release, et l'étape 4 validerait un nettoyage incomplet.
+      - |
+        echo ">> Nettoyage de l'état Helm"
+        {{.RESOLVE_RELEASE}}
+        for HR in $({{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+          resolve_release "$HR" "{{.NAMESPACE}}"
+          echo "   $HR → release '$RELEASE_NAME' dans '$RELEASE_NS'"
+          {{.HELM}} uninstall "$RELEASE_NAME" -n "$RELEASE_NS" --no-hooks --timeout=60s 2>/dev/null || true
+          {{.KUBECTL}} delete secret -n "$RELEASE_NS" -l owner=helm,name="$RELEASE_NAME" --ignore-not-found
+        done
+
+        # Filet : secrets Helm restants dans le namespace de la HelmRelease
+        {{.KUBECTL}} delete secret -n {{.NAMESPACE}} -l owner=helm --ignore-not-found
+        # Hooks résiduels : un Job existant bloque la recréation
+        {{.KUBECTL}} delete job -n {{.NAMESPACE}} --all --ignore-not-found --wait=false
+
+      # 4. Vérifier que l'état est bien vide
+      - |
+        echo ">> Vérification"
+        LEFT=$({{.KUBECTL}} get secret -n {{.NAMESPACE}} -l owner=helm -o name 2>/dev/null | wc -l)
+        if [ "$LEFT" -gt 0 ]; then
+          echo "✗ $LEFT secret(s) Helm résiduel(s)"
+          {{.KUBECTL}} get secret -n {{.NAMESPACE}} -l owner=helm
+          exit 1
+        fi
+        echo "✓ Aucun état Helm"
+
+      # 5. Relancer depuis Git
+      - |
+        echo ">> Reprise"
+        {{.KUBECTL}} patch kustomization -n flux-system {{.KUSTOMIZATION}} \
+          --type=merge -p '{"spec":{"suspend":false}}'
+        {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o name 2>/dev/null | xargs -r -I{} \
+          {{.KUBECTL}} patch {} -n {{.NAMESPACE}} --type=merge -p '{"spec":{"suspend":false}}'
+        {{.FLUX}} reconcile source git flux-system
+        {{.KUBECTL}} annotate kustomization -n flux-system {{.KUSTOMIZATION}} \
+          reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+
+      # 6. Attendre et diagnostiquer
+      - task: .wait-helmreleases
+        vars: { NAMESPACE: '{{.NAMESPACE}}', KUSTOMIZATION: '{{.KUSTOMIZATION}}', TIMEOUT: '{{.TIMEOUT}}' }
+
+      - echo "✓ Réinstallation réussie"
+
+      - task: .show-values
+        vars: { NAMESPACE: '{{.NAMESPACE}}', ALL_VALUES: '{{.ALL_VALUES | default "false"}}' }
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # values — vérifier qu'une modification est bien arrivée dans la release
+  #
+  # Consultation pure, sans rien déclencher. Pour vérifier après un push :
+  #   task infra02:flux:values:infrastructure:dns
+  #   ALL_VALUES=true task infra02:flux:values:tenant:<tenant>:<app>
+  #
+  # Lire les values ne suffit pas à conclure : si la release n'a pas été mise à
+  # jour, elles sont simplement celles d'avant. La révision et la date de
+  # déploiement affichées en tête permettent de trancher.
+  # ───────────────────────────────────────────────────────────────────────────
+
+  values:tenant:*:*:
+    desc: "Affiche les values de la release d'un tenant (ALL_VALUES=true pour inclure les défauts du chart)"
+    silent: true
+    vars:
+      TENANT: '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
+      NAMESPACE: '{{.TENANT}}-{{.APPLICATION}}'
+    requires:
+      vars: [TENANT, APPLICATION]
+    cmds:
+      - task: .show-values
+        vars: { NAMESPACE: '{{.NAMESPACE}}', ALL_VALUES: '{{.ALL_VALUES | default "false"}}' }
+
+  values:infrastructure:*:
+    desc: "Affiche les values d'une release d'infrastructure (ALL_VALUES=true pour inclure les défauts du chart)"
+    silent: true
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+      NAMESPACE: 'controller-{{.SERVICE}}'
+    requires:
+      vars: [SERVICE]
+    cmds:
+      - task: .show-values
+        vars: { NAMESPACE: '{{.NAMESPACE}}', ALL_VALUES: '{{.ALL_VALUES | default "false"}}' }
+
+  .show-values:
+    internal: true
+    silent: true
+    requires:
+      vars: [CLUSTER, NAMESPACE]
+    vars:
+      ALL_VALUES: '{{.ALL_VALUES | default "false"}}'
+    cmds:
+      - |
+        {{.RESOLVE_RELEASE}}
+
+        HRS=$({{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+        if [ -z "$HRS" ]; then
+          echo "✗ Aucune HelmRelease dans {{.NAMESPACE}}"
+          exit 1
+        fi
+
+        for HR in $HRS; do
+          resolve_release "$HR" "{{.NAMESPACE}}"
+
+          echo ""
+          echo "═══ $HR  →  release '$RELEASE_NAME' @ '$RELEASE_NS'"
+
+          # Révision + date de déploiement : une modification poussée dans Git
+          # mais jamais reprise se voit ICI (révision inchangée) avant de se voir
+          # dans les values.
+          {{.HELM}} list -n "$RELEASE_NS" --filter "^${RELEASE_NAME}\$"
+
+          # État côté Flux : si la dernière tentative a échoué, la release tourne
+          # encore sur les values précédentes.
+          {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} "$HR" \
+            -o jsonpath='{range .status.conditions[?(@.type=="Ready")]}   Flux: {.status} {.reason}: {.message}{"\n"}{end}'
+
+          echo ""
+          echo "── Values déclarées (ce qui vient de tes fichiers Git)"
+          {{.HELM}} get values "$RELEASE_NAME" -n "$RELEASE_NS"
+
+          if [ "{{.ALL_VALUES}}" = "true" ]; then
+            echo ""
+            echo "── Values complètes (défauts du chart fusionnés)"
+            {{.HELM}} get values "$RELEASE_NAME" -n "$RELEASE_NS" --all
+          fi
+        done
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Attente + diagnostic, partagés par reconcile et reinstall
+  # ───────────────────────────────────────────────────────────────────────────
+
+  .wait-helmreleases:
+    internal: true
+    silent: true
+    requires:
+      vars: [CLUSTER, NAMESPACE, TIMEOUT]
+    cmds:
+      # `kubectl wait --all` ÉCHOUE immédiatement sur "no matching resources
+      # found" tant qu'aucune HelmRelease n'existe : il attend qu'une condition
+      # devienne vraie, pas que la ressource apparaisse. Juste après une reprise,
+      # Flux peut ne pas les avoir encore recréées.
+      - |
+        DEADLINE=$(( $(date +%s) + 120 ))
+        while [ "$({{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o name 2>/dev/null | wc -l)" -eq 0 ]; do
+          if [ "$(date +%s)" -ge "$DEADLINE" ]; then
+            echo "✗ Aucune HelmRelease dans {{.NAMESPACE}} après 120s"
+            echo "   La Kustomization {{.KUSTOMIZATION}} les produit-elle bien ?"
+            exit 1
+          fi
+          sleep 5
+        done
+
+      - |
+        if {{.KUBECTL}} wait --for=condition=Ready helmrelease --all -n {{.NAMESPACE}} --timeout={{.TIMEOUT}}; then
+          exit 0
+        fi
+
+        echo ""
+        echo "✗ Non Ready après {{.TIMEOUT}}"
+        echo "── Conditions ──"
+        {{.KUBECTL}} get helmrelease -n {{.NAMESPACE}} -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.conditions[*]}  {.type}={.status} {.reason}: {.message}{"\n"}{end}{end}'
+        echo ""
+        echo "── Pods ──"
+        {{.KUBECTL}} get pods -n {{.NAMESPACE}}
+        echo ""
+        echo "── Événements ──"
+        {{.KUBECTL}} get events -n {{.NAMESPACE}} --sort-by=.lastTimestamp 2>/dev/null | tail -15
+        echo ""
+        echo "── Logs applicatifs ──"
+        for POD in $({{.KUBECTL}} get pods -n {{.NAMESPACE}} -o name 2>/dev/null); do
+          echo "── $POD"
+          {{.KUBECTL}} logs -n {{.NAMESPACE}} "$POD" --tail=20 --all-containers --prefix 2>/dev/null || true
+        done
+        exit 1

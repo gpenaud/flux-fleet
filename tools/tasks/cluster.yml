@@ -1,51 +1,32 @@
 version: '3'
 
-tasks:
-  recreate:flux:
-    desc: Force k3s local redeployment with flux
-    cmds:
-      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook -i ${ANSIBLE_PATH}/inventories/localhost/hosts.yml ${ANSIBLE_PATH}/playbooks/install-k3s-with-flux.yml --tags flux'
-    silent: true
+includes:
+  flux:
+    taskfile: ./flux.yml
+    vars: { CLUSTER: '{{.CLUSTER}}' }
 
-  recreate:lab:
-    desc: Force k3s local redeployment for lab
-    cmds:
-      - 'ANSIBLE_CONFIG=${ANSIBLE_PATH}/ansible.cfg ansible-playbook -i ${ANSIBLE_PATH}/inventories/localhost/hosts.yml ${ANSIBLE_PATH}/playbooks/install-k3s-lab.yml'
-    silent: true
+  # flux:reconcile:
+  #   taskfile: ./flux/reconcile.yml
+  #   vars: { CLUSTER: '{{.CLUSTER}}' }
 
-  encrypt:
-    desc: Encrypt secrets with sops
-    cmds:
-      - |
-        #!/bin/bash
-        find . -name "secrets.yaml" ! -name "*.enc.yaml" | while read -r file; do
+  # flux:reset:
+  #   taskfile: ./flux/reset.yml
+  #   vars: { CLUSTER: '{{.CLUSTER}}' }
 
-          enc_file="${file%.yaml}.enc.yaml"
+  database:
+    taskfile: ./database.yml
+    vars: { CLUSTER: '{{.CLUSTER}}' }
 
-          # Pas encore chiffré → chiffrer vers .enc.yaml
-          if [ ! -f "$enc_file" ]; then
-            echo "Chiffrement de $file → $enc_file..."
-            sops --encrypt "$file" > "$enc_file"
-            continue
-          fi
+  backup:
+    taskfile: ./backup.yml
+    vars: { CLUSTER: '{{.CLUSTER}}' }
 
-          # Jamais commité → rechiffrer par sécurité
-          if ! git show HEAD:"$enc_file" &>/dev/null; then
-            echo "Jamais commité, chiffrement de $file → $enc_file..."
-            sops --encrypt "$file" > "$enc_file"
-            continue
-          fi
+  restore:
+    taskfile: ./restore.yml
+    vars: { CLUSTER: '{{.CLUSTER}}' }
 
-          # Comparer le contenu déchiffré actuel vs dernier commit
-          current=$(cat "$file")
-          committed=$(git show HEAD:"$enc_file" | sops --decrypt --input-type yaml --output-type yaml /dev/stdin 2>/dev/null)
-
-          if [ "$current" = "$committed" ]; then
-            echo "Aucun changement, ignoré : $file"
-          else
-            echo "Contenu modifié, rechiffrement de $file → $enc_file..."
-            sops --encrypt "$file" > "$enc_file"
-          fi
-        done
-        exit 0
-    silent: true
+  vpn:
+    taskfile: ./vpn.yml
+    vars: 
+      CLUSTER: '{{.CLUSTER}}'
+      VPN_DOMAIN: '{{.VPN_DOMAIN}}'
