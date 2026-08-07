@@ -22,9 +22,25 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: bitnami
-  timeout: 30m
   interval: 5m
+  # 10m plutôt que les 3m du reste de la fleet : l'image Bitnami est lourde et
+  # le PVC de 10Gi doit être provisionné. Mais loin des 30m précédents — Flux
+  # installe avec --wait, donc une release condamnée (secret absent, image
+  # introuvable) occupe la place pendant TOUT le timeout, et le correctif que
+  # tu pousses entre-temps attend son tour sans que rien ne l'indique.
+  timeout: 10m
   install:
-    timeout: 30m
     remediation:
-      retries: -1
+      # 3 essais, comme le reste de la fleet, plutôt que l'infini : une config
+      # durablement fausse doit finir en échec visible, pas boucler en
+      # désinstallant à chaque tour.
+      retries: 3
+  upgrade:
+    remediation:
+      # Sans ce bloc, upgrade.remediation.retries vaut 0 : un mauvais upgrade
+      # échoue et RESTE en échec, application indisponible, jusqu'à
+      # intervention. Avec des essais, Flux rollback sur la dernière release
+      # fonctionnelle — l'application redevient disponible pendant qu'on
+      # corrige.
+      retries: 3
+      strategy: rollback

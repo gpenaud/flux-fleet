@@ -26,3 +26,10 @@ spec:
   install:
     remediation:
       retries: 3
+  upgrade:
+    remediation:
+      # Sans ce bloc, retries vaut 0 : un upgrade raté reste en échec et laisse
+      # l'application indisponible jusqu'à intervention. Avec rollback, Flux
+      # revient à la dernière release fonctionnelle le temps qu'on corrige.
+      retries: 3
+      strategy: rollback
