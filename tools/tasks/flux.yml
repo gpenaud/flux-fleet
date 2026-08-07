@@ -45,6 +45,90 @@ vars:
     }
 
 tasks:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # resynchronize
+  # ───────────────────────────────────────────────────────────────────────────
+
+  # Propager un changement de variable (domaine, endpoint, storage class...)
+  #
+  # postBuild.substituteFrom lit les ConfigMaps DEPUIS LE CLUSTER, pas depuis
+  # Git. Un changement dans cluster-vars ne se propage donc pas tout seul :
+  # chaque Kustomization rend ses manifestes avec la ConfigMap telle qu'elle est
+  # à l'instant de SA réconciliation, puis se marque à jour. dependsOn n'ordonne
+  # que l'application initiale — ensuite chacune repart sur son propre intervalle
+  # (1h ici), dans un ordre quelconque.
+  #
+  # Réconcilier la Kustomization racine ne suffit pas : elle ré-applique bien les
+  # objets enfants, mais leur spec est inchangée, donc aucun ne se réconcilie.
+  # Il faut les pousser un par un.
+
+  resynchronize:vars:
+    desc: "Recharge la ConfigMap cluster-vars depuis Git (ne propage pas aux consommateurs)"
+    silent: true
+    cmds:
+      - '{{.FLUX}} reconcile source git flux-system'
+      - '{{.FLUX}} reconcile kustomization -n flux-system cluster-vars --with-source'
+
+  resynchronize:tenants:
+    desc: "Propage un changement de variables à tous les tenants"
+    silent: true
+    cmds:
+      - task: .resynchronize
+        vars: { ROOT: 'tenants', PREFIX: 'tenant-' }
+
+  resynchronize:infrastructure:
+    desc: "Propage un changement de variables à toute l'infrastructure"
+    silent: true
+    cmds:
+      - task: .resynchronize
+        vars: { ROOT: 'infrastructure', PREFIX: 'infrastructure-' }
+
+  .resynchronize:
+    internal: true
+    silent: true
+    requires:
+      vars: [CLUSTER, ROOT, PREFIX]
+    cmds:
+      - |
+        echo ">> Source Git"
+        {{.FLUX}} reconcile source git flux-system
+
+      - |
+        echo ">> cluster-vars (les ConfigMaps de substitution en premier)"
+        {{.FLUX}} reconcile kustomization -n flux-system cluster-vars
+
+      - |
+        echo ">> {{.ROOT}} (crée/supprime les Kustomizations enfants)"
+        {{.FLUX}} reconcile kustomization -n flux-system {{.ROOT}}
+
+      # Deux passes, séparées par dépendance : celles qui n'en ont pas produisent
+      # généralement les ConfigMaps de vars (tenant-<nom>-vars), celles qui en ont
+      # les consomment. `flux reconcile` ATTEND la fin de chaque réconciliation :
+      # c'est ce qui garantit que la passe 1 est terminée avant la passe 2.
+      - |
+        ALL=$({{.KUBECTL}} get kustomization -n flux-system -o json)
+        pick() {
+          echo "$ALL" | jq -r --arg p '{{.PREFIX}}' \
+            ".items[]
+             | select(.metadata.name | startswith(\$p))
+             | select(((.spec.dependsOn // []) | length) $1)
+             | .metadata.name"
+        }
+
+        ROOTS=$(pick '== 0')
+        LEAVES=$(pick '> 0')
+
+        if [ -n "$ROOTS" ]; then
+          echo ">> Passe 1 — sans dépendance : $(echo $ROOTS | tr '\n' ' ')"
+          for k in $ROOTS; do {{.FLUX}} reconcile kustomization -n flux-system "$k"; done
+        fi
+
+        if [ -n "$LEAVES" ]; then
+          echo ">> Passe 2 — dépendants : $(echo $LEAVES | tr '\n' ' ')"
+          for k in $LEAVES; do {{.FLUX}} reconcile kustomization -n flux-system "$k"; done
+        fi
+
   # ───────────────────────────────────────────────────────────────────────────
   # reconcile
   # ───────────────────────────────────────────────────────────────────────────
