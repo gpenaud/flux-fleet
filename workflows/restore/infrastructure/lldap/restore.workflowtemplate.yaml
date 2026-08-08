@@ -58,21 +58,20 @@ spec:
       - name: database-path
         value: "/data/users.db"
 
-      # Dépôt restic source, en toutes lettres.
+      # Dépôt restic source : celui du cluster courant par défaut.
       #
       # Pas de paramètre `backup-cluster-source` ici, contrairement aux workflows
       # d'applications : Argo n'interpole pas les paramètres du workflow entre
       # eux, donc une valeur par défaut du genre
       #   "${owner}-{{workflow.parameters.backup-cluster-source}}-backup-…"
-      # resterait littérale et le dépôt serait introuvable.
+      # resterait littérale et le dépôt serait introuvable. Restaurer depuis un
+      # autre cluster se fait donc en donnant le bucket entier :
+      #   -p source-bucket=alter-it-infra02-backup-controller-directory
       #
-      # Restaurer depuis un autre cluster se fait donc en donnant le bucket
-      # entier — ce qui est de toute façon nécessaire ici : le bucket réellement
-      # provisionné ne suit PAS la formule du Schedule (voir le README du
-      # dossier), et vaut par exemple
-      #   alter-it-infra02-backup-controller-directory
+      # Le suffixe est le namespace, pas ${tenant}-${application} — voir le
+      # README du dossier.
       - name: source-bucket
-        value: "${owner}-${cluster}-backup-${tenant}-${application}"
+        value: "${owner}-${cluster}-backup-controller-directory"
 
       # Snapshot imposé. Vide : le plus récent du chemin est retenu.
       # À renseigner quand le plus récent n'est pas le bon — une sauvegarde

@@ -20,12 +20,18 @@ spec:
     secretRef:
       name: sops-age-private-key
   postBuild:
-    # Le Schedule mutualisé nomme son bucket ${owner}-${cluster}-backup-${tenant}-${application}.
-    # lldap n'appartenant à aucun tenant, on lui réserve le pseudo-tenant
-    # « controller » → alter-it-<cluster>-backup-controller-lldap.
+    # lldap n'appartient à aucun tenant : on lui réserve le pseudo-tenant
+    # « controller ».
     #
-    # Doit rester identique à local.backup_tenants dans
-    # infrastructure-as-code/infrastructure/infra02/s3.tf, qui crée le bucket.
+    # ⚠ Ces deux valeurs ne nomment PAS le bucket. Le Schedule mutualisé le
+    # dérive de ${tenant}-${application}, ce qui donnerait ici
+    # « controller-lldap » — un dépôt qui n'a jamais existé. Le dépôt réel porte
+    # le nom du namespace, « controller-directory », et components/backup/
+    # schedule.yaml l'écrit donc en toutes lettres.
+    #
+    # Les buckets sont créés par :
+    #   infrastructure-as-code/infrastructure/s3-buckets/locals.tf   (infra01)
+    #   infrastructure-as-code/infrastructure/infra02/s3.tf          (infra02)
     substitute:
       application: lldap
       tenant: controller

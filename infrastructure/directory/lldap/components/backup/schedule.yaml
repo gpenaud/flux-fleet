@@ -34,7 +34,16 @@ spec:
       key: RESTIC_PASSWORD
     s3:
       endpoint: https://s3.sbg.io.cloud.ovh.net
-      bucket: "${owner}-${cluster}-backup-${tenant}-${application}"
+      # Suffixe écrit en toutes lettres, et non dérivé de ${tenant}-${application}
+      # comme dans le Schedule mutualisé : celui-ci donnerait « controller-lldap »,
+      # alors que le dépôt restic existe sous le nom du NAMESPACE,
+      # « controller-directory ». lldap étant le seul service sauvegardé de ce
+      # namespace, c'est ce nom qui fait foi.
+      #
+      # Doit rester aligné sur les deux endroits qui créent le bucket :
+      #   infrastructure-as-code/infrastructure/s3-buckets/locals.tf   (infra01)
+      #   infrastructure-as-code/infrastructure/infra02/s3.tf          (infra02)
+      bucket: "${owner}-${cluster}-backup-controller-directory"
       accessKeyIDSecretRef:
         name: k8up-credentials
         key: AWS_ACCESS_KEY_ID

@@ -34,21 +34,30 @@ puis présence d'au moins un compte), conserve l'ancienne base en `.bak`, et
 supprime les `-wal` / `-shm` / `-journal`, qui décrivent la base précédente et
 seraient rejoués à tort sur la nouvelle.
 
-## ⚠ Le nom du bucket ne suit pas la formule
+## Le nom du bucket
 
-Trois nommages coexistent aujourd'hui, et deux ne désignent rien :
+Le suffixe du dépôt est le **namespace** — `controller-directory` — et non
+`${tenant}-${application}`, qui donnerait `controller-lldap`. lldap est le seul
+service sauvegardé de ce namespace, et c'est sous ce nom que le dépôt restic
+existe.
 
-| Origine | Nom attendu | Existe ? |
-|---|---|---|
-| `components/backup/schedule.yaml` (`${owner}-${cluster}-backup-${tenant}-${application}`) | `alter-it-infra01-backup-controller-lldap` | **non** |
-| `infra02/s3.tf` (`backup_tenants = { controller = ["lldap"] }`) | `alter-it-infra02-backup-controller-lldap` | **non** |
-| bucket réellement provisionné | `alter-it-infra02-backup-controller-directory` | oui |
+Trois endroits doivent rester alignés :
 
-Conséquence directe : **les sauvegardes de lldap échouent sur infra01**, le
-Schedule pointant vers un bucket inexistant. Et le seul snapshot disponible
-(`/controller-directory-lldap-dump.sqlite3`) vit dans le dépôt `-directory`,
-d'où le paramètre `source-bucket` de ce workflow.
+| Fichier | Rôle |
+|---|---|
+| `flux-fleet/infrastructure/directory/lldap/components/backup/schedule.yaml` | où k8up écrit |
+| `infrastructure-as-code/infrastructure/s3-buckets/locals.tf` | crée le bucket infra01 |
+| `infrastructure-as-code/infrastructure/infra02/s3.tf` | crée le bucket infra02 |
 
-À trancher : soit aligner `s3.tf` et le Schedule sur `controller-directory`,
-soit créer le bucket `controller-lldap` et migrer le dépôt existant. Tant que
-ce n'est pas fait, la restauration exige de passer `source-bucket` à la main.
+Un décalage ne casse rien à l'`apply` : c'est k8up qui échouera, la nuit, sur un
+bucket absent. C'est précisément ce qui s'est produit — le Schedule dérivait le
+suffixe de `${application}` et visait `controller-lldap`, qui n'a jamais existé,
+tandis que les sauvegardes réelles vivaient dans `controller-directory`.
+
+Le dépôt d'infra01 étant neuf, restaurer depuis l'historique d'infra02 demande
+encore de désigner son bucket :
+
+```bash
+task infra01:restore:infrastructure:lldap \
+  SOURCE_BUCKET=alter-it-infra02-backup-controller-directory
+```

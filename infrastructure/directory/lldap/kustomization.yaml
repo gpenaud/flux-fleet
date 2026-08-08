@@ -10,3 +10,5 @@ resources:
   - configmaps.yaml
   - secrets.enc.yaml
   - components/backup
+  # workflows
+  - ../../../workflows/restore/infrastructure/lldap
