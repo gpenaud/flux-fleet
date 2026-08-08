@@ -4,3 +4,7 @@ metadata:
   name: controller-directory
   labels:
     pod-security.kubernetes.io/enforce: restricted
+    # Fait recopier k8up-credentials ici par reflector (secret d'origine dans
+    # controller-backup). Sans ce label, le Schedule ne trouve ni le mot de passe
+    # restic ni les clés S3, et la sauvegarde échoue.
+    reflector/k8up-credentials: "true"

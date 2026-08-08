@@ -63,8 +63,15 @@ spec:
       accessModes: ["ReadWriteOnce"]
       storageClass: ${storage_class}
       annotations:
-        # Pour que k8up backup ce PVC, voir Schedule k8up plus bas
-        k8up.io/backup: "true"
+        # Pas de sauvegarde au niveau fichier : elle copierait users.db sans
+        # garantie de cohérence transactionnelle, et embarquerait au passage les
+        # users.db.bak-* laissés par les restaurations. La sauvegarde passe par
+        # le PreBackupPod de components/backup, qui produit un dump SQLite
+        # cohérent.
+        #
+        # (Cette annotation était de toute façon inopérante : le chart ne la
+        # propageait pas jusqu'au PVC.)
+        k8up.io/backup: "false"
 
     service:
       type: ClusterIP

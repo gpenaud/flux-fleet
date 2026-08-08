@@ -6,3 +6,4 @@ resources:
   - lldap.yaml
   - configmaps.yaml
   - secrets.enc.yaml
+  - components/backup

@@ -20,6 +20,15 @@ spec:
     secretRef:
       name: sops-age-private-key
   postBuild:
+    # Le Schedule mutualisé nomme son bucket ${owner}-${cluster}-backup-${tenant}-${application}.
+    # lldap n'appartenant à aucun tenant, on lui réserve le pseudo-tenant
+    # « controller » → alter-it-<cluster>-backup-controller-lldap.
+    #
+    # Doit rester identique à local.backup_tenants dans
+    # infrastructure-as-code/infrastructure/infra02/s3.tf, qui crée le bucket.
+    substitute:
+      application: lldap
+      tenant: controller
     substituteFrom:
       - kind: ConfigMap
         name: cluster-vars
