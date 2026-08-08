@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - pod-config.yaml
   - pre-backup-pod.yaml
-  # Schedule mutualisé : même politique de rétention que les applications de
-  # tenants (4 derniers, 4 hebdomadaires, 2 mensuels, 1 annuel), définie en un
-  # seul endroit. Il attend ${application} et ${tenant}, fournis par sync.yaml.
-  - ../../../../../applications/shared/components/backup/schedule.yaml
+  # Schedule dédié et non mutualisé : voir l'explication en tête de schedule.yaml
+  # (podConfigRef doit être posé par job, ce que le Schedule partagé ne fait pas).
+  - schedule.yaml

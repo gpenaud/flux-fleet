@@ -92,6 +92,21 @@ spec:
   postRenderers:
     - kustomize:
         patches:
+          # Exclut le PVC de la sauvegarde au niveau fichier. k8up sauvegarde par
+          # défaut TOUT PVC non annoté — ses logs le disaient explicitement :
+          # « PVC doesn't have annotation, adding to list ». On se retrouvait
+          # avec deux sauvegardes du même volume : le dump SQLite cohérent du
+          # PreBackupPod, et une copie brute embarquant les users.db.bak-*.
+          #
+          # L'annotation déclarée dans values.persistence.annotations n'atteint
+          # jamais le PVC : le chart ne la propage pas. D'où ce patch.
+          - target:
+              kind: PersistentVolumeClaim
+              name: lldap-data
+            patch: |
+              - op: add
+                path: /metadata/annotations/k8up.io~1backup
+                value: "false"
           - target:
               kind: Deployment
               name: lldap

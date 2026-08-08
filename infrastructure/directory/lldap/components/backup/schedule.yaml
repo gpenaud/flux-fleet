@@ -1,0 +1,63 @@
+---
+# Schedule dédié à lldap.
+#
+# POURQUOI PAS LE SCHEDULE MUTUALISÉ (applications/shared/components/backup)
+#
+# Celui-ci pose podConfigRef au niveau `spec`. k8up NE LE PROPAGE PAS aux Backup
+# qu'il génère : l'objet Backup créé n'en porte aucun, et le Job hérite d'un
+# securityContext vide. Constaté ici — les Jobs `backup-directory-*` étaient
+# refusés à l'admission avec les quatre violations `restricted`, et le pod de
+# pré-sauvegarde restait indéfiniment en attente d'un backup qui ne démarrait
+# jamais.
+#
+# podConfigRef doit donc être posé PAR JOB (backup / check / prune).
+#
+# Ce défaut existe aussi dans le Schedule mutualisé, mais il y est sans effet :
+# aucun namespace de tenant n'applique PodSecurity. Le corriger là-bas
+# imposerait d'un coup à dix sauvegardes qui fonctionnent un securityContext
+# jusqu'ici ignoré — avec le risque qu'un runAsUser forcé empêche restic de lire
+# des fichiers appartenant à d'autres UID. D'où ce fichier séparé plutôt qu'une
+# correction centrale.
+#
+# La rétention est volontairement identique à celle du Schedule mutualisé.
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: ${application}
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+
+  backend:
+    repoPasswordSecretRef:
+      name: k8up-credentials
+      key: RESTIC_PASSWORD
+    s3:
+      endpoint: https://s3.sbg.io.cloud.ovh.net
+      bucket: "${owner}-${cluster}-backup-${tenant}-${application}"
+      accessKeyIDSecretRef:
+        name: k8up-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: k8up-credentials
+        key: AWS_SECRET_ACCESS_KEY
+
+  backup:
+    schedule: '0 2 * * *'
+    podConfigRef:
+      name: podconfig
+
+  check:
+    schedule: '0 3 * * 4'
+    podConfigRef:
+      name: podconfig
+
+  prune:
+    schedule: '0 4 * * 4'
+    podConfigRef:
+      name: podconfig
+    retention:
+      keepLast: 4
+      keepWeekly: 4
+      keepMonthly: 2
+      keepYearly: 1
