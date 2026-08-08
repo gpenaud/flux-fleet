@@ -31,6 +31,11 @@ spec:
     persistence:
       enabled: true
       size: 5Gi
+      # Sans cette ligne, le PVC retombe sur la StorageClass marquée par défaut
+      # dans le cluster — openebs-lvm — qui n'a aucune capacité sur infra01 et
+      # laisse le volume Pending indéfiniment. Toutes les autres applications
+      # nomment déjà leur classe explicitement.
+      storageClass: ${storage_class}
     dolibarr:
       admin:
         username: le-portail
