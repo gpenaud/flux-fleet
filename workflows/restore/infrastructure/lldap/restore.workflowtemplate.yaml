@@ -1,0 +1,264 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: restore
+  namespace: controller-directory
+spec:
+  podGC:
+    strategy: OnWorkflowSuccess
+  serviceAccountName: restore-runner
+  entrypoint: main
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DEUX ÉCARTS ASSUMÉS PAR RAPPORT AUX WORKFLOWS D'APPLICATIONS (grist, …)
+  #
+  # 1. Pas de k8up Restore.
+  #    controller-directory applique PodSecurity `restricted`, là où les namespaces de
+  #    tenants n'ont aucun label. Or la ressource Restore de k8up n'expose qu'un
+  #    `podSecurityContext` — rien pour le securityContext du CONTENEUR. Le Job
+  #    qu'elle génère est donc refusé à l'admission (allowPrivilegeEscalation,
+  #    capabilities, seccompProfile manquants). C'est le pendant exact du
+  #    problème déjà documenté dans components/backup/schedule.yaml.
+  #    On appelle donc restic directement, dans un pod qu'on maîtrise.
+  #
+  # 2. Pas de restauration de volume.
+  #    lldap n'est pas sauvegardé au niveau fichier : son PreBackupPod produit un
+  #    instantané SQLite cohérent (`.backup`) poussé sur stdout. Le snapshot ne
+  #    contient donc qu'un fichier, et restaurer signifie REMPLACER users.db —
+  #    d'où l'étape de bascule ci-dessous, avec vérification d'intégrité.
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  # Appliqué à TOUS les pods du workflow, y compris ceux des templateRef
+  # partagés (scale, resolve-snapshot-id), qui sinon seraient refusés ici.
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  podSpecPatch: |
+    containers:
+      - name: main
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+
+  arguments:
+    parameters:
+      - name: snapshot-data-path
+        value: "/controller-directory-${application}-dump.sqlite3"
+      - name: workload-kind
+        value: "deployment"
+      - name: workload-name
+        value: "${application}"
+
+      # Chemin de la base DANS le volume lldap-data, tel que lldap l'ouvre.
+      - name: database-path
+        value: "/data/users.db"
+
+      # Dépôt restic source, en toutes lettres.
+      #
+      # Pas de paramètre `backup-cluster-source` ici, contrairement aux workflows
+      # d'applications : Argo n'interpole pas les paramètres du workflow entre
+      # eux, donc une valeur par défaut du genre
+      #   "${owner}-{{workflow.parameters.backup-cluster-source}}-backup-…"
+      # resterait littérale et le dépôt serait introuvable.
+      #
+      # Restaurer depuis un autre cluster se fait donc en donnant le bucket
+      # entier — ce qui est de toute façon nécessaire ici : le bucket réellement
+      # provisionné ne suit PAS la formule du Schedule (voir le README du
+      # dossier), et vaut par exemple
+      #   alter-it-infra02-backup-controller-directory
+      - name: source-bucket
+        value: "${owner}-${cluster}-backup-${tenant}-${application}"
+
+      # Snapshot imposé. Vide : le plus récent du chemin est retenu.
+      # À renseigner quand le plus récent n'est pas le bon — une sauvegarde
+      # prise après un redéploiement à blanc est valide mais vide, et devient
+      # le latest.
+      - name: snapshot-data-id
+        value: ""
+
+  volumes:
+    - name: lldap-data
+      persistentVolumeClaim:
+        claimName: ${application}-data
+
+  volumeClaimTemplates:
+    - metadata:
+        name: dump
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ${storage_class}
+        resources:
+          requests:
+            storage: 1Gi
+
+  templates:
+    - name: main
+      dag:
+        tasks:
+          # lldap doit être arrêté : remplacer users.db sous un processus qui
+          # l'a ouvert laisserait un journal WAL orphelin, et lldap repartirait
+          # sur un état incohérent.
+          - name: scale-down
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: replicas
+                  value: "0"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"
+
+          - name: resolve-snapshot-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+              clusterScope: true
+            dependencies:
+              - scale-down
+            arguments:
+              parameters:
+                - name: snapshot_path
+                  value: "{{workflow.parameters.snapshot-data-path}}"
+                - name: source_bucket
+                  value: "{{workflow.parameters.source-bucket}}"
+                - name: snapshot_id
+                  value: "{{workflow.parameters.snapshot-data-id}}"
+
+          - name: fetch-dump
+            template: fetch-dump
+            dependencies:
+              - resolve-snapshot-id
+            arguments:
+              parameters:
+                - name: snapshot_id
+                  value: "{{tasks.resolve-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: source_bucket
+                  value: "{{workflow.parameters.source-bucket}}"
+
+          - name: swap-database
+            template: swap-database
+            dependencies:
+              - fetch-dump
+            arguments:
+              parameters:
+                - name: database_path
+                  value: "{{workflow.parameters.database-path}}"
+
+          - name: scale-up
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
+            dependencies:
+              - swap-database
+            arguments:
+              parameters:
+                - name: replicas
+                  value: "1"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"
+
+    # ───────────────────────────────────────────────────────────────────────────
+    # Récupération du dump depuis restic, dans un volume de travail.
+    # ───────────────────────────────────────────────────────────────────────────
+    - name: fetch-dump
+      inputs:
+        parameters:
+          - name: snapshot_id
+          - name: source_bucket
+      container:
+        image: restic/restic:latest
+        command: [sh, -c]
+        args:
+          - |
+            set -eu
+            restic restore "{{inputs.parameters.snapshot_id}}" --target /dump
+            FILE=$(find /dump -name '*.sqlite3' -type f | head -1)
+            test -s "$FILE" || { echo "ERREUR: aucun dump .sqlite3 restauré"; ls -laR /dump; exit 1; }
+            echo ">> dump récupéré: $FILE ($(stat -c%s "$FILE") octets)"
+        volumeMounts:
+          - name: dump
+            mountPath: /dump
+        env:
+          - name: RESTIC_REPOSITORY
+            value: "s3:https://s3.sbg.io.cloud.ovh.net/{{inputs.parameters.source_bucket}}"
+          - name: RESTIC_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: RESTIC_PASSWORD
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: k8up-credentials
+                key: AWS_SECRET_ACCESS_KEY
+
+    # ───────────────────────────────────────────────────────────────────────────
+    # Bascule de la base.
+    #
+    # L'intégrité est vérifiée AVANT de toucher à l'existant : un dump tronqué
+    # remplacerait sinon une base saine par une base illisible, et lldap
+    # redémarrerait sans aucun compte — sans moyen de revenir en arrière.
+    # L'ancienne base est conservée en .bak pour la même raison.
+    # ───────────────────────────────────────────────────────────────────────────
+    - name: swap-database
+      inputs:
+        parameters:
+          - name: database_path
+      container:
+        image: keinos/sqlite3:latest
+        command: [sh, -c]
+        args:
+          - |
+            set -eu
+            TARGET="{{inputs.parameters.database_path}}"
+            DUMP=$(find /dump -name '*.sqlite3' -type f | head -1)
+            test -s "$DUMP" || { echo "ERREUR: dump introuvable"; exit 1; }
+
+            echo ">> vérification d'intégrité du dump"
+            RES=$(sqlite3 "$DUMP" 'PRAGMA integrity_check;')
+            if [ "$RES" != "ok" ]; then
+              echo "ERREUR: dump corrompu -> $RES"
+              exit 1
+            fi
+
+            USERS=$(sqlite3 "$DUMP" 'SELECT COUNT(*) FROM users;' 2>/dev/null || echo 0)
+            if [ "$USERS" -eq 0 ]; then
+              echo "ERREUR: le dump ne contient aucun compte, restauration refusée"
+              exit 1
+            fi
+            echo ">> dump valide : $USERS comptes"
+
+            if [ -f "$TARGET" ]; then
+              cp -f "$TARGET" "${TARGET}.bak"
+              echo ">> base existante sauvegardée en ${TARGET}.bak"
+            fi
+
+            # Les fichiers annexes de SQLite décrivent l'ANCIENNE base : les
+            # laisser en place ferait rejouer un journal sans rapport avec le
+            # fichier qu'on vient d'installer.
+            rm -f "${TARGET}-wal" "${TARGET}-shm" "${TARGET}-journal"
+
+            cp -f "$DUMP" "$TARGET"
+            echo ">> base restaurée dans $TARGET"
+            sqlite3 "$TARGET" 'PRAGMA integrity_check;'
+        volumeMounts:
+          - name: dump
+            mountPath: /dump
+            readOnly: true
+          - name: lldap-data
+            mountPath: /data
