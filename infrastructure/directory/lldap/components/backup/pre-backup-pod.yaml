@@ -1,0 +1,55 @@
+---
+# Sauvegarde cohérente de la base lldap
+#
+# lldap stocke tout dans un unique SQLite : utilisateurs, groupes, appartenances
+# et hachages de mots de passe. Une sauvegarde au niveau fichier (annotation
+# k8up.io/backup sur le PVC) copierait users.db tel quel — et, si elle tombe
+# pendant une transaction, restaurerait une base potentiellement corrompue :
+# le journal de rollback vit dans un fichier séparé qu'elle n'attraperait pas.
+#
+# k8up démarre donc ce pod avant la sauvegarde, exécute `backupCommand` et pousse
+# sa sortie standard dans restic. `.backup` utilise l'API de sauvegarde en ligne
+# de SQLite, qui produit un instantané cohérent sans arrêter lldap.
+#
+# L'image lldap n'embarque pas sqlite3 (ni sqlite) : d'où ce pod séparé, avec une
+# image qui l'a.
+apiVersion: k8up.io/v1
+kind: PreBackupPod
+metadata:
+  name: lldap-prebackup
+spec:
+  backupCommand: sh -c 'sqlite3 /data/users.db ".backup /tmp/lldap-backup.db" && cat /tmp/lldap-backup.db'
+  fileExtension: .sqlite3
+  pod:
+    spec:
+      # ATTENTION — contrairement au PreBackupPod de Grist, ce securityContext
+      # doit être complet : controller-directory applique PodSecurity
+      # `restricted`, alors que les namespaces de tenants n'ont aucune
+      # contrainte. Sans ces quatre réglages, le pod est refusé à l'admission et
+      # la sauvegarde échoue chaque nuit.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: lldap-dump
+          image: keinos/sqlite3
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            # Monté en écriture, pas en lecture seule : si lldap s'est arrêté
+            # brutalement, un journal de rollback subsiste et SQLite doit
+            # pouvoir le rejouer avant de lire. En lecture seule, la sauvegarde
+            # échouerait précisément dans le cas où elle est la plus utile.
+            - name: lldap-data
+              mountPath: /data
+      volumes:
+        - name: lldap-data
+          persistentVolumeClaim:
+            claimName: lldap-data
