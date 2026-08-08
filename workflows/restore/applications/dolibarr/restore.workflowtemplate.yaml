@@ -26,6 +26,18 @@ spec:
         value: "deployment"
       - name: workload-name
         value: "${application}"
+
+      # Snapshots imposés. Vides : le plus récent de chaque chemin est retenu.
+      #
+      # À renseigner quand le plus récent n'est pas le bon — typiquement après
+      # un redéploiement à blanc, dont la sauvegarde est valide mais vide et
+      # devient le latest. Les deux se règlent séparément, et il faut les
+      # prendre dans le MÊME cycle de sauvegarde : un volume et un dump SQL
+      # désynchronisés donnent des fichiers absents de l'index, et l'inverse.
+      - name: snapshot-data-id
+        value: ""
+      - name: snapshot-db-id
+        value: ""
   volumes:
     - name: ${application}-data
       persistentVolumeClaim:
@@ -67,6 +79,8 @@ spec:
                   value: "{{workflow.parameters.snapshot-data-path}}"
                 - name: source_bucket
                   value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
+                - name: snapshot_id
+                  value: "{{workflow.parameters.snapshot-data-id}}"
             dependencies: 
               - scale-down
 
@@ -113,6 +127,8 @@ spec:
                   value: "/{{workflow.parameters.snapshot-db-dump-file}}"
                 - name: source_bucket
                   value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"          
+                - name: snapshot_id
+                  value: "{{workflow.parameters.snapshot-db-id}}"
             dependencies: 
               - scale-down
 

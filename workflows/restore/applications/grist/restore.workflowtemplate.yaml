@@ -18,6 +18,14 @@ spec:
         value: "deployment"
       - name: workload-name
         value: "${application}"
+
+      # Snapshots imposés. Vides : le plus récent de chaque chemin est retenu.
+      #
+      # À renseigner quand le plus récent n'est pas le bon — typiquement après
+      # un redéploiement à blanc, dont la sauvegarde est valide mais vide et
+      # devient le latest.
+      - name: snapshot-data-id
+        value: ""
   volumes:
     - name: ${application}-data
       persistentVolumeClaim:
@@ -52,6 +60,8 @@ spec:
                   value: "{{workflow.parameters.snapshot-data-path}}" 
                 - name: source_bucket
                   value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"
+                - name: snapshot_id
+                  value: "{{workflow.parameters.snapshot-data-id}}"
 
           - name: create-k8up-restore
             templateRef:

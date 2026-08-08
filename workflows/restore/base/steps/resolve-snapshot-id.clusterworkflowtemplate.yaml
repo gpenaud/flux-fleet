@@ -11,19 +11,54 @@ spec:
         parameters:
           - name: snapshot_path
           - name: source_bucket
+          # Snapshot imposé. Vide (défaut) : on prend le plus récent du chemin.
+          #
+          # Ce paramètre existe parce que « le plus récent » n'est pas toujours
+          # « le bon ». Une sauvegarde prise pendant une migration, ou juste
+          # après un redéploiement à blanc, produit un snapshot parfaitement
+          # valide mais VIDE : il devient le latest et masque le dernier état
+          # réel. Le forçage permet de désigner explicitement un snapshot connu.
+          - name: snapshot_id
+            value: ""
       script:
         image: restic/restic:latest
         command:
           - sh
         source: |
           set -euo pipefail
-          ID=$(restic snapshots --json --latest 1 --path "{{inputs.parameters.snapshot_path}}" \
-            | jq -r '.[0].short_id')
-          if [ -z "$ID" ] || [ "$ID" = "null" ]; then
-            echo "aucun snapshot pour {{inputs.parameters.snapshot_path}}" >&2
-            exit 1
+
+          FORCED="{{inputs.parameters.snapshot_id}}"
+          WANTED_PATH="{{inputs.parameters.snapshot_path}}"
+
+          if [ -n "$FORCED" ]; then
+            # Un ID imposé est vérifié avant d'être accepté : le workflow
+            # restaure plusieurs snapshots (volume, dump SQL) et les confondre
+            # écrirait un dump à la place des données, ou l'inverse.
+            META=$(restic snapshots --json "$FORCED" 2>/dev/null | jq -r '.[0] // empty')
+            if [ -z "$META" ]; then
+              echo "snapshot imposé introuvable dans le dépôt : $FORCED" >&2
+              exit 1
+            fi
+
+            ID=$(printf '%s' "$META" | jq -r '.short_id')
+            PATHS=$(printf '%s' "$META" | jq -r '.paths | join(",")')
+
+            if ! printf '%s' "$META" | jq -e --arg p "$WANTED_PATH" '.paths | index($p)' >/dev/null; then
+              echo "snapshot $ID porte sur [$PATHS], or on attend [$WANTED_PATH]" >&2
+              exit 1
+            fi
+
+            echo "snapshot imposé: $ID ($PATHS)" >&2
+          else
+            ID=$(restic snapshots --json --latest 1 --path "$WANTED_PATH" \
+              | jq -r '.[0].short_id')
+            if [ -z "$ID" ] || [ "$ID" = "null" ]; then
+              echo "aucun snapshot pour $WANTED_PATH" >&2
+              exit 1
+            fi
+            echo "resolved snapshot: $ID" >&2
           fi
-          echo "resolved snapshot: $ID" >&2
+
           printf '%s' "$ID" > /tmp/snapshot-id
         env:
           - name: RESTIC_REPOSITORY
