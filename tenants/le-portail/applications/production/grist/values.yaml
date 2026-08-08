@@ -28,18 +28,18 @@ spec:
 
               # === PUBLIC URLS ===
               APP_HOME_URL: "https://grist.${domain}"
-              # GRIST_OIDC_SP_HOST: "https://grist.${domain}"
+              GRIST_OIDC_SP_HOST: "https://grist.${domain}"
 
-              # # === OIDC ===
-              # GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
-              # GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
-              # GRIST_OIDC_IDP_CLIENT_SECRET:
-              #   secretKeyRef:
-              #     name: grist-oidc-client-secret
-              #     key: client_secret
-              # GRIST_OIDC_IDP_SCOPES: "openid email profile"
-              # GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
-              # # + tes env actuels : session secret (via secret), sandbox flavor, OIDC Grist, etc.
+              # === OIDC ===
+              GRIST_OIDC_IDP_ISSUER: "https://auth.${domain}"
+              GRIST_OIDC_IDP_CLIENT_ID: "grist-${tenant}"
+              GRIST_OIDC_IDP_CLIENT_SECRET:
+                secretKeyRef:
+                  name: grist-oidc-client-secret
+                  key: client_secret
+              GRIST_OIDC_IDP_SCOPES: "openid email profile"
+              GRIST_OIDC_IDP_SKIP_END_SESSION_ENDPOINT: "true"    # ok pour l'instant
+              # + tes env actuels : session secret (via secret), sandbox flavor, OIDC Grist, etc.
             probes:
               liveness:
                 enabled: true
