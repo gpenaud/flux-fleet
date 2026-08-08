@@ -40,31 +40,17 @@ spec:
   # Le securityContext de pod ci-dessus ne suffit pas : `restricted` exige aussi
   # allowPrivilegeEscalation et capabilities AU NIVEAU DE CHAQUE CONTENEUR.
   #
-  # Et il ne s'agit pas que des nôtres : Argo injecte ses propres sidecars
-  # `init` (initContainer, récupération des artefacts) et `wait` (collecte des
-  # résultats). Les oublier fait rejeter le pod à l'admission — sans que le
-  # template en cause y soit pour quelque chose :
+  # Ce patch-ci ne vise que `main`, le seul conteneur que TOUS les pods du
+  # workflow possèdent. Les sidecars qu'Argo injecte pour les templates `script`
+  # et `container` — `init` et `wait` — sont patchés au niveau de ces templates,
+  # et non ici : `podSpecPatch` est un strategic merge patch, donc nommer un
+  # conteneur absent l'AJOUTE au lieu de le modifier. Un patch global sur `wait`
+  # casserait les templates `resource` (scale-down/up), qui n'ont que `main` :
   #
-  #   pods "restore-…-main-…" is forbidden: violates PodSecurity "restricted:latest":
-  #   allowPrivilegeEscalation != false (containers "init", "wait" …)
-  #
-  # Un template `resource` (scale-down/up) passe malgré tout : il n'embarque
-  # pas ces sidecars. L'erreur ne se déclenche donc qu'au premier `script` ou
-  # `container` du workflow.
+  #   Pod "restore-…" is invalid: spec.containers[1].image: Required value
   podSpecPatch: |
-    initContainers:
-      - name: init
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop: ["ALL"]
     containers:
       - name: main
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop: ["ALL"]
-      - name: wait
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
