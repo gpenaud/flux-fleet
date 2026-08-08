@@ -288,13 +288,17 @@ spec:
             fi
             echo ">> dump valide : $USERS comptes"
 
-            # ⚠ Toujours "$TARGET", jamais "${TARGET}" dans ce script.
-            # Flux substitue les ${...} de tout le manifeste au postBuild, et une
-            # variable absente de cluster-vars est remplacée par du VIDE — avant
-            # même que le shell la voie. "${TARGET}.bak" arrivait ici sous la
-            # forme ".bak" :
+            # ⚠ Dans ce script, les variables shell s'écrivent SANS accolades.
             #
-            #   cp: can't create '.bak': Permission denied
+            # Flux substitue au postBuild toute variable écrite entre accolades,
+            # dans l'ensemble du manifeste — commentaires compris. Une variable
+            # inconnue de cluster-vars est remplacée par du VIDE avant même que
+            # le shell la voie : la sauvegarde de la base est ainsi devenue un
+            # « cp vers .bak », rejeté à la racine. Et une accolade dont le
+            # contenu n'est pas un nom valide fait carrément échouer le rendu :
+            #
+            #   envsubst error: variable substitution failed:
+            #   unable to parse variable name
             if [ -f "$TARGET" ]; then
               cp -f "$TARGET" "$TARGET.bak"
               echo ">> base existante sauvegardée en $TARGET.bak"
