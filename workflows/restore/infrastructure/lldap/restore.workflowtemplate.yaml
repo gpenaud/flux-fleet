@@ -288,15 +288,22 @@ spec:
             fi
             echo ">> dump valide : $USERS comptes"
 
+            # ⚠ Toujours "$TARGET", jamais "${TARGET}" dans ce script.
+            # Flux substitue les ${...} de tout le manifeste au postBuild, et une
+            # variable absente de cluster-vars est remplacée par du VIDE — avant
+            # même que le shell la voie. "${TARGET}.bak" arrivait ici sous la
+            # forme ".bak" :
+            #
+            #   cp: can't create '.bak': Permission denied
             if [ -f "$TARGET" ]; then
-              cp -f "$TARGET" "${TARGET}.bak"
-              echo ">> base existante sauvegardée en ${TARGET}.bak"
+              cp -f "$TARGET" "$TARGET.bak"
+              echo ">> base existante sauvegardée en $TARGET.bak"
             fi
 
             # Les fichiers annexes de SQLite décrivent l'ANCIENNE base : les
             # laisser en place ferait rejouer un journal sans rapport avec le
             # fichier qu'on vient d'installer.
-            rm -f "${TARGET}-wal" "${TARGET}-shm" "${TARGET}-journal"
+            rm -f "$TARGET-wal" "$TARGET-shm" "$TARGET-journal"
 
             cp -f "$DUMP" "$TARGET"
             echo ">> base restaurée dans $TARGET"
