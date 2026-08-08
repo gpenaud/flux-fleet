@@ -2,7 +2,7 @@
 apiVersion: k8up.io/v1
 kind: PreBackupPod
 metadata:
-  name: grist
+  name: grist-prebackup
 spec:
   backupCommand: sh -c 'sqlite3 /persist/home.sqlite3 ".backup /tmp/grist-backup.sqlite3" && cat /tmp/grist-backup.sqlite3'
   fileExtension: .sqlite3
