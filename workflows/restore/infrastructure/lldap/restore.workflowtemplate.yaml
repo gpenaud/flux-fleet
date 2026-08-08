@@ -230,6 +230,10 @@ spec:
           - name: dump
             mountPath: /dump
         env:
+          # Cf. resolve-snapshot-id : sans $HOME inscriptible, restic tente
+          # /.cache et échoue dès que le pod ne tourne pas en root.
+          - name: RESTIC_CACHE_DIR
+            value: /tmp/restic-cache
           - name: RESTIC_REPOSITORY
             value: "s3:https://s3.sbg.io.cloud.ovh.net/{{inputs.parameters.source_bucket}}"
           - name: RESTIC_PASSWORD

@@ -61,6 +61,15 @@ spec:
 
           printf '%s' "$ID" > /tmp/snapshot-id
         env:
+          # restic place son cache sous $HOME, ou à défaut dans /.cache — non
+          # inscriptible dès que le pod ne tourne pas en root, ce qu'impose un
+          # namespace en PodSecurity `restricted` :
+          #
+          #   unable to open cache: mkdir /.cache: permission denied
+          #
+          # Sans effet là où le pod tourne en root ; indispensable ailleurs.
+          - name: RESTIC_CACHE_DIR
+            value: /tmp/restic-cache
           - name: RESTIC_REPOSITORY
             value: "s3:https://s3.sbg.io.cloud.ovh.net/{{inputs.parameters.source_bucket}}"
           - name: RESTIC_PASSWORD
