@@ -181,6 +181,22 @@ spec:
     # Récupération du dump depuis restic, dans un volume de travail.
     # ───────────────────────────────────────────────────────────────────────────
     - name: fetch-dump
+      # Sidecars d'Argo : ils existent pour ce template, donc les nommer les
+      # modifie au lieu de les créer. Cf. le podSpecPatch de workflow ci-dessus,
+      # qui ne peut viser que `main`.
+      podSpecPatch: |
+        initContainers:
+          - name: init
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+        containers:
+          - name: wait
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
       inputs:
         parameters:
           - name: snapshot_id
@@ -226,6 +242,19 @@ spec:
     # L'ancienne base est conservée en .bak pour la même raison.
     # ───────────────────────────────────────────────────────────────────────────
     - name: swap-database
+      podSpecPatch: |
+        initContainers:
+          - name: init
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+        containers:
+          - name: wait
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
       inputs:
         parameters:
           - name: database_path

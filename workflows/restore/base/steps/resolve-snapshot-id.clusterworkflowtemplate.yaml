@@ -7,6 +7,32 @@ spec:
   entrypoint: main
   templates:
     - name: main
+      # Sidecars injectés par Argo autour d'un template `script` : `init`
+      # (initContainer) et `wait`. Un namespace en PodSecurity `restricted` —
+      # controller-directory, par exemple — rejette le pod s'ils n'ont pas leur
+      # propre securityContext, alors même que le template n'y est pour rien :
+      #
+      #   pods "…" is forbidden: violates PodSecurity "restricted:latest":
+      #   allowPrivilegeEscalation != false (containers "init", "wait" …)
+      #
+      # Le patch est posé ICI et non dans les workflows appelants : un
+      # `podSpecPatch` de workflow ne traverse pas un templateRef. Il est sans
+      # effet là où aucune contrainte ne s'applique (namespaces de tenants), et
+      # sûr en toutes circonstances — ces deux conteneurs existent toujours pour
+      # un template `script`, donc les nommer les MODIFIE au lieu de les créer.
+      podSpecPatch: |
+        initContainers:
+          - name: init
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+        containers:
+          - name: wait
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
       inputs:
         parameters:
           - name: snapshot_path
