@@ -40,17 +40,37 @@ spec:
   # Le securityContext de pod ci-dessus ne suffit pas : `restricted` exige aussi
   # allowPrivilegeEscalation et capabilities AU NIVEAU DE CHAQUE CONTENEUR.
   #
-  # Ce patch-ci ne vise que `main`, le seul conteneur que TOUS les pods du
-  # workflow possèdent. Les sidecars qu'Argo injecte pour les templates `script`
-  # et `container` — `init` et `wait` — sont patchés au niveau de ces templates,
-  # et non ici : `podSpecPatch` est un strategic merge patch, donc nommer un
-  # conteneur absent l'AJOUTE au lieu de le modifier. Un patch global sur `wait`
-  # casserait les templates `resource` (scale-down/up), qui n'ont que `main` :
+  # Il couvre les trois conteneurs de chaque pod : le nôtre (`main`) et les deux
+  # sidecars qu'Argo injecte, `init` (initContainer) et `wait`.
+  #
+  # Ce patch DOIT être posé au niveau du workflow. Le même, placé sur un
+  # template, n'est pas appliqué lorsque celui-ci est atteint par `templateRef`
+  # — vérifié sur resolve-snapshot-id, qui continuait d'être rejeté malgré un
+  # podSpecPatch correct dans le ClusterWorkflowTemplate.
+  #
+  # Corollaire : tous les pods du workflow doivent avoir ces trois conteneurs.
+  # `podSpecPatch` étant un strategic merge patch, nommer un conteneur absent
+  # l'AJOUTE — sans image, donc invalide :
   #
   #   Pod "restore-…" is invalid: spec.containers[1].image: Required value
+  #
+  # C'est pourquoi le scale-down/up n'utilise pas le ClusterWorkflowTemplate
+  # `scale`, de type `resource` et donc dépourvu de sidecars, mais le template
+  # `scale` local ci-dessous, de type `script`.
   podSpecPatch: |
+    initContainers:
+      - name: init
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
     containers:
       - name: main
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+      - name: wait
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -114,16 +134,11 @@ spec:
           # l'a ouvert laisserait un journal WAL orphelin, et lldap repartirait
           # sur un état incohérent.
           - name: scale-down
-            templateRef:
-              name: scale
-              template: main
-              clusterScope: true
+            template: scale
             arguments:
               parameters:
                 - name: replicas
                   value: "0"
-                - name: workload-name
-                  value: "{{workflow.parameters.workload-name}}"
             when: "{{workflow.parameters.workload-name}} != ''"
 
           - name: resolve-snapshot-id
@@ -163,40 +178,40 @@ spec:
                   value: "{{workflow.parameters.database-path}}"
 
           - name: scale-up
-            templateRef:
-              name: scale
-              template: main
-              clusterScope: true
+            template: scale
             dependencies:
               - swap-database
             arguments:
               parameters:
                 - name: replicas
                   value: "1"
-                - name: workload-name
-                  value: "{{workflow.parameters.workload-name}}"
             when: "{{workflow.parameters.workload-name}} != ''"
+
+    # ───────────────────────────────────────────────────────────────────────────
+    # Arrêt / redémarrage de lldap.
+    #
+    # Équivalent local du ClusterWorkflowTemplate `scale`, en `script` plutôt
+    # qu'en `resource` : un template `resource` n'a pas les sidecars d'Argo, et
+    # le podSpecPatch du workflow — qui les nomme — y ajouterait un conteneur
+    # sans image. Voir le commentaire de ce podSpecPatch.
+    # ───────────────────────────────────────────────────────────────────────────
+    - name: scale
+      inputs:
+        parameters:
+          - name: replicas
+      script:
+        image: bitnami/kubectl:latest
+        command: [sh]
+        source: |
+          set -eu
+          kubectl -n controller-directory scale \
+            {{workflow.parameters.workload-kind}}/{{workflow.parameters.workload-name}} \
+            --replicas={{inputs.parameters.replicas}}
 
     # ───────────────────────────────────────────────────────────────────────────
     # Récupération du dump depuis restic, dans un volume de travail.
     # ───────────────────────────────────────────────────────────────────────────
     - name: fetch-dump
-      # Sidecars d'Argo : ils existent pour ce template, donc les nommer les
-      # modifie au lieu de les créer. Cf. le podSpecPatch de workflow ci-dessus,
-      # qui ne peut viser que `main`.
-      podSpecPatch: |
-        initContainers:
-          - name: init
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop: ["ALL"]
-        containers:
-          - name: wait
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop: ["ALL"]
       inputs:
         parameters:
           - name: snapshot_id
@@ -242,19 +257,6 @@ spec:
     # L'ancienne base est conservée en .bak pour la même raison.
     # ───────────────────────────────────────────────────────────────────────────
     - name: swap-database
-      podSpecPatch: |
-        initContainers:
-          - name: init
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop: ["ALL"]
-        containers:
-          - name: wait
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop: ["ALL"]
       inputs:
         parameters:
           - name: database_path
