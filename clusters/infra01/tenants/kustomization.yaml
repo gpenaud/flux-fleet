@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+ 
+resources:
+  ########
+  # Shared
+  ########
+
+  - ../../../tenants/shared/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/shared/components/subdomain/sync.yaml
+  # - ../../../tenants/shared/applications/production/wordpress/sync.yaml
+  # cluster-scoped workflows
+  - ../../../workflows/restore/base/steps/sync.yaml
+
+  ############
+  # Le Portail
+  ############
+
+  - ../../../tenants/le-portail/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/le-portail/components/subdomain/sync.yaml
+  - ../../../tenants/le-portail/components/authentication/sync.yaml
+  # applications
+  - ../../../tenants/le-portail/applications/production/dolibarr/sync.yaml
+  - ../../../tenants/le-portail/applications/production/grist/sync.yaml
+  # - ../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
+  - ../../../tenants/le-portail/applications/production/alterconso/sync.yaml
+  # - ../../../tenants/le-portail/applications/production/wordpress/sync.yaml
+  - ../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
+  - ../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml
+
+  ###################
+  # Ferme Du jointout
+  ###################
+
+  - ../../../tenants/ferme-du-jointout/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/ferme-du-jointout/components/subdomain/sync.yaml
+  - ../../../tenants/ferme-du-jointout/components/authentication/sync.yaml
+  # applications
+  - ../../../tenants/ferme-du-jointout/applications/production/dolibarr/sync.yaml
+  - ../../../tenants/ferme-du-jointout/applications/production/nextcloud/sync.yaml
+  - ../../../tenants/ferme-du-jointout/applications/production/wordpress/site/sync.yaml
+
+  ##################
+  # La Bergeronnette
+  ##################
+
+  - ../../../tenants/la-bergeronnette/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/la-bergeronnette/components/subdomain/sync.yaml
+  - ../../../tenants/la-bergeronnette/components/authentication/sync.yaml
+  # applications
+  - ../../../tenants/la-bergeronnette/applications/production/wordpress/site/sync.yaml
+
+  ###############
+  # Jardins Vedas
+  ###############
+
+  - ../../../tenants/jardins-vedas/sync.yaml
+  # zone & subdomain creation 
+  - ../../../tenants/jardins-vedas/components/subdomain/sync.yaml
+  - ../../../tenants/jardins-vedas/components/authentication/sync.yaml
+  # applications
+  - ../../../tenants/jardins-vedas/applications/production/wordpress/site/sync.yaml
