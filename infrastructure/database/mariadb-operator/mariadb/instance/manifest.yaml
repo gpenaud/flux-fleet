@@ -15,7 +15,10 @@ spec:
     antiAffinityEnabled: true
   storage:
     size: 10Gi
-    storageClassName: openebs-lvm
+    # Substitué depuis cluster-vars, comme partout ailleurs : la classe de
+    # stockage dépend du cluster (openebs-lvm sur infra02, qui a un disque dédié
+    # au VG ; openebs-hostpath sur infra01, mono-disque).
+    storageClassName: ${storage_class}
   service:
     type: ClusterIP
   podSecurityContext:

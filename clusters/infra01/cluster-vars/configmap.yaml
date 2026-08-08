@@ -15,5 +15,12 @@ data:
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
   internal_service_ip: 10.96.0.100
-  storage_class: openebs-lvm
+  # openebs-hostpath, et non openebs-lvm comme sur infra02 : le VPS Hostinger
+  # n'a qu'UN disque, entièrement consommé par Talos à l'installation (sda6 /
+  # EPHEMERAL occupe 212 des 215 Go). Il ne reste rien pour le groupe de volumes
+  # vg-openebs, la capacité CSI annoncée est nulle, et tout PVC en openebs-lvm
+  # reste Pending sur « node(s) did not have enough free storage ».
+  #
+  # infra02 garde openebs-lvm : son VG vit sur un second disque dédié (sdb).
+  storage_class: openebs-hostpath
   cilium_operator_replicas: "1"
