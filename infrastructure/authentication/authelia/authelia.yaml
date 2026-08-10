@@ -168,7 +168,14 @@ spec:
 
       # --- Session
       session:
-        name: 'authelia_session'
+        # Le nom doit différer entre production et staging. Un cookie posé sur
+        # « leportail.org » est aussi envoyé à « auth.staging.leportail.org » :
+        # à nom identique, le navigateur transmet les deux, staging reçoit une
+        # session qu'il n'a pas émise, la rejette et renvoie au portail — une
+        # boucle silencieuse, sans échec d'authentification à journaliser.
+        # Le suffixe est vide par défaut : la production garde son nom actuel
+        # et ses sessions en cours.
+        name: 'authelia_session${session_cookie_suffix:=}'
         expiration: '1 hour'
         inactivity: '5 minutes'
         remember_me: '1 month'

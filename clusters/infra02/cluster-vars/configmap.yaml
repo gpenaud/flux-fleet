@@ -11,6 +11,10 @@ data:
   domain: alter-it.eu
   domain_prefix: "staging." # only for applications, not used in cluster configuration, can be empty string if not needed
   environment: staging
+  # Distingue le cookie de session Authelia de celui de la production, qui est
+  # aussi envoyé aux sous-domaines « staging. ». Absent sur infra01, où la
+  # valeur par défaut vide préserve le nom historique.
+  session_cookie_suffix: "_staging"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12
