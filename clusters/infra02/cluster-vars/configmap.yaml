@@ -9,8 +9,8 @@ data:
   cluster: infra02
   s3_region: sbg 
   domain: alter-it.eu
-  domain_prefix: "" # only for applications, not used in cluster configuration, can be empty string if not needed
-  environment: production
+  domain_prefix: "staging." # only for applications, not used in cluster configuration, can be empty string if not needed
+  environment: staging
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12
