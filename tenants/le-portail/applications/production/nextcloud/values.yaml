@@ -41,7 +41,7 @@ spec:
       existingSecret:
         enabled: true
         secretName: nextcloud
-        usernameKey: nextcloud-username
+        usernameKey: nextcloud-user
         passwordKey: nextcloud-password
     ingress:
       enabled: false
