@@ -154,13 +154,16 @@ spec:
         default_policy: 'deny'
         rules:
           # Tenant leportail
-          - domain: '*.leportail.org'
+          # Les domaines portent ${domain_prefix} (vide en production,
+          # « staging. » sur infra02) : figés en dur, ils ne désignaient rien
+          # sur le cluster de staging, dont toutes les routes sont préfixées.
+          - domain: '*.${domain_prefix}leportail.org'
             policy: 'one_factor'
             subject:
               - 'group:leportail_admins'
               - 'group:leportail_users'
           # Authelia lui-même : bypass (sinon boucle infinie de login)
-          - domain: 'auth.infra01.alter-it.eu'
+          - domain: 'auth.${cluster}.${domain}'
             policy: 'bypass'
 
       # --- Session
@@ -173,15 +176,21 @@ spec:
           disabled: false
           secret_name: 'authelia-secrets'
           path: 'AUTHELIA_SESSION_SECRET'
+        # Authelia refuse toute requête OIDC dont l'URL ne correspond à aucune
+        # de ces entrées (« no session cookie configuration matches url ») :
+        # sur staging, les hôtes préfixés n'étaient couverts par aucune, et la
+        # découverte OIDC répondait 500.
         cookies:
-          - subdomain: 'auth.infra01'
-            domain: 'alter-it.eu'
+          - subdomain: 'auth.${cluster}'
+            domain: '${domain}'
           - subdomain: 'auth'
-            domain: 'leportail.org'
+            domain: '${domain_prefix}leportail.org'
           - subdomain: 'auth'
-            domain: 'fermedujointout.fr'
+            domain: '${domain_prefix}fermedujointout.fr'
           - subdomain: 'auth'
-            domain: 'labergeronnette.org'
+            domain: '${domain_prefix}labergeronnette.org'
+          - subdomain: 'auth'
+            domain: '${domain_prefix}jardinsvedas.com'
 
       # --- Storage : SQLite local
       storage:
@@ -205,7 +214,7 @@ spec:
           address: 'submissions://smtp.gmail.com:465'
           timeout: '10 seconds'
           sender: 'Authelia <ops.gpenaud@gmail.com>'
-          identifier: 'auth.infra01.alter-it.eu'
+          identifier: 'auth.${cluster}.${domain}'
           subject: '[Authelia] {title}'
           startup_check_address: 'ops.gpenaud@gmail.com'
           disable_html_emails: false
@@ -240,7 +249,7 @@ spec:
               public: false
               authorization_policy: 'one_factor'
               redirect_uris:
-                - 'https://grist.leportail.org/oauth2/callback'
+                - 'https://grist.${domain_prefix}leportail.org/oauth2/callback'
               scopes:
                 - 'openid'
                 - 'email'
