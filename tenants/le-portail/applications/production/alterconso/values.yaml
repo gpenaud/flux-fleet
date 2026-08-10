@@ -8,7 +8,7 @@ spec:
     fullnameOverride: ""
     image:
       repository: ghcr.io/gpenaud/alterconso
-      tag: 8eab82a
+      tag: 4254482
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
