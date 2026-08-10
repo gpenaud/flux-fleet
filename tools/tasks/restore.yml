@@ -14,7 +14,7 @@ tasks:
     cmds:
       - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:wordpress-site
       - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:wordpress-epilibres
-      # - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:alterconso
+      - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:alterconso
       - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:grist
       - task: application:from:{{.SOURCE_CLUSTER}}:le-portail:dolibarr
       - task: application:from:{{.SOURCE_CLUSTER}}:ferme-du-jointout:wordpress-site
@@ -25,16 +25,62 @@ tasks:
     silent: false
 
   application:from:*:*:*:
-    desc: 'Restore a backup for a specific tenant and application from a specific cluster'
+    desc: 'Restore a backup for a specific tenant and application from a specific cluster (optional: SNAPSHOT_DATA_ID, SNAPSHOT_DB_ID)'
     silent: false
     vars:
       SOURCE_CLUSTER: '{{index .MATCH 0}}'
       TENANT:  '{{index .MATCH 1}}'
       APPLICATION: '{{index .MATCH 2}}'
+
+      # Snapshots imposés, vides par défaut : le workflow prend alors le plus
+      # récent de chaque chemin.
+      #
+      #   task infra01:restore:application:from:infra01:ferme-du-jointout:nextcloud \
+      #     SNAPSHOT_DATA_ID=35d6dd39 SNAPSHOT_DB_ID=d897cc58
+      #
+      # Utile quand le plus récent n'est pas le bon : une sauvegarde prise juste
+      # après un redéploiement à blanc est valide mais vide, et devient le
+      # latest. Les IDs se lisent avec `task <cluster>:backup:list`.
+      SNAPSHOT_DATA_ID: '{{.SNAPSHOT_DATA_ID | default ""}}'
+      SNAPSHOT_DB_ID: '{{.SNAPSHOT_DB_ID | default ""}}'
     requires:
       vars: [SOURCE_CLUSTER, APPLICATION, TENANT]
     cmds:
-      - argo submit --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} --from workflowtemplate/restore -p backup-cluster-source='{{.SOURCE_CLUSTER}}'
+      # Les paramètres ne sont ajoutés que s'ils sont renseignés : `argo submit`
+      # rejette un paramètre absent du WorkflowTemplate, et grist n'a pas de
+      # snapshot-db-id (pas de dump SQL séparé, tout vit dans le volume).
+      - |
+        EXTRA=""
+        if [ -n "{{.SNAPSHOT_DATA_ID}}" ]; then
+          EXTRA="$EXTRA -p snapshot-data-id={{.SNAPSHOT_DATA_ID}}"
+        fi
+        if [ -n "{{.SNAPSHOT_DB_ID}}" ]; then
+          EXTRA="$EXTRA -p snapshot-db-id={{.SNAPSHOT_DB_ID}}"
+        fi
+        argo submit --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} \
+          --from workflowtemplate/restore \
+          -p backup-cluster-source='{{.SOURCE_CLUSTER}}' $EXTRA
+
+  infrastructure:lldap:
+    desc: 'Restore the lldap directory (optional: SNAPSHOT_DATA_ID, SOURCE_BUCKET)'
+    silent: false
+    vars:
+      # lldap n'appartient à aucun tenant : pas de `from:<cluster>` ici, le
+      # dépôt se désigne par son nom complet. Voir le README du workflow — le
+      # bucket réellement provisionné ne suit pas la formule du Schedule.
+      SNAPSHOT_DATA_ID: '{{.SNAPSHOT_DATA_ID | default ""}}'
+      SOURCE_BUCKET: '{{.SOURCE_BUCKET | default ""}}'
+    cmds:
+      - |
+        EXTRA=""
+        if [ -n "{{.SNAPSHOT_DATA_ID}}" ]; then
+          EXTRA="$EXTRA -p snapshot-data-id={{.SNAPSHOT_DATA_ID}}"
+        fi
+        if [ -n "{{.SOURCE_BUCKET}}" ]; then
+          EXTRA="$EXTRA -p source-bucket={{.SOURCE_BUCKET}}"
+        fi
+        argo submit --context admin@{{.CLUSTER}} -n controller-directory \
+          --from workflowtemplate/restore $EXTRA
 
   alterconso:transform:
     desc: 'Transform alterconso database from Haxe to Go (internal task)'

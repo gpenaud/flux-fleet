@@ -10,6 +10,7 @@ resources:
   - ingressroute.yaml
   - secrets.enc.yaml
   # workflows
+  - ../../../../../workflows/restore/applications/alterconso
 
 patches:
   - target:

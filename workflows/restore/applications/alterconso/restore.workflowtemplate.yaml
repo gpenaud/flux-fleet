@@ -1,0 +1,152 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: restore
+  namespace: ${tenant}-${application}
+spec:
+  podGC:
+    strategy: OnWorkflowSuccess
+  serviceAccountName: restore-runner
+  entrypoint: main
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # PAS DE RESTAURATION DE VOLUME, contrairement à nextcloud ou wordpress.
+  #
+  # alterconso ne persiste rien sur disque : un simple Deployment, sans PVC.
+  # Tout son état vit dans MariaDB, et sa sauvegarde est un dump SQL produit
+  # par le PreBackupPod mutualisé. Restaurer se réduit donc à réinjecter ce
+  # dump — d'où l'absence des étapes snapshot-data-path / data-pvc-name.
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  arguments:
+    parameters:
+      - name: snapshot-db-dump-file
+        value: ${tenant}-${application}-db-dump.sql
+      - name: db-secret-name
+        value: "${application}"
+      - name: db-secret-database-key
+        value: "mariadb-database"
+      - name: backup-cluster-source
+        value: infra01
+      - name: workload-kind
+        value: "deployment"
+      - name: workload-name
+        value: "${application}"
+
+      # Snapshot imposé. Vide : le plus récent du chemin est retenu.
+      # À renseigner quand le plus récent n'est pas le bon — une sauvegarde
+      # prise après un redéploiement à blanc est valide mais vide, et devient
+      # le latest.
+      - name: snapshot-db-id
+        value: ""
+
+  volumeClaimTemplates:
+    - metadata:
+        name: db-dump
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ${storage_class}
+        resources:
+          requests:
+            storage: 2Gi
+
+  templates:
+    - name: main
+      dag:
+        tasks:
+          # L'application est arrêtée pendant l'injection : elle écrit dans les
+          # mêmes tables, et une écriture concurrente pendant le chargement du
+          # dump laisserait la base dans un état bâtard.
+          - name: scale-down
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: replicas
+                  value: "0"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"
+
+          - name: resolve-database-dump-snapshot-id
+            templateRef:
+              name: resolve-snapshot-id
+              template: main
+              clusterScope: true
+            dependencies:
+              - scale-down
+            arguments:
+              parameters:
+                - name: snapshot_path
+                  value: "/{{workflow.parameters.snapshot-db-dump-file}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"
+                - name: snapshot_id
+                  value: "{{workflow.parameters.snapshot-db-id}}"
+
+          - name: create-database-dump-restore
+            templateRef:
+              name: create-k8up-restore
+              template: main
+              clusterScope: true
+            dependencies:
+              - resolve-database-dump-snapshot-id
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_target_pvc
+                  value: "{{workflow.name}}-db-dump"
+                - name: snapshot_id
+                  value: "{{tasks.resolve-database-dump-snapshot-id.outputs.parameters.snapshot-id}}"
+                - name: source_bucket
+                  value: "alter-it-{{workflow.parameters.backup-cluster-source}}-backup-${tenant}-${application}"
+
+          - name: wait-for-database-dump-restore
+            templateRef:
+              name: wait-for-k8up-restore
+              template: main
+              clusterScope: true
+            dependencies:
+              - create-database-dump-restore
+            arguments:
+              parameters:
+                - name: namespace
+                  value: "${tenant}-${application}"
+                - name: restore_name
+                  value: "{{tasks.create-database-dump-restore.outputs.parameters.restore-name}}"
+
+          - name: inject-database-dump
+            templateRef:
+              name: restore-database
+              template: main
+              clusterScope: true
+            dependencies:
+              - wait-for-database-dump-restore
+            arguments:
+              parameters:
+                - name: dump-file
+                  value: "{{workflow.parameters.snapshot-db-dump-file}}"
+                - name: db-host
+                  value: "mariadb.controller-database.svc.cluster.local"
+                - name: db-secret-name
+                  value: "{{workflow.parameters.db-secret-name}}"
+                - name: db-secret-database-key
+                  value: "{{workflow.parameters.db-secret-database-key}}"
+
+          - name: scale-up
+            templateRef:
+              name: scale
+              template: main
+              clusterScope: true
+            dependencies:
+              - inject-database-dump
+            arguments:
+              parameters:
+                - name: replicas
+                  value: "1"
+                - name: workload-name
+                  value: "{{workflow.parameters.workload-name}}"
+            when: "{{workflow.parameters.workload-name}} != ''"

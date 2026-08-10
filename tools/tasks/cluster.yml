@@ -5,9 +5,11 @@ includes:
     taskfile: ./flux.yml
     vars: { CLUSTER: '{{.CLUSTER}}' }
 
-  # flux:reconcile:
-  #   taskfile: ./flux/reconcile.yml
-  #   vars: { CLUSTER: '{{.CLUSTER}}' }
+  flux:bootstrap:
+    taskfile: ./flux/bootstrap.yaml
+    vars:
+      CLUSTER: '{{.CLUSTER}}'
+      NODE_COUNT: 1
 
   # flux:reset:
   #   taskfile: ./flux/reset.yml

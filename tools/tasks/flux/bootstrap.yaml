@@ -1,0 +1,83 @@
+---
+version: '3'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Amorçage Flux d'un cluster Talos déjà provisionné et joignable.
+#
+#   task infra01:flux:bootstrap
+#   task infra02:flux:bootstrap
+#
+# Toute la logique vit dans le playbook `bootstrap-cluster.yaml` du dépôt
+# infrastructure-as-code : installation des configs sur le poste, mise à jour de
+# cluster_endpoint_ip dans ce dépôt-ci, attente que le cluster soit réellement
+# exploitable, `flux bootstrap` sur GitHub, dépôt de la clé age pour SOPS.
+# Cette task ne fait que lui passer ses entrées.
+#
+# ⚠ Le playbook attend le CONTENU des configs dans BOOTSTRAP_TALOSCONFIG et
+# BOOTSTRAP_KUBECONFIG, pas leur chemin — il les écrit telles quelles sur le
+# poste. D'où les `sh: cat` ci-dessous ; passer un chemin produirait un
+# kubeconfig d'une ligne contenant… un chemin.
+#
+# Deux provenances possibles pour ces configs, selon le cluster :
+#
+#   infra01  installé à la main (kexec sur VPS Hostinger, cf. le module
+#            talos-hostinger). Pas de state Tofu : les fichiers du poste sont la
+#            seule source.
+#   infra02  provisionné par Tofu. Le playbook sait alors les lire lui-même via
+#            `tofu output`, ce qu'il fait dès que les variables sont vides.
+#
+# D'où le `|| true` : un fichier absent n'est pas une erreur, il rend la main au
+# repli Tofu du playbook. Ce qui serait une erreur, c'est de passer une valeur
+# tronquée ou fausse — le playbook l'écrirait telle quelle par-dessus une config
+# valide.
+# ─────────────────────────────────────────────────────────────────────────────
+
+vars:
+  IAC_DIRECTORY: '{{.IAC_DIRECTORY | default (printf "%s/work/infrastructure-as-code" .HOME)}}'
+  ANSIBLE_DIRECTORY: '{{.IAC_DIRECTORY}}/ansible'
+
+  # Emplacement canonique, celui qu'écrit le playbook ; `generated/` est le repli
+  # pour un cluster fraîchement sorti de `talosctl gen config` et pas encore
+  # passé par un bootstrap.
+  TALOSCONFIG_FILE: '{{.HOME}}/.talos/clusters/{{.CLUSTER}}/talosconfig'
+  TALOSCONFIG_FALLBACK: '{{.HOME}}/.talos/clusters/{{.CLUSTER}}/generated/talosconfig'
+  KUBECONFIG_FILE: '{{.HOME}}/.kubernetes/kubeconfigs/{{.CLUSTER}}'
+
+tasks:
+  default:
+    desc: 'Amorce Flux sur le cluster {{.CLUSTER}}'
+
+    # Pas de `dir:` ici : Task le résout relativement au répertoire du taskfile
+    # inclus, y compris pour un chemin absolu — on obtiendrait
+    # tools/tasks/home/gpenaud/… et un chdir impossible. Le `cd` est donc fait
+    # dans la commande, qui en a besoin : ansible.cfg (lequel porte l'inventaire)
+    # n'est lu que depuis le répertoire courant.
+
+    preconditions:
+      - sh: 'test -f {{.ANSIBLE_DIRECTORY}}/bootstrap-cluster.yaml'
+        msg: >-
+          Playbook introuvable dans {{.ANSIBLE_DIRECTORY}}. Si le dépôt
+          infrastructure-as-code est ailleurs :
+          task {{.CLUSTER}}:flux:bootstrap IAC_DIRECTORY=<chemin>
+
+    env:
+      BOOTSTRAP_CLUSTER_NAME: '{{.CLUSTER}}'
+      BOOTSTRAP_NODE_COUNT: '{{.NODE_COUNT}}'
+
+      BOOTSTRAP_TALOSCONFIG:
+        sh: 'cat {{.TALOSCONFIG_FILE}} 2>/dev/null || cat {{.TALOSCONFIG_FALLBACK}} 2>/dev/null || true'
+      BOOTSTRAP_KUBECONFIG:
+        sh: 'cat {{.KUBECONFIG_FILE}} 2>/dev/null || true'
+
+      # Lu dans le kubeconfig plutôt que codé en dur : c'est la même valeur que
+      # celle passée à `talosctl gen config`, et elle change si le nœud est
+      # recréé.
+      BOOTSTRAP_CLUSTER_ENDPOINT:
+        sh: >-
+          kubectl --kubeconfig {{.KUBECONFIG_FILE}} config view --minify
+          --output jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || true
+
+    cmds:
+      - cd {{.ANSIBLE_DIRECTORY}} && ansible-playbook bootstrap-cluster.yaml
+
+    silent: false
