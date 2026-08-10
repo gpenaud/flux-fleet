@@ -8,7 +8,11 @@ spec:
     fullnameOverride: ""
     image:
       repository: ghcr.io/gpenaud/alterconso
-      tag: 4254482
+      # Quoté impérativement : un sha court tout en chiffres est sinon lu comme
+      # un nombre par YAML, et ressort en notation scientifique (4.254482e+06),
+      # donnant une image introuvable. Les sha contenant une lettre masquaient
+      # le piège jusqu'ici.
+      tag: "4254482"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
