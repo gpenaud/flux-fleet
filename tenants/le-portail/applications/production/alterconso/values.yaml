@@ -21,6 +21,15 @@ spec:
       image: mysql:8.4
       timeoutSeconds: 60
 
+    # Le conteneur tournait en UTC alors que les dates en base sont écrites en
+    # heure locale française : les fenêtres de commande s'ouvraient et se
+    # fermaient deux heures trop tard en été, une heure en hiver. L'application
+    # compare time.Now() à ces dates sans conversion, il faut donc que son
+    # horloge soit celle des données.
+    extraEnv:
+      - name: TZ
+        value: Europe/Paris
+
     resources:
       requests:
         cpu: 100m
