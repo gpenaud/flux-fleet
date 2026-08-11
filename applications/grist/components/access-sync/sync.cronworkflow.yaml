@@ -1,0 +1,23 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: sync-grist-access
+  namespace: ${tenant}-${application}
+spec:
+  # Grist provisionne le compte à la première connexion, mais lui laisse un
+  # accès nul tant que personne ne le partage. Ce passage régulier pose les
+  # rôles issus de l'annuaire, et retire ceux qui n'y correspondent plus.
+  schedule: "*/5 * * * *"
+  timezone: "Europe/Paris"
+  # Suspendu partout sauf là où cluster-vars l'autorise.
+  suspend: ${grist_sync_suspend:=true}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  workflowSpec:
+    # Même définition que le lancement à la demande : le WorkflowTemplate est la
+    # seule source.
+    workflowTemplateRef:
+      name: sync-grist-access

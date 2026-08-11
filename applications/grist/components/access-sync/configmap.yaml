@@ -1,0 +1,131 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grist-access-sync
+data:
+  apply-directory.py: |
+    """Aligne les acces d'une organisation Grist sur les groupes de l'annuaire.
+
+    Grist n'exploite aucun claim de groupe : OIDCConfig ne lit que l'adresse et
+    le nom. L'authentification vient donc d'Authelia, mais les roles se posent
+    de l'exterieur, par l'API REST.
+
+    Tout passe par la bibliotheque standard : l'annuaire est interroge en
+    GraphQL sur le port HTTP de LLDAP plutot qu'en LDAP, ce qui evite d'embarquer
+    un client dans l'image.
+    """
+
+    import json
+    import os
+    import sys
+    import urllib.error
+    import urllib.request
+
+    LLDAP = os.environ["LLDAP_URL"].rstrip("/")
+    GRIST = os.environ["GRIST_URL"].rstrip("/")
+    ORG = os.environ["GRIST_ORG"]
+
+    # Du plus fort au plus faible : un membre de plusieurs groupes garde le role
+    # le plus eleve.
+    ROLES = (
+        ("owners", os.environ.get("GROUP_OWNERS", "")),
+        ("editors", os.environ.get("GROUP_EDITORS", "")),
+        ("viewers", os.environ.get("GROUP_VIEWERS", "")),
+    )
+
+    # Adresses que la synchronisation ne retire jamais, quoi qu'en dise
+    # l'annuaire : le proprietaire initial de l'instance et le porteur de la cle
+    # d'API. Les retirer couperait la branche sur laquelle on est assis.
+    PROTEGES = {a.strip().lower() for a in os.environ.get("PROTECTED_EMAILS", "").split(",") if a.strip()}
+
+
+    def appel(url, method="GET", data=None, headers=None):
+        corps = json.dumps(data).encode() if data is not None else None
+        entetes = {"Content-Type": "application/json"}
+        entetes.update(headers or {})
+        requete = urllib.request.Request(url, data=corps, method=method, headers=entetes)
+        try:
+            with urllib.request.urlopen(requete, timeout=30) as reponse:
+                brut = reponse.read().decode()
+                return json.loads(brut) if brut else {}
+        except urllib.error.HTTPError as erreur:
+            detail = erreur.read().decode()[:500]
+            sys.exit("Appel {0} {1} en echec ({2}) : {3}".format(method, url, erreur.code, detail))
+
+
+    def annuaire():
+        """Renvoie {nom de groupe: [adresses]} pour tous les groupes de l'annuaire."""
+        jeton = appel(
+            LLDAP + "/auth/simple/login",
+            method="POST",
+            data={"username": os.environ["LLDAP_USER"], "password": os.environ["LLDAP_PASSWORD"]},
+        ).get("token")
+        if not jeton:
+            sys.exit("Authentification LLDAP refusee.")
+        reponse = appel(
+            LLDAP + "/api/graphql",
+            method="POST",
+            data={"query": "{groups{displayName users{email}}}"},
+            headers={"Authorization": "Bearer " + jeton},
+        )
+        if reponse.get("errors"):
+            sys.exit("Interrogation de l annuaire en echec : " + json.dumps(reponse["errors"])[:300])
+        return {
+            groupe["displayName"]: [u["email"].lower() for u in groupe.get("users", []) if u.get("email")]
+            for groupe in reponse["data"]["groups"]
+        }
+
+
+    def voulus(groupes):
+        """Role attendu pour chaque adresse, le plus eleve l'emportant."""
+        attendus = {}
+        for role, noms in ROLES:
+            for nom in (n.strip() for n in noms.split(",") if n.strip()):
+                if nom not in groupes:
+                    print("Groupe absent de l annuaire, ignore : " + nom)
+                    continue
+                for adresse in groupes[nom]:
+                    attendus.setdefault(adresse, role)
+        return attendus
+
+
+    entete = {"Authorization": "Bearer " + os.environ["GRIST_API_KEY"]}
+    groupes = annuaire()
+    attendus = voulus(groupes)
+
+    actuels = {
+        u["email"].lower(): u.get("access")
+        for u in appel(GRIST + "/api/orgs/" + ORG + "/access", headers=entete).get("users", [])
+        if u.get("email") and u.get("access")
+    }
+
+    delta = {}
+    for adresse, role in attendus.items():
+        if actuels.get(adresse) != role:
+            delta[adresse] = role
+    # Present dans Grist, absent de tout groupe : l'acces est retire.
+    for adresse in actuels:
+        if adresse not in attendus and adresse not in PROTEGES:
+            delta[adresse] = None
+
+    print("Attendus  : " + (", ".join(sorted(attendus)) or "(aucun)"))
+    print("Actuels   : " + (", ".join(sorted(actuels)) or "(aucun)"))
+    print("Proteges  : " + (", ".join(sorted(PROTEGES)) or "(aucun)"))
+
+    if not delta:
+        print("Aucun changement.")
+        sys.exit(0)
+
+    # Garde-fou : jamais d'organisation sans proprietaire.
+    restants = {a for a, r in actuels.items() if r == "owners"}
+    restants -= {a for a, r in delta.items() if r != "owners"}
+    restants |= {a for a, r in delta.items() if r == "owners"}
+    if not restants:
+        sys.exit("Changement refuse : il ne resterait aucun proprietaire sur l organisation.")
+
+    for adresse, role in sorted(delta.items(), key=lambda c: c[0]):
+        print("  {0} -> {1}".format(adresse, role if role else "(acces retire)"))
+
+    appel(GRIST + "/api/orgs/" + ORG + "/access", method="PATCH", data={"delta": {"users": delta}}, headers=entete)
+    print("Acces mis a jour : {0} modification(s).".format(len(delta)))

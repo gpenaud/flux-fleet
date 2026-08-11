@@ -1,0 +1,68 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: sync-grist-access
+  namespace: ${tenant}-${application}
+spec:
+  serviceAccountName: access-sync-runner
+  entrypoint: main
+  podGC:
+    strategy: OnWorkflowSuccess
+  volumes:
+    - name: scripts
+      configMap:
+        name: grist-access-sync
+  templates:
+    - name: main
+      container:
+        # Le script n'utilise que la bibliothèque standard : l'annuaire est
+        # interrogé en GraphQL sur le port HTTP de LLDAP, ce qui évite d'ajouter
+        # un client LDAP à l'image.
+        image: docker.io/library/python:3.12-alpine
+        command:
+          - python3
+          - /opt/access-sync/apply-directory.py
+        env:
+          - name: LLDAP_URL
+            value: "http://lldap.controller-directory.svc.cluster.local:17170"
+          - name: LLDAP_USER
+            value: "grist"
+          - name: LLDAP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: lldap-bind-grist
+                key: password
+          # Appel interne : inutile de sortir du cluster pour joindre
+          # l'application qui tourne dans ce namespace.
+          - name: GRIST_URL
+            value: "http://${application}:8484"
+          - name: GRIST_ORG
+            value: "${tenant}"
+          - name: GRIST_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: grist-api-key
+                key: api_key
+          # Du plus fort au plus faible : un membre de plusieurs groupes garde
+          # le rôle le plus élevé.
+          - name: GROUP_OWNERS
+            value: "${tenant}-${application}-admins,${tenant}-admins"
+          - name: GROUP_EDITORS
+            value: "${tenant}-${application}-writers"
+          - name: GROUP_VIEWERS
+            value: "${tenant}-${application}-readers"
+          # Jamais retirés, quoi qu'en dise l'annuaire : le propriétaire initial
+          # de l'instance, qui porte aussi la clé d'API.
+          - name: PROTECTED_EMAILS
+            value: "ops.gpenaud@gmail.com"
+        volumeMounts:
+          - name: scripts
+            mountPath: /opt/access-sync
+            readOnly: true
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            memory: 256Mi

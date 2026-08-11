@@ -128,6 +128,11 @@ spec:
                             # toucher au SSO.
                             - key: dolibarr.json
                               path: user-configs/dolibarr.json
+                            # Lecture seule elle aussi, mais par le port HTTP :
+                            # le workflow des accès Grist interroge l'annuaire
+                            # en GraphQL plutôt qu'en LDAP.
+                            - key: grist.json
+                              path: user-configs/grist.json
                       - configMap:
                           name: lldap-bootstrap-groups
                           items:

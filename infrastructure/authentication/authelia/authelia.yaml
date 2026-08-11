@@ -246,6 +246,26 @@ spec:
         oidc:
           enabled: true
 
+          # Politiques d'autorisation nommees, referencees par les clients.
+          #
+          # Sans elles, « one_factor » laisse entrer TOUT compte de l'annuaire :
+          # l'application ne l'apprend qu'ensuite. Grist provisionne son compte
+          # des la premiere connexion, il en creerait donc un pour n'importe qui.
+          #
+          # Les entrees de « subject » sont alternatives : appartenir a l'un des
+          # groupes suffit. Le role, lui, se pose par l'API — Grist n'exploite
+          # aucun claim de groupe.
+          authorization_policies:
+            grist-le-portail:
+              default_policy: 'deny'
+              rules:
+                - policy: 'one_factor'
+                  subject:
+                    - 'group:le-portail-grist-readers'
+                    - 'group:le-portail-grist-writers'
+                    - 'group:le-portail-grist-admins'
+                    - 'group:le-portail-admins'
+
           # Clients
           clients:
             - client_id: 'grist-le-portail'
@@ -254,7 +274,15 @@ spec:
                 # Le hash pbkdf2 du client secret en clair
                 value: "$pbkdf2-sha512$310000$Kra1XW1tIxx3aBFtBassbw$0VQPncmkduO4dxiIv1/3eVLB3XQ5Ioq0sU5CdY5Li08EINcciyITqmIxt2tZ7ZzmN4tsOgAKcPC3KQ0v8w0hWQ"
               public: false
-              authorization_policy: 'one_factor'
+              # Restreint aux groupes Grist du tenant et a ses administrateurs
+              # toutes applications, au lieu de laisser entrer tout l'annuaire.
+              #
+              # Pilote par cluster-vars, et volontairement laisse a 'one_factor'
+              # sur infra01 : les groupes y portent encore l'ancienne
+              # nomenclature, et une politique en « deny » par defaut qui ne
+              # designerait aucun groupe existant fermerait Grist a tout le
+              # monde. A basculer une fois la production renommee.
+              authorization_policy: '${grist_authorization_policy:=one_factor}'
               redirect_uris:
                 - 'https://grist.${domain_prefix}leportail.org/oauth2/callback'
               scopes:

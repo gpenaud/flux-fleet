@@ -7,6 +7,7 @@ namespace: ${tenant}-grist
 resources:
   - ../../../../../applications/grist
   - ../../../../../applications/grist/components/backup
+  - ../../../../../applications/grist/components/access-sync
   - ingressroute.yaml
   - secrets.enc.yaml
   # workflows

@@ -10,3 +10,4 @@ metadata:
     reflector/k8up-credentials: "true"
     reflector/database: "true"
     reflector/grist-oidc-client-secret: "true"
+    reflector/lldap-bind-grist: "true"
