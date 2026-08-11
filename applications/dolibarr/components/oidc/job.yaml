@@ -73,7 +73,11 @@ spec:
                 ('MAIN_AUTHENTICATION_OIDC_AUTHORIZE_URL', 1, 'https://auth.${domain}/api/oidc/authorization',        'chaine', 0, 'Gere par Flux'),
                 ('MAIN_AUTHENTICATION_OIDC_TOKEN_URL',     1, 'https://auth.${domain}/api/oidc/token',                'chaine', 0, 'Gere par Flux'),
                 ('MAIN_AUTHENTICATION_OIDC_USERINFO_URL',  1, 'https://auth.${domain}/api/oidc/userinfo',             'chaine', 0, 'Gere par Flux'),
-                ('MAIN_AUTHENTICATION_OIDC_LOGIN_CLAIM',   1, 'email',                                                'chaine', 0, 'Gere par Flux')
+                ('MAIN_AUTHENTICATION_OIDC_LOGIN_CLAIM',   1, 'email',                                                'chaine', 0, 'Gere par Flux'),
+                -- Sans cette constante, openid_connect_get_url() construit un
+                -- « scope= » vide : la demande ne porte alors pas openid, et
+                -- Authelia ne délivre aucun id_token.
+                ('MAIN_AUTHENTICATION_OIDC_SCOPES',        1, 'openid email profile',                                 'chaine', 0, 'Gere par Flux')
               ON DUPLICATE KEY UPDATE value = VALUES(value), note = VALUES(note);
               SQL
 
