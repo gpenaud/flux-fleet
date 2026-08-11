@@ -246,6 +246,22 @@ spec:
         oidc:
           enabled: true
 
+          # Claims autorises a etre demandes par le parametre « claims » d'une
+          # requete d'autorisation.
+          #
+          # user_oidc ne se contente pas des scopes : il demande nommement les
+          # claims dont il a besoin. Sans cette declaration, Authelia refuse la
+          # requete — « the client requested claims were not permitted » — et
+          # Nextcloud n'en voit que le contrecoup, « Le fournisseur d'identite
+          # n'a pas reussi a authentifier l'utilisateur ».
+          claims_policies:
+            nextcloud:
+              id_token:
+                - 'preferred_username'
+                - 'email'
+                - 'name'
+                - 'groups'
+
           # Politiques d'autorisation nommees, referencees par les clients.
           #
           # Sans elles, « one_factor » laisse entrer TOUT compte de l'annuaire :
@@ -309,6 +325,7 @@ spec:
               # Comme Grist, laisse a 'one_factor' la ou l'application n'est pas
               # encore branchee sur l'annuaire.
               authorization_policy: '${nextcloud_authorization_policy:=one_factor}'
+              claims_policy: 'nextcloud'
               redirect_uris:
                 # Chemin impose par user_oidc : /apps/user_oidc/code.
                 - 'https://nextcloud.${domain_prefix}leportail.org/apps/user_oidc/code'
