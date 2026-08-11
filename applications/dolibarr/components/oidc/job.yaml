@@ -1,0 +1,81 @@
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-oidc
+  labels:
+    reflector/database: "true"
+  annotations:
+    # Recrée le Job dès que son contenu change : sans cela, un Job existant est
+    # immuable et toute correction des URL ou du client secret serait ignorée.
+    kustomize.toolkit.fluxcd.io/force: "enabled"
+spec:
+  template:
+    spec:
+      ttlSecondsAfterFinished: 30
+      # Plus large que les 90s des jobs de création de base : celui-ci peut
+      # devoir attendre que Dolibarr ait terminé son installation initiale et
+      # créé llx_const, ce qui n'arrive qu'après le démarrage de l'application.
+      activeDeadlineSeconds: 600
+      containers:
+        - name: mysql-oidc
+          image: mysql:8.4.3
+          env:
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: ${application}
+                  key: mariadb-password
+            - name: DOLIBARR_MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ${application}
+                  key: mariadb-user
+            - name: DOLIBARR_MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: ${application}
+                  key: mariadb-database
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  # Reflété depuis controller-authentication, un secret distinct
+                  # par tenant.
+                  name: dolibarr-${tenant}-oidc-client-secret
+                  key: client_secret
+          command:
+            - sh
+            - -c
+            # Les variables shell s'écrivent sans accolades : Flux substitue
+            # toute occurrence de la syntaxe à accolades dans le manifeste rendu,
+            # avant même que le conteneur démarre, et vide celles qu'il ne
+            # connaît pas.
+            - |
+              set -eu
+              MYSQL="mysql -h mariadb.controller-database.svc.cluster.local -u $DOLIBARR_MYSQL_USER $DOLIBARR_MYSQL_DATABASE"
+
+              # llx_const n'existe qu'une fois Dolibarr installé. Au premier
+              # déploiement d'un tenant, ce Job démarre avant : on attend plutôt
+              # que d'échouer en boucle.
+              until $MYSQL -e "SELECT 1 FROM llx_const LIMIT 1" >/dev/null 2>&1; do
+                echo "llx_const absente, attente de l'installation de Dolibarr..."
+                sleep 10
+              done
+
+              # Les six paramètres OIDC sont lus par getDolGlobalString(), donc
+              # stockés en base et non dans conf.php. entity=1 : instance unique,
+              # pas de multi-société. uk_const(name, entity) rend l'upsert sûr.
+              $MYSQL <<SQL
+              INSERT INTO llx_const (name, entity, value, type, visible, note) VALUES
+                ('MAIN_AUTHENTICATION_OIDC_ON',            1, '1',                                                    'chaine', 0, 'Gere par Flux'),
+                ('MAIN_AUTHENTICATION_OIDC_CLIENT_ID',     1, 'dolibarr-${tenant}',                                   'chaine', 0, 'Gere par Flux'),
+                ('MAIN_AUTHENTICATION_OIDC_CLIENT_SECRET', 1, '$OIDC_CLIENT_SECRET',                                  'chaine', 0, 'Gere par Flux'),
+                ('MAIN_AUTHENTICATION_OIDC_AUTHORIZE_URL', 1, 'https://auth.${domain}/api/oidc/authorization',        'chaine', 0, 'Gere par Flux'),
+                ('MAIN_AUTHENTICATION_OIDC_TOKEN_URL',     1, 'https://auth.${domain}/api/oidc/token',                'chaine', 0, 'Gere par Flux'),
+                ('MAIN_AUTHENTICATION_OIDC_USERINFO_URL',  1, 'https://auth.${domain}/api/oidc/userinfo',             'chaine', 0, 'Gere par Flux'),
+                ('MAIN_AUTHENTICATION_OIDC_LOGIN_CLAIM',   1, 'email',                                                'chaine', 0, 'Gere par Flux')
+              ON DUPLICATE KEY UPDATE value = VALUES(value), note = VALUES(note);
+              SQL
+
+              echo "Constantes OIDC Dolibarr enregistrees."
+      restartPolicy: OnFailure

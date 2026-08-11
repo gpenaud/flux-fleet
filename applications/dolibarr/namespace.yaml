@@ -9,3 +9,10 @@ metadata:
     alter-it.eu/managed-by: "fluxcd"
     reflector/k8up-credentials: "true"
     reflector/database: "true"
+    # Le client OIDC est propre à chaque tenant : le label porte le nom du
+    # tenant pour que le namespace de le-portail ne reçoive pas le secret de
+    # ferme-du-jointout, alors que ce namespace de base les sert tous les deux.
+    reflector/dolibarr-${tenant}-oidc-client-secret: "true"
+    # Le compte de bind LLDAP, lui, est unique et partagé : lecture seule sur
+    # l'annuaire, rien de spécifique au tenant.
+    reflector/lldap-bind-dolibarr: "true"

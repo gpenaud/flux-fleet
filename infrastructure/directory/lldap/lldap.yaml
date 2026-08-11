@@ -122,6 +122,12 @@ spec:
                           items:
                             - key: authelia.json
                               path: user-configs/authelia.json
+                            # Compte de lecture seule dédié à Dolibarr, qui se
+                            # lie à l'annuaire directement plutôt que via
+                            # Authelia : un compte distinct se révoque sans
+                            # toucher au SSO.
+                            - key: dolibarr.json
+                              path: user-configs/dolibarr.json
                       - configMap:
                           name: lldap-bootstrap-groups
                           items:

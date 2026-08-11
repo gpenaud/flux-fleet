@@ -264,7 +264,33 @@ spec:
               userinfo_signed_response_alg: 'none'
               token_endpoint_auth_method: 'client_secret_basic'
               consent_mode: 'implicit'
-          
+
+            - client_id: 'dolibarr-le-portail'
+              client_name: 'Dolibarr - Ecolieu du Portail'
+              client_secret:
+                # Hash pbkdf2 du client secret ; la valeur en clair est dans le
+                # Secret dolibarr-le-portail-oidc-client-secret, reflété vers le
+                # namespace de l'application.
+                value: "$pbkdf2-sha512$310000$xtOHpw34f8M1Rmu/X5KAJg$Rqq88pBBA3c6NIA8GHhIQAaNvG9xWQgMruGalkIUjHLFlcGMbSdHasHqD6G2qibvqoaYiyvCz44d6aC0O7pi9A"
+              public: false
+              authorization_policy: 'one_factor'
+              redirect_uris:
+                # Chemin imposé par Dolibarr : openid_connect_get_redirect_url()
+                # renvoie DOL_MAIN_URL_ROOT suivi de ce fichier, sans réglage
+                # possible.
+                - 'https://dolibarr.${domain_prefix}leportail.org/core/modules/openid_connect/callback.php'
+              scopes:
+                - 'openid'
+                - 'email'
+                - 'profile'
+              userinfo_signed_response_alg: 'none'
+              # client_secret_post, et non _basic comme Grist : Dolibarr place
+              # client_id et client_secret dans le corps du POST au token
+              # endpoint (http_build_query), donc l'authentification Basic
+              # échouerait en 401 au moment de l'échange du code.
+              token_endpoint_auth_method: 'client_secret_post'
+              consent_mode: 'implicit'
+
           hmac_secret:
             value: "0FZg4+U4lhgJqUA49n1H0SoO6NzAuC94hRG4jtjBozwQQjwPL/tRuWznPqUJMauV5yXlz58YFc6mWro5R"
           

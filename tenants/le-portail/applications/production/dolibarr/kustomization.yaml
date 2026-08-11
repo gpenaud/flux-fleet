@@ -7,6 +7,7 @@ namespace: ${tenant}-dolibarr
 resources:
   - ../../../../../applications/dolibarr
   - ../../../../../applications/dolibarr/components/init
+  - ../../../../../applications/dolibarr/components/oidc
   - ../../../../../applications/dolibarr/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml

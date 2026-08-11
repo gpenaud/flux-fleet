@@ -43,6 +43,45 @@ spec:
       externalUrl: https://dolibarr.${domain}
       cron:
         enabled: false
+    # ================================================================
+    # Authentification : SSO Authelia → bind LLDAP → comptes locaux
+    # ================================================================
+    # La chaîne vient de cluster-vars et vaut « dolibarr » par défaut, donc
+    # rien ne change sur infra01 tant que la variable n'y est pas déclarée.
+    #
+    # Ces variables ne sont lues qu'à la génération de conf.php, que l'image
+    # n'écrit que si le fichier est absent — mais /var/www/html n'est monté sur
+    # aucun volume (seul /var/www/documents l'est), donc le fichier est bien
+    # régénéré à chaque démarrage de pod.
+    #
+    # Dolibarr ne crée aucun compte, ni en LDAP ni en OIDC : l'utilisateur doit
+    # exister côté Dolibarr. Le module OIDC le retrouve avec
+    # « WHERE (login = … OR email = …) », donc l'adresse portée par LLDAP suffit
+    # à rattacher un compte existant, sans migration d'identifiants.
+    extraEnvVars:
+      - name: DOLI_AUTH
+        value: "${dolibarr_auth:=dolibarr}"
+      - name: DOLI_LDAP_HOST
+        value: "lldap.controller-directory.svc.cluster.local"
+      - name: DOLI_LDAP_PORT
+        value: "3890"
+      - name: DOLI_LDAP_VERSION
+        value: "3"
+      - name: DOLI_LDAP_SERVER_TYPE
+        value: "openldap"
+      - name: DOLI_LDAP_LOGIN_ATTRIBUTE
+        value: "uid"
+      - name: DOLI_LDAP_DN
+        value: "ou=people,dc=alter-it,dc=eu"
+      - name: DOLI_LDAP_BIND_DN
+        value: "uid=dolibarr,ou=people,dc=alter-it,dc=eu"
+      - name: DOLI_LDAP_BIND_PASS
+        valueFrom:
+          secretKeyRef:
+            # Reflété depuis controller-directory : une seule source pour le mot
+            # de passe, celle qui sert aussi à créer le compte au bootstrap.
+            name: lldap-bind-dolibarr
+            key: password
     existingSecret: dolibarr
     existingSecretKeyAdminPassword: dolibarr-admin-password
     existingSecretKeyCronSecurityKey: dolibarr-cron-security-key
