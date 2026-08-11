@@ -25,6 +25,22 @@ data:
   grist_authorization_policy: "grist-le-portail"
   # grist_sync_suspend reste absent : la synchronisation des rôles Grist exige
   # une clé d'API, qui n'existe pas encore.
+  #
+  # Branche Nextcloud sur l'annuaire : comptes par LDAP, SSO par OIDC. Le point
+  # qu'il fallait éprouver sur infra02 est le mapping d'identifiant — les deux
+  # backends doivent produire le même, sinon la connexion SSO crée un compte
+  # parallèle et l'utilisateur arrive sur un espace vide. Validé au navigateur
+  # le 11 août 2026 : la connexion aboutit bien sur le compte créé par LDAP.
+  #
+  # La production ne compte encore que le compte « admin » local, qui reste le
+  # recours si l'annuaire devient injoignable : les comptes de l'annuaire n'y
+  # apparaîtront qu'à leur première connexion.
+  nextcloud_directory: "1"
+  # Restreint l'entrée aux membres des groupes Nextcloud du tenant et à ses
+  # administrateurs toutes applications, au lieu de laisser entrer tout
+  # l'annuaire. Les trois groupes désignés existent bien sur ce cluster, sans
+  # quoi le « deny » par défaut fermerait l'application à tout le monde.
+  nextcloud_authorization_policy: "nextcloud-le-portail"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
