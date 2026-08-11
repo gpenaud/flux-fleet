@@ -9,3 +9,7 @@ metadata:
     alter-it.eu/managed-by: fluxcd
     reflector/k8up-credentials: "true"
     reflector/database: "true"
+    # Le client OIDC est propre à chaque tenant ; le compte de lecture de
+    # l'annuaire est unique et partagé.
+    reflector/nextcloud-${tenant}-oidc-client-secret: "true"
+    reflector/lldap-bind-nextcloud: "true"

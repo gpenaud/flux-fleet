@@ -256,6 +256,14 @@ spec:
           # groupes suffit. Le role, lui, se pose par l'API — Grist n'exploite
           # aucun claim de groupe.
           authorization_policies:
+            nextcloud-le-portail:
+              default_policy: 'deny'
+              rules:
+                - policy: 'one_factor'
+                  subject:
+                    - 'group:le-portail-nextcloud'
+                    - 'group:le-portail-nextcloud-admins'
+                    - 'group:le-portail-admins'
             grist-le-portail:
               default_policy: 'deny'
               rules:
@@ -285,6 +293,25 @@ spec:
               authorization_policy: '${grist_authorization_policy:=one_factor}'
               redirect_uris:
                 - 'https://grist.${domain_prefix}leportail.org/oauth2/callback'
+              scopes:
+                - 'openid'
+                - 'email'
+                - 'profile'
+              userinfo_signed_response_alg: 'none'
+              token_endpoint_auth_method: 'client_secret_basic'
+              consent_mode: 'implicit'
+
+            - client_id: 'nextcloud-le-portail'
+              client_name: 'Nextcloud - Ecolieu du Portail'
+              client_secret:
+                value: "$pbkdf2-sha512$310000$/8YjU2idb6cg7j.nRBX8hw$ED/VqDTblH79cdFNOQjFGET9Fd/CXE9O2Qexeu9i7WCEcWCo5iwscuQVlT.uZpvPXoavU/8mE667gIHknTW3RA"
+              public: false
+              # Comme Grist, laisse a 'one_factor' la ou l'application n'est pas
+              # encore branchee sur l'annuaire.
+              authorization_policy: '${nextcloud_authorization_policy:=one_factor}'
+              redirect_uris:
+                # Chemin impose par user_oidc : /apps/user_oidc/code.
+                - 'https://nextcloud.${domain_prefix}leportail.org/apps/user_oidc/code'
               scopes:
                 - 'openid'
                 - 'email'

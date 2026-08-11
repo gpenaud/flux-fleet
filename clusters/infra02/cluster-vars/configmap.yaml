@@ -34,6 +34,11 @@ data:
   # les groupes portent encore l'ancienne nomenclature : une politique en
   # « deny » par défaut y fermerait Grist à tout le monde.
   grist_authorization_policy: "grist-le-portail"
+  # Branche Nextcloud sur l'annuaire : comptes par LDAP, SSO par OIDC. Absent
+  # d'infra01 tant que le mapping d'identifiant n'y est pas éprouvé — mal réglé,
+  # il ferait atterrir les utilisateurs sur un espace vide.
+  nextcloud_directory: "1"
+  nextcloud_authorization_policy: "nextcloud-le-portail"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12

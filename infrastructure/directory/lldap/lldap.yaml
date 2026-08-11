@@ -133,6 +133,8 @@ spec:
                             # en GraphQL plutôt qu'en LDAP.
                             - key: grist.json
                               path: user-configs/grist.json
+                            - key: nextcloud.json
+                              path: user-configs/nextcloud.json
                       - configMap:
                           name: lldap-bootstrap-groups
                           items:

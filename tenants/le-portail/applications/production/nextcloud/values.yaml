@@ -48,5 +48,86 @@ spec:
         secretName: nextcloud
         usernameKey: nextcloud-username
         passwordKey: nextcloud-password
+      # ================================================================
+      # Annuaire : comptes par LDAP, SSO par OIDC
+      # ================================================================
+      # Les deux cohabitent volontairement. Le LDAP conserve la Basic auth, dont
+      # dependent les clients bureau, mobiles et WebDAV/CalDAV ; l'OIDC ajoute le
+      # bouton de connexion unique dans le navigateur.
+      #
+      # Ils doivent produire le MEME identifiant, sinon la connexion SSO cree un
+      # second compte et l'utilisateur arrive sur un espace vide. D'ou
+      # ldapExpertUsernameAttr=uid d'un cote, et --unique-uid=0 avec
+      # --mapping-uid=preferred_username de l'autre.
+      extraEnv:
+        - name: LDAP_BIND_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lldap-bind-nextcloud
+              key: password
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-${tenant}-oidc-client-secret
+              key: client_secret
+      hooks:
+        # « before-starting » s'execute a chaque demarrage : la configuration est
+        # donc reappliquee, et se corrige d'elle-meme si quelqu'un l'a modifiee
+        # depuis l'interface.
+        before-starting: |
+          #!/bin/sh
+          set -eu
+
+          # Variables shell sans accolades : Flux substitue toute occurrence de
+          # cette syntaxe dans le manifeste rendu, avant meme le demarrage du
+          # conteneur, et vide celles qu'il ne connait pas.
+          ACTIF="${nextcloud_directory:=0}"
+          if [ "$ACTIF" != "1" ]; then
+            echo "Annuaire non active sur ce cluster, configuration inchangee."
+            exit 0
+          fi
+
+          BASE="dc=alter-it,dc=eu"
+          GROUPES="(|(memberOf=cn=${tenant}-nextcloud,ou=groups,$BASE)(memberOf=cn=${tenant}-nextcloud-admins,ou=groups,$BASE)(memberOf=cn=${tenant}-admins,ou=groups,$BASE))"
+
+          php occ app:enable user_ldap >/dev/null
+
+          # Une seule configuration, reutilisee d'un demarrage a l'autre : sans ce
+          # test, chaque redemarrage en creerait une nouvelle.
+          if ! php occ ldap:show-config s01 >/dev/null 2>&1; then
+            php occ ldap:create-empty-config
+          fi
+
+          php occ ldap:set-config s01 ldapHost "lldap.controller-directory.svc.cluster.local"
+          php occ ldap:set-config s01 ldapPort "3890"
+          php occ ldap:set-config s01 ldapAgentName "uid=nextcloud,ou=people,$BASE"
+          php occ ldap:set-config s01 ldapAgentPassword "$LDAP_BIND_PASSWORD"
+          php occ ldap:set-config s01 ldapBase "$BASE"
+          php occ ldap:set-config s01 ldapBaseUsers "ou=people,$BASE"
+          php occ ldap:set-config s01 ldapBaseGroups "ou=groups,$BASE"
+          php occ ldap:set-config s01 ldapUserFilter "(&(objectClass=person)$GROUPES)"
+          php occ ldap:set-config s01 ldapLoginFilter "(&(uid=%uid)$GROUPES)"
+          php occ ldap:set-config s01 ldapUserDisplayName "displayname"
+          php occ ldap:set-config s01 ldapEmailAttribute "mail"
+          # Sans cela, Nextcloud forge un identifiant interne opaque, que la
+          # connexion SSO ne retrouverait jamais.
+          php occ ldap:set-config s01 ldapExpertUsernameAttr "uid"
+          php occ ldap:set-config s01 ldapGroupFilter "(&(objectClass=groupOfNames)(|(cn=${tenant}-nextcloud)(cn=${tenant}-nextcloud-admins)(cn=${tenant}-admins)))"
+          php occ ldap:set-config s01 ldapGroupMemberAssocAttr "member"
+          php occ ldap:set-config s01 ldapConfigurationActive "1"
+
+          php occ app:install user_oidc >/dev/null 2>&1 || php occ app:enable user_oidc >/dev/null
+          # Le secret passe par l'environnement plutot que par la ligne de
+          # commande, ou il serait lisible dans la liste des processus.
+          php occ user_oidc:provider authelia \
+            --clientid="nextcloud-${tenant}" \
+            --clientsecret-env=OIDC_CLIENT_SECRET \
+            --discoveryuri="https://auth.${domain}/.well-known/openid-configuration" \
+            --unique-uid=0 \
+            --mapping-uid=preferred_username \
+            --mapping-display-name=name \
+            --mapping-email=email
+
+          echo "Annuaire et SSO configures."
     ingress:
       enabled: false
