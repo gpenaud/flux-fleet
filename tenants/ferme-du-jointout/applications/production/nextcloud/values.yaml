@@ -11,7 +11,13 @@ spec:
     externalDatabase:
       enabled: true
       type: mysql
-      host: mariadb.controller-database.svc.cluster.local:6446
+      # Sans port : le service mariadb n'expose que 3306. Le 6446 tenait de
+      # l'ancienne infrastructure MySQL, dont le routeur MaxScale ecoutait la ;
+      # repris tel quel a la migration, il ne designait plus rien et faisait
+      # echouer l'installation sur « SQLSTATE[HY000] [2002] Connection timed
+      # out ». Le custom.config.php de ce meme fichier portait deja l'hote sans
+      # port : les deux valeurs se contredisaient.
+      host: mariadb.controller-database.svc.cluster.local
       database: fdj-nextcloud
       existingSecret:
         enabled: true
