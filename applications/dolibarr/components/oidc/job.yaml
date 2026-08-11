@@ -43,6 +43,11 @@ spec:
                   # par tenant.
                   name: dolibarr-${tenant}-oidc-client-secret
                   key: client_secret
+            - name: LDAP_BIND_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-bind-dolibarr
+                  key: password
           command:
             - sh
             - -c
@@ -78,6 +83,35 @@ spec:
                 -- « scope= » vide : la demande ne porte alors pas openid, et
                 -- Authelia ne délivre aucun id_token.
                 ('MAIN_AUTHENTICATION_OIDC_SCOPES',        1, 'openid email profile',                                 'chaine', 0, 'Gere par Flux')
+              ON DUPLICATE KEY UPDATE value = VALUES(value), note = VALUES(note);
+
+              -- Module LDAP : requis par sync_users_ldap2dolibarr.php, qui
+              -- provisionne les comptes. LDAP_SYNCHRO_ACTIVE vaut 2
+              -- (SYNCHRO_LDAP_TO_DOLIBARR) : Dolibarr lit l'annuaire mais n'y
+              -- ecrit jamais, ce que le compte de bind en lecture seule
+              -- refuserait de toute facon.
+              INSERT INTO llx_const (name, entity, value, type, visible, note) VALUES
+                -- Desactive par defaut : activer le module ajoute des ecrans
+                -- d'administration visibles, et la production doit rester
+                -- inchangee tant qu'on valide sur staging.
+                ('MAIN_MODULE_LDAP',            1, '${dolibarr_ldap_module:=0}',           'chaine', 0, 'Gere par Flux'),
+                ('LDAP_SYNCHRO_ACTIVE',         1, '2',                                    'chaine', 0, 'Gere par Flux'),
+                ('LDAP_SERVER_HOST',            1, 'lldap.controller-directory.svc.cluster.local', 'chaine', 0, 'Gere par Flux'),
+                ('LDAP_SERVER_PORT',            1, '3890',                                 'chaine', 0, 'Gere par Flux'),
+                ('LDAP_SERVER_PROTOCOLVERSION', 1, '3',                                    'chaine', 0, 'Gere par Flux'),
+                ('LDAP_SERVER_USE_TLS',         1, '0',                                    'chaine', 0, 'Gere par Flux'),
+                ('LDAP_SERVER_DN',              1, 'dc=alter-it,dc=eu',                    'chaine', 0, 'Gere par Flux'),
+                ('LDAP_ADMIN_DN',               1, 'uid=dolibarr,ou=people,dc=alter-it,dc=eu', 'chaine', 0, 'Gere par Flux'),
+                ('LDAP_ADMIN_PASS',             1, '$LDAP_BIND_PASS',                      'chaine', 0, 'Gere par Flux'),
+                ('LDAP_USER_DN',                1, 'ou=people,dc=alter-it,dc=eu',          'chaine', 0, 'Gere par Flux'),
+                -- Restreint la synchronisation aux membres du groupe applicatif.
+                ('LDAP_FILTER_CONNECTION',      1, '(memberOf=cn=leportail_dolibarr_users,ou=groups,dc=alter-it,dc=eu)', 'chaine', 0, 'Gere par Flux'),
+                ('LDAP_KEY_USERS',              1, 'uid',                                  'chaine', 0, 'Gere par Flux'),
+                ('LDAP_FIELD_LOGIN',            1, 'uid',                                  'chaine', 0, 'Gere par Flux'),
+                ('LDAP_FIELD_FULLNAME',         1, 'cn',                                   'chaine', 0, 'Gere par Flux'),
+                ('LDAP_FIELD_NAME',             1, 'sn',                                   'chaine', 0, 'Gere par Flux'),
+                ('LDAP_FIELD_FIRSTNAME',        1, 'givenname',                            'chaine', 0, 'Gere par Flux'),
+                ('LDAP_FIELD_MAIL',             1, 'mail',                                 'chaine', 0, 'Gere par Flux')
               ON DUPLICATE KEY UPDATE value = VALUES(value), note = VALUES(note);
               SQL
 

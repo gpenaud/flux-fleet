@@ -23,6 +23,10 @@ data:
   # clusters, et la valeur par défaut « dolibarr » du substitute y conserve le
   # comportement actuel jusqu'à validation sur staging.
   dolibarr_auth: "openid_connect,ldap,dolibarr"
+  # Active le module LDAP de Dolibarr, requis par le script qui provisionne les
+  # comptes depuis l'annuaire. Absent d'infra01 pour les mêmes raisons que
+  # dolibarr_auth.
+  dolibarr_ldap_module: "1"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12
