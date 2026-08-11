@@ -340,7 +340,10 @@ spec:
                 # absent from the client registration. »
                 - 'groups'
               userinfo_signed_response_alg: 'none'
-              token_endpoint_auth_method: 'client_secret_basic'
+              # client_secret_post, comme Dolibarr : user_oidc place ses
+              # identifiants dans le corps du POST au token endpoint. Declare en
+              # _basic, Authelia refuse l'echange du code contre le jeton.
+              token_endpoint_auth_method: 'client_secret_post'
               consent_mode: 'implicit'
 
             - client_id: 'dolibarr-le-portail'
