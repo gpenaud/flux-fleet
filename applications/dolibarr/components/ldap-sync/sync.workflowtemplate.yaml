@@ -50,7 +50,7 @@ spec:
               EXTRA="--excludeuser=$EXCLUDE_USERS"
             fi
             php /var/www/scripts/user/sync_users_ldap2dolibarr.php commitiferror -y $EXTRA
-            php /opt/ldap-sync/promote-admins.php
+            php /opt/ldap-sync/apply-directory.php
         env:
           # Impératif : ce pod ne monte pas /var/www/documents, où vit
           # install.lock. Sans ce verrou en vue, l'entrypoint relancerait une

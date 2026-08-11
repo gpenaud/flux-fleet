@@ -4,12 +4,14 @@ kind: ConfigMap
 metadata:
   name: ldap-sync-scripts
 data:
-  promote-admins.php: |
+  apply-directory.php: |
     <?php
-    // Aligne le drapeau administrateur de Dolibarr sur les groupes de
-    // l'annuaire. sync_users_ldap2dolibarr.php synchronise les comptes mais
-    // ignore la colonne admin de llx_user : sans ce complement, un membre du
-    // groupe d'administration arrive avec un compte sans aucun droit.
+    // Aligne sur l'annuaire ce que sync_users_ldap2dolibarr.php laisse de cote :
+    // la colonne admin de llx_user, et l'activation des comptes.
+    //
+    // Le script officiel cree et met a jour les comptes des membres des groupes,
+    // mais n'a aucune notion de sortie de groupe : sans ce complement, retirer
+    // quelqu'un d'un groupe lui laisse un compte actif, administrateur compris.
 
     $dbPort = (int) (getenv('DOLI_DB_HOST_PORT') ?: 3306);
     $db = new mysqli(getenv('DOLI_DB_HOST'), getenv('DOLI_DB_USER'), getenv('DOLI_DB_PASSWORD'), getenv('DOLI_DB_NAME'), $dbPort);
@@ -19,8 +21,8 @@ data:
     }
     $db->set_charset('utf8mb4');
 
-    // La configuration LDAP est lue dans llx_const plutot que dupliquee dans
-    // les variables du pod : une seule source, celle que Flux tient a jour.
+    // La configuration LDAP est lue dans llx_const plutot que dupliquee dans les
+    // variables du pod : une seule source, celle que Flux tient a jour.
     function constante(mysqli $db, string $nom): string {
         $st = $db->prepare('SELECT value FROM llx_const WHERE name = ? AND entity IN (0, 1) ORDER BY entity DESC LIMIT 1');
         $st->bind_param('s', $nom);
@@ -29,13 +31,11 @@ data:
         return $row ? (string) $row[0] : '';
     }
 
-    $host = constante($db, 'LDAP_SERVER_HOST');
-    $port = (int) (constante($db, 'LDAP_SERVER_PORT') ?: 389);
     $userDn = constante($db, 'LDAP_USER_DN');
     $filtre = constante($db, 'LDAP_FILTER_CONNECTION');
     $champ = constante($db, 'LDAP_FIELD_LOGIN') ?: 'uid';
 
-    $ldap = ldap_connect('ldap://' . $host . ':' . $port);
+    $ldap = ldap_connect('ldap://' . constante($db, 'LDAP_SERVER_HOST') . ':' . ((int) (constante($db, 'LDAP_SERVER_PORT') ?: 389)));
     ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
     ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
     if (!@ldap_bind($ldap, constante($db, 'LDAP_ADMIN_DN'), constante($db, 'LDAP_ADMIN_PASS'))) {
@@ -59,13 +59,17 @@ data:
         return $out;
     }
 
-    // Le perimetre est celui de la synchronisation elle-meme : on ne touche
-    // jamais a un compte que l'annuaire ne gouverne pas, comme les comptes
-    // locaux crees a la main.
+    // Trois ensembles, du plus large au plus etroit :
+    //
+    //   annuaire  tous les comptes de l'annuaire. Sert a reconnaitre ce que la
+    //             synchronisation gouverne : un compte Dolibarr dont le login ne
+    //             correspond a aucun identifiant d'annuaire est un compte local,
+    //             jamais touche ici.
+    //   perimetre les membres des groupes de l'application. Doivent etre actifs.
+    //   admins    ceux des groupes d'administration.
+    $annuaire = logins($ldap, $userDn, '(' . $champ . '=*)', $champ);
     $perimetre = logins($ldap, $userDn, '(' . $filtre . ')', $champ);
 
-    // DN complets separes par des points-virgules : un DN contient deja des
-    // virgules.
     $dnGroupes = array_filter(array_map('trim', explode(';', (string) getenv('ADMIN_GROUP_DNS'))));
     if (!$dnGroupes) {
         fwrite(STDERR, 'ADMIN_GROUP_DNS est vide : aucun groupe ne confere l administration.' . PHP_EOL);
@@ -77,41 +81,64 @@ data:
     }
     $admins = logins($ldap, $userDn, '(|' . $clauses . ')', $champ);
 
-    // Les comptes ecartes de la synchronisation le sont aussi ici : leur login
-    // Dolibarr ne correspond a aucun uid, une mise a jour ne les toucherait pas,
-    // mais autant ne pas les compter comme administrateurs a revoquer.
+    // Les comptes ecartes de la synchronisation le sont partout : leur login
+    // Dolibarr ne correspond pas a leur identifiant d'annuaire, les toucher
+    // reviendrait a agir sur le mauvais compte.
     $exclus = array_filter(array_map('trim', explode(',', (string) getenv('EXCLUDE_USERS'))));
+    $annuaire = array_values(array_diff($annuaire, $exclus));
     $perimetre = array_values(array_diff($perimetre, $exclus));
     $admins = array_values(array_diff(array_intersect($admins, $perimetre), $exclus));
     $simples = array_values(array_diff($perimetre, $admins));
+    // Connus de l'annuaire mais plus membres d'aucun groupe de l'application.
+    $sortis = array_values(array_diff($annuaire, $perimetre));
 
-    echo 'Perimetre : ' . implode(', ', $perimetre) . PHP_EOL;
+    echo 'Perimetre : ' . (implode(', ', $perimetre) ?: '(aucun)') . PHP_EOL;
     echo 'Administrateurs attendus : ' . (implode(', ', $admins) ?: '(aucun)') . PHP_EOL;
+    echo 'Sortis des groupes : ' . (implode(', ', $sortis) ?: '(aucun)') . PHP_EOL;
 
-    function appliquer(mysqli $db, array $logins, int $valeur): int {
+    function appliquer(mysqli $db, string $colonne, array $logins, int $valeur): int {
         if (!$logins) {
             return 0;
         }
         $trous = implode(',', array_fill(0, count($logins), '?'));
-        $st = $db->prepare('UPDATE llx_user SET admin = ? WHERE login IN (' . $trous . ') AND admin <> ?');
+        $st = $db->prepare('UPDATE llx_user SET ' . $colonne . ' = ? WHERE login IN (' . $trous . ') AND ' . $colonne . ' <> ?');
         $st->bind_param(str_repeat('s', count($logins) + 2), ...array_merge(array($valeur), $logins, array($valeur)));
         $st->execute();
         return $st->affected_rows;
     }
 
-    // Garde-fou : on refuse de retirer les droits si plus aucun administrateur
-    // ne subsistait ensuite, y compris les comptes hors perimetre.
-    $restants = $db->query('SELECT COUNT(*) FROM llx_user WHERE admin = 1' .
-        ($simples ? " AND login NOT IN ('" . implode("','", array_map(array($db, 'real_escape_string'), $simples)) . "')" : ''))
-        ->fetch_row()[0];
-    $futurs = (int) $restants + count($admins);
-
-    $promus = appliquer($db, $admins, 1);
-    $revoques = 0;
-    if ($futurs > 0) {
-        $revoques = appliquer($db, $simples, 0);
-    } else {
-        fwrite(STDERR, 'Revocation ignoree : elle ne laisserait aucun administrateur.' . PHP_EOL);
+    // Combien d'administrateurs resteraient actifs une fois tout applique, en
+    // comptant les comptes locaux, que rien de tout ceci ne touche.
+    function adminsRestants(mysqli $db, array $perdants): int {
+        $sql = 'SELECT COUNT(*) FROM llx_user WHERE admin = 1 AND statut = 1';
+        if ($perdants) {
+            $echappes = array_map(array($db, 'real_escape_string'), $perdants);
+            $sql .= " AND login NOT IN ('" . implode("','", $echappes) . "')";
+        }
+        return (int) $db->query($sql)->fetch_row()[0];
     }
 
-    echo 'Promus : ' . $promus . ' | Revoques : ' . $revoques . PHP_EOL;
+    // Un compte remis dans un groupe redevient actif : l'annuaire fait autorite
+    // dans les deux sens, sinon une reintegration resterait sans effet visible.
+    $reactives = appliquer($db, 'statut', $perimetre, 1);
+    $promus = appliquer($db, 'admin', $admins, 1);
+
+    // Garde-fou commun aux deux retraits : ni la revocation ni la desactivation
+    // ne doivent laisser l'application sans aucun administrateur actif.
+    $revoques = 0;
+    $desactives = 0;
+    // Les promus viennent d'etre ecrits et ne figurent pas parmi les perdants
+    // (admins, simples et sortis sont disjoints) : le compte ci-dessous les
+    // inclut deja, les ajouter les compterait deux fois.
+    if (adminsRestants($db, array_merge($simples, $sortis)) > 0) {
+        // Les sortis perdent aussi l'administration : un compte desactive qui
+        // resterait administrateur la retrouverait intacte a sa reintegration,
+        // sans que l'annuaire ne l'ait jamais accordee.
+        $revoques = appliquer($db, 'admin', array_merge($simples, $sortis), 0);
+        $desactives = appliquer($db, 'statut', $sortis, 0);
+    } else {
+        fwrite(STDERR, 'Retraits ignores : ils ne laisseraient aucun administrateur actif.' . PHP_EOL);
+    }
+
+    echo 'Promus : ' . $promus . ' | Revoques : ' . $revoques
+       . ' | Reactives : ' . $reactives . ' | Desactives : ' . $desactives . PHP_EOL;
