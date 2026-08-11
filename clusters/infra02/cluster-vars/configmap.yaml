@@ -27,6 +27,9 @@ data:
   # comptes depuis l'annuaire. Absent d'infra01 pour les mêmes raisons que
   # dolibarr_auth.
   dolibarr_ldap_module: "1"
+  # Laisse tourner la synchronisation des comptes depuis l'annuaire. Absente
+  # d'infra01, où le CronJob reste suspendu.
+  dolibarr_sync_suspend: "false"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12

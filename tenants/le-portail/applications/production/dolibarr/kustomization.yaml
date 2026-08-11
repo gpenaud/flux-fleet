@@ -8,6 +8,7 @@ resources:
   - ../../../../../applications/dolibarr
   - ../../../../../applications/dolibarr/components/init
   - ../../../../../applications/dolibarr/components/oidc
+  - ../../../../../applications/dolibarr/components/ldap-sync
   - ../../../../../applications/dolibarr/components/backup
   - ingressroute.yaml
   - secrets.enc.yaml
