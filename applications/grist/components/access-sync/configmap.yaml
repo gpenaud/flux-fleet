@@ -39,6 +39,11 @@ data:
     # d'API. Les retirer couperait la branche sur laquelle on est assis.
     PROTEGES = {a.strip().lower() for a in os.environ.get("PROTECTED_EMAILS", "").split(",") if a.strip()}
 
+    # Passage a blanc : le delta est calcule et affiche, mais rien n'est ecrit.
+    # A lancer apres toute modification des groupes, le retrait d'acces etant
+    # silencieux pour qui le subit.
+    A_BLANC = os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+
 
     def appel(url, method="GET", data=None, headers=None):
         corps = json.dumps(data).encode() if data is not None else None
@@ -124,8 +129,12 @@ data:
     if not restants:
         sys.exit("Changement refuse : il ne resterait aucun proprietaire sur l organisation.")
 
-    for adresse, role in sorted(delta.items(), key=lambda c: c[0]):
-        print("  {0} -> {1}".format(adresse, role if role else "(acces retire)"))
+    for adresse, role in sorted(delta.items(), key=lambda c: (c[1] is None, c[0])):
+        print("  {0} : {1} -> {2}".format(adresse, actuels.get(adresse, "(aucun)"), role if role else "ACCES RETIRE"))
+
+    if A_BLANC:
+        print("Passage a blanc : {0} modification(s) calculee(s), aucune appliquee.".format(len(delta)))
+        sys.exit(0)
 
     appel(GRIST + "/api/orgs/" + ORG + "/access", method="PATCH", data={"delta": {"users": delta}}, headers=entete)
     print("Acces mis a jour : {0} modification(s).".format(len(delta)))

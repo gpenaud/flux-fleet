@@ -9,12 +9,22 @@ spec:
   entrypoint: main
   podGC:
     strategy: OnWorkflowSuccess
+  arguments:
+    parameters:
+      # « true » calcule et affiche le delta sans rien ecrire. Le CronWorkflow
+      # garde la valeur par defaut ; le lancement a la demande peut la forcer.
+      - name: dry-run
+        value: "false"
   volumes:
     - name: scripts
       configMap:
         name: grist-access-sync
   templates:
     - name: main
+      inputs:
+        parameters:
+          - name: dry-run
+            value: "{{workflow.parameters.dry-run}}"
       container:
         # Le script n'utilise que la bibliothèque standard : l'annuaire est
         # interrogé en GraphQL sur le port HTTP de LLDAP, ce qui évite d'ajouter
@@ -56,6 +66,8 @@ spec:
           # de l'instance, qui porte aussi la clé d'API.
           - name: PROTECTED_EMAILS
             value: "ops.gpenaud@gmail.com"
+          - name: DRY_RUN
+            value: "{{inputs.parameters.dry-run}}"
         volumeMounts:
           - name: scripts
             mountPath: /opt/access-sync

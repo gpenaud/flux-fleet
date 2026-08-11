@@ -30,6 +30,26 @@ tasks:
         argo submit --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} \
           --from workflowtemplate/sync-ldap-users --log $EXTRA
 
+  access:*:*:
+    desc: 'Aligne les acces Grist sur l annuaire (optional: DRY_RUN=true pour un passage a blanc)'
+    silent: false
+    vars:
+      TENANT: '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
+
+      # Un passage a blanc calcule et affiche le delta sans rien ecrire. A
+      # lancer apres toute modification des groupes : le retrait d'un acces est
+      # silencieux pour qui le subit.
+      #
+      #   task infra02:directory:access:le-portail:grist DRY_RUN=true
+      DRY_RUN: '{{.DRY_RUN | default "false"}}'
+    requires:
+      vars: [TENANT, APPLICATION]
+    cmds:
+      - |
+        argo submit --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} \
+          --from workflowtemplate/sync-grist-access --log -p dry-run={{.DRY_RUN}}
+
   sync:status:*:*:
     desc: 'Affiche les derniers passages de synchronisation'
     silent: false
