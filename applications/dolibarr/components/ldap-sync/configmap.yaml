@@ -1,0 +1,117 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-sync-scripts
+data:
+  promote-admins.php: |
+    <?php
+    // Aligne le drapeau administrateur de Dolibarr sur les groupes de
+    // l'annuaire. sync_users_ldap2dolibarr.php synchronise les comptes mais
+    // ignore la colonne admin de llx_user : sans ce complement, un membre du
+    // groupe d'administration arrive avec un compte sans aucun droit.
+
+    $dbPort = (int) (getenv('DOLI_DB_HOST_PORT') ?: 3306);
+    $db = new mysqli(getenv('DOLI_DB_HOST'), getenv('DOLI_DB_USER'), getenv('DOLI_DB_PASSWORD'), getenv('DOLI_DB_NAME'), $dbPort);
+    if ($db->connect_errno) {
+        fwrite(STDERR, 'Connexion a la base impossible : ' . $db->connect_error . PHP_EOL);
+        exit(1);
+    }
+    $db->set_charset('utf8mb4');
+
+    // La configuration LDAP est lue dans llx_const plutot que dupliquee dans
+    // les variables du pod : une seule source, celle que Flux tient a jour.
+    function constante(mysqli $db, string $nom): string {
+        $st = $db->prepare('SELECT value FROM llx_const WHERE name = ? AND entity IN (0, 1) ORDER BY entity DESC LIMIT 1');
+        $st->bind_param('s', $nom);
+        $st->execute();
+        $row = $st->get_result()->fetch_row();
+        return $row ? (string) $row[0] : '';
+    }
+
+    $host = constante($db, 'LDAP_SERVER_HOST');
+    $port = (int) (constante($db, 'LDAP_SERVER_PORT') ?: 389);
+    $userDn = constante($db, 'LDAP_USER_DN');
+    $filtre = constante($db, 'LDAP_FILTER_CONNECTION');
+    $champ = constante($db, 'LDAP_FIELD_LOGIN') ?: 'uid';
+
+    $ldap = ldap_connect('ldap://' . $host . ':' . $port);
+    ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+    ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+    if (!@ldap_bind($ldap, constante($db, 'LDAP_ADMIN_DN'), constante($db, 'LDAP_ADMIN_PASS'))) {
+        fwrite(STDERR, 'Bind LDAP echoue : ' . ldap_error($ldap) . PHP_EOL);
+        exit(1);
+    }
+
+    function logins($ldap, string $userDn, string $filtre, string $champ): array {
+        $res = @ldap_search($ldap, $userDn, $filtre, array($champ));
+        if ($res === false) {
+            fwrite(STDERR, 'Recherche LDAP echouee (' . $filtre . ') : ' . ldap_error($ldap) . PHP_EOL);
+            exit(1);
+        }
+        $out = array();
+        foreach (ldap_get_entries($ldap, $res) as $cle => $entree) {
+            if ($cle === 'count' || !isset($entree[$champ][0])) {
+                continue;
+            }
+            $out[] = $entree[$champ][0];
+        }
+        return $out;
+    }
+
+    // Le perimetre est celui de la synchronisation elle-meme : on ne touche
+    // jamais a un compte que l'annuaire ne gouverne pas, comme les comptes
+    // locaux crees a la main.
+    $perimetre = logins($ldap, $userDn, '(' . $filtre . ')', $champ);
+
+    // DN complets separes par des points-virgules : un DN contient deja des
+    // virgules.
+    $dnGroupes = array_filter(array_map('trim', explode(';', (string) getenv('ADMIN_GROUP_DNS'))));
+    if (!$dnGroupes) {
+        fwrite(STDERR, 'ADMIN_GROUP_DNS est vide : aucun groupe ne confere l administration.' . PHP_EOL);
+        exit(1);
+    }
+    $clauses = '';
+    foreach ($dnGroupes as $dn) {
+        $clauses .= '(memberOf=' . $dn . ')';
+    }
+    $admins = logins($ldap, $userDn, '(|' . $clauses . ')', $champ);
+
+    // Les comptes ecartes de la synchronisation le sont aussi ici : leur login
+    // Dolibarr ne correspond a aucun uid, une mise a jour ne les toucherait pas,
+    // mais autant ne pas les compter comme administrateurs a revoquer.
+    $exclus = array_filter(array_map('trim', explode(',', (string) getenv('EXCLUDE_USERS'))));
+    $perimetre = array_values(array_diff($perimetre, $exclus));
+    $admins = array_values(array_diff(array_intersect($admins, $perimetre), $exclus));
+    $simples = array_values(array_diff($perimetre, $admins));
+
+    echo 'Perimetre : ' . implode(', ', $perimetre) . PHP_EOL;
+    echo 'Administrateurs attendus : ' . (implode(', ', $admins) ?: '(aucun)') . PHP_EOL;
+
+    function appliquer(mysqli $db, array $logins, int $valeur): int {
+        if (!$logins) {
+            return 0;
+        }
+        $trous = implode(',', array_fill(0, count($logins), '?'));
+        $st = $db->prepare('UPDATE llx_user SET admin = ? WHERE login IN (' . $trous . ') AND admin <> ?');
+        $st->bind_param(str_repeat('s', count($logins) + 2), ...array_merge(array($valeur), $logins, array($valeur)));
+        $st->execute();
+        return $st->affected_rows;
+    }
+
+    // Garde-fou : on refuse de retirer les droits si plus aucun administrateur
+    // ne subsistait ensuite, y compris les comptes hors perimetre.
+    $restants = $db->query('SELECT COUNT(*) FROM llx_user WHERE admin = 1' .
+        ($simples ? " AND login NOT IN ('" . implode("','", array_map(array($db, 'real_escape_string'), $simples)) . "')" : ''))
+        ->fetch_row()[0];
+    $futurs = (int) $restants + count($admins);
+
+    $promus = appliquer($db, $admins, 1);
+    $revoques = 0;
+    if ($futurs > 0) {
+        $revoques = appliquer($db, $simples, 0);
+    } else {
+        fwrite(STDERR, 'Revocation ignoree : elle ne laisserait aucun administrateur.' . PHP_EOL);
+    }
+
+    echo 'Promus : ' . $promus . ' | Revoques : ' . $revoques . PHP_EOL;

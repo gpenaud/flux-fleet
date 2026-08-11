@@ -104,11 +104,14 @@ spec:
                 ('LDAP_ADMIN_DN',               1, 'uid=dolibarr,ou=people,dc=alter-it,dc=eu', 'chaine', 0, 'Gere par Flux'),
                 ('LDAP_ADMIN_PASS',             1, '$LDAP_BIND_PASS',                      'chaine', 0, 'Gere par Flux'),
                 ('LDAP_USER_DN',                1, 'ou=people,dc=alter-it,dc=eu',          'chaine', 0, 'Gere par Flux'),
-                -- Restreint la synchronisation aux membres du groupe applicatif.
+                -- Restreint la synchronisation aux membres des groupes de
+                -- l'application, plus les administrateurs du tenant : sans eux,
+                -- on accorderait l'administration a des comptes jamais crees.
+                --
                 -- Sans parentheses englobantes : Ldap::getRecords encadre deja
                 -- cette valeur des siennes, et « ((memberOf=...)) » est un
                 -- filtre invalide (« LDAP search failed: -7 Bad search filter »).
-                ('LDAP_FILTER_CONNECTION',      1, 'memberOf=cn=leportail_dolibarr_users,ou=groups,dc=alter-it,dc=eu', 'chaine', 0, 'Gere par Flux'),
+                ('LDAP_FILTER_CONNECTION',      1, '|(memberOf=cn=${tenant}-${application}-users,ou=groups,dc=alter-it,dc=eu)(memberOf=cn=${tenant}-${application}-admins,ou=groups,dc=alter-it,dc=eu)(memberOf=cn=${tenant}-admins,ou=groups,dc=alter-it,dc=eu)', 'chaine', 0, 'Gere par Flux'),
                 ('LDAP_KEY_USERS',              1, 'uid',                                  'chaine', 0, 'Gere par Flux'),
                 ('LDAP_FIELD_LOGIN',            1, 'uid',                                  'chaine', 0, 'Gere par Flux'),
                 ('LDAP_FIELD_FULLNAME',         1, 'cn',                                   'chaine', 0, 'Gere par Flux'),

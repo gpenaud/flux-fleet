@@ -160,8 +160,8 @@ spec:
           - domain: '*.${domain_prefix}leportail.org'
             policy: 'one_factor'
             subject:
-              - 'group:leportail_admins'
-              - 'group:leportail_users'
+              - 'group:le-portail-admins'
+              - 'group:le-portail-users'
           # Authelia lui-même : bypass (sinon boucle infinie de login)
           - domain: 'auth.${cluster}.${domain}'
             policy: 'bypass'

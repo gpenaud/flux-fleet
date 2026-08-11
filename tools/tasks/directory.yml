@@ -1,0 +1,42 @@
+version: '3'
+
+tasks:
+  sync:*:*:
+    desc: 'Synchronise les comptes d une application depuis l annuaire (optional: EXCLUDE_USERS)'
+    silent: false
+    vars:
+      TENANT: '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
+
+      # Comptes écartés de la synchronisation, séparés par des virgules. Vide,
+      # le WorkflowTemplate applique sa propre valeur par défaut.
+      #
+      #   task infra02:directory:sync:le-portail:dolibarr EXCLUDE_USERS=jsergi,mschneider
+      #
+      # Un compte s'exclut quand son login Dolibarr ne correspond pas à son uid
+      # d'annuaire : le script le chercherait par uid, ne le trouverait pas, et
+      # créerait un doublon portant le même courriel.
+      EXCLUDE_USERS: '{{.EXCLUDE_USERS | default ""}}'
+    requires:
+      vars: [TENANT, APPLICATION]
+    cmds:
+      # Le paramètre n'est passé que s'il est renseigné : sans cela on écraserait
+      # la valeur par défaut du WorkflowTemplate par une chaîne vide.
+      - |
+        EXTRA=""
+        if [ -n "{{.EXCLUDE_USERS}}" ]; then
+          EXTRA="-p exclude-users={{.EXCLUDE_USERS}}"
+        fi
+        argo submit --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}} \
+          --from workflowtemplate/sync-ldap-users --log $EXTRA
+
+  sync:status:*:*:
+    desc: 'Affiche les derniers passages de synchronisation'
+    silent: false
+    vars:
+      TENANT: '{{index .MATCH 0}}'
+      APPLICATION: '{{index .MATCH 1}}'
+    requires:
+      vars: [TENANT, APPLICATION]
+    cmds:
+      - argo list --context admin@{{.CLUSTER}} -n {{.TENANT}}-{{.APPLICATION}}

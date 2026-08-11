@@ -1,0 +1,96 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: sync-ldap-users
+  namespace: ${tenant}-${application}
+spec:
+  serviceAccountName: ldap-sync-runner
+  entrypoint: main
+  podGC:
+    strategy: OnWorkflowSuccess
+  arguments:
+    parameters:
+      # Comptes écartés de la synchronisation, séparés par des virgules.
+      #
+      # Julie a déjà un compte Dolibarr sous le login « Aux retrouvailles » : le
+      # script la cherche par uid, ne la trouve pas, et créerait un doublon
+      # portant le même courriel — ce qui rendrait ambiguë la recherche du
+      # module OIDC, qui interroge le login OU le courriel. À vider une fois son
+      # login aligné sur son uid.
+      - name: exclude-users
+        value: "jsergi"
+  volumes:
+    - name: scripts
+      configMap:
+        name: ldap-sync-scripts
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: exclude-users
+            value: "{{workflow.parameters.exclude-users}}"
+      container:
+        # Même version que le Deployment : le script de synchronisation fait
+        # partie du code applicatif et suit ses montées de version.
+        image: docker.io/dolibarr/dolibarr:23.0.0
+        # args seulement, jamais command : l'ENTRYPOINT de l'image régénère
+        # conf.php à partir des DOLI_*, puis termine par « exec "$@" ». Le
+        # remplacer priverait les scripts de toute configuration.
+        args:
+          - sh
+          - -c
+          # Variables shell sans accolades : Flux substitue toute occurrence de
+          # cette syntaxe dans le manifeste rendu, avant même le démarrage du
+          # conteneur, et vide celles qu'il ne connaît pas.
+          - |
+            set -eu
+            EXTRA=""
+            if [ -n "$EXCLUDE_USERS" ]; then
+              EXTRA="--excludeuser=$EXCLUDE_USERS"
+            fi
+            php /var/www/scripts/user/sync_users_ldap2dolibarr.php commitiferror -y $EXTRA
+            php /opt/ldap-sync/promote-admins.php
+        env:
+          # Impératif : ce pod ne monte pas /var/www/documents, où vit
+          # install.lock. Sans ce verrou en vue, l'entrypoint relancerait une
+          # installation sur une base déjà installée.
+          - name: DOLI_INSTALL_AUTO
+            value: "0"
+          - name: DOLI_DB_HOST
+            value: "mariadb.controller-database.svc.cluster.local"
+          - name: DOLI_DB_HOST_PORT
+            value: "3306"
+          - name: DOLI_URL_ROOT
+            value: "https://dolibarr.${domain}"
+          - name: DOLI_DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: ${application}
+                key: mariadb-database
+          - name: DOLI_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: ${application}
+                key: mariadb-user
+          - name: DOLI_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ${application}
+                key: mariadb-password
+          - name: EXCLUDE_USERS
+            value: "{{inputs.parameters.exclude-users}}"
+          # Groupes conférant l'administration Dolibarr, en DN complets séparés
+          # par des points-virgules — un DN contient déjà des virgules.
+          - name: ADMIN_GROUP_DNS
+            value: "cn=${tenant}-${application}-admins,ou=groups,dc=alter-it,dc=eu;cn=${tenant}-admins,ou=groups,dc=alter-it,dc=eu"
+        volumeMounts:
+          - name: scripts
+            mountPath: /opt/ldap-sync
+            readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi

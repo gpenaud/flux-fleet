@@ -1,0 +1,37 @@
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ldap-sync-runner
+  namespace: ${tenant}-${application}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ldap-sync-runner
+  namespace: ${tenant}-${application}
+rules:
+  # Le workflow ne pilote aucune ressource : il fait tourner un conteneur qui
+  # parle à l'annuaire et à la base. Seul reste ce qu'Argo exige de tout pod
+  # pour rapporter son résultat.
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtaskresults
+    verbs:
+      - create
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ldap-sync-runner
+  namespace: ${tenant}-${application}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ldap-sync-runner
+subjects:
+  - kind: ServiceAccount
+    name: ldap-sync-runner
+    namespace: ${tenant}-${application}

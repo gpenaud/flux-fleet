@@ -27,6 +27,10 @@ includes:
     taskfile: ./restore.yml
     vars: { CLUSTER: '{{.CLUSTER}}' }
 
+  directory:
+    taskfile: ./directory.yml
+    vars: { CLUSTER: '{{.CLUSTER}}' }
+
   vpn:
     taskfile: ./vpn.yml
     vars: 

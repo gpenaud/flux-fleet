@@ -1,0 +1,28 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: sync-ldap-users
+  namespace: ${tenant}-${application}
+spec:
+  # Dolibarr ne crée aucun compte à la volée : main.inc.php refuse la connexion
+  # dès que le fetch échoue, et afterLoginFailed — le seul hook du parcours —
+  # ne s'exécute qu'après le refus. Ce passage régulier est donc ce qui
+  # approche le mieux le provisionnement automatique : un nouveau membre du
+  # groupe est utilisable au bout de cinq minutes au pire.
+  schedule: "*/5 * * * *"
+  timezone: "Europe/Paris"
+  # Suspendu partout sauf là où cluster-vars l'autorise : la production ne doit
+  # pas se mettre à créer des comptes tant que staging n'est pas validé.
+  suspend: ${dolibarr_sync_suspend:=true}
+  # Une synchronisation à la fois : deux passages concurrents écriraient les
+  # mêmes comptes.
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  workflowSpec:
+    # Même définition que le lancement à la demande : le WorkflowTemplate est la
+    # seule source, il n'y a rien à tenir synchronisé entre les deux.
+    workflowTemplateRef:
+      name: sync-ldap-users
