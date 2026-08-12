@@ -372,69 +372,31 @@ spec:
               token_endpoint_auth_method: 'client_secret_post'
               consent_mode: 'implicit'
 
+          # Lu dans le Secret authelia-secrets, chiffre par SOPS, plutot que pose
+          # en clair ici : ce fichier est versionne, et le secret y etait lisible
+          # de quiconque a acces au depot.
+          #
+          # secret_name suffit a detourner le chart : il cesse alors de fabriquer
+          # sa propre cle et injecte AUTHELIA_..._HMAC_SECRET_FILE pointant sur
+          # le fichier monte. Encore faut-il que la cle figure dans les items de
+          # secret.additionalSecrets, sans quoi rien n'est monte.
           hmac_secret:
-            value: "0FZg4+U4lhgJqUA49n1H0SoO6NzAuC94hRG4jtjBozwQQjwPL/tRuWznPqUJMauV5yXlz58YFc6mWro5R"
+            secret_name: 'authelia-secrets'
+            path: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET'
           
-          # JWKS : clé RSA pour signer les id_tokens
-          # On la met directement en valeur (le chart la mettra dans un secret pour nous)
+          # JWKS : cle RSA de signature des id_tokens, lue dans le meme Secret.
+          #
+          # Ici pas de secret_name : le chart ne sait pas monter les cles JWKS,
+          # il se contente de rendre « {{ secret "<chemin>" }} » dans la
+          # configuration, que le filtre « template » d'Authelia resout au
+          # demarrage. Le chemin est donc celui du fichier DANS le conteneur, et
+          # depend de secret.mountPath.
           jwks:
             - key_id: 'default'
               algorithm: 'RS256'
               use: 'sig'
               key:
-                value: |
-                  -----BEGIN PRIVATE KEY-----
-                  MIIJRAIBADANBgkqhkiG9w0BAQEFAASCCS4wggkqAgEAAoICAQC2Yq/HHzVVCSuu
-                  gjU6iKUf7zsLYRXdjjFW6/cnkOmH0L8QpkPaBCZBq8AD5fmWFRjjrQaA+cN4kAg/
-                  EPEEjH1Kcyj6VDVGqnS+Pm/rupRHdJ8TdtPwQUMcckRKmyJ0Jn5NHsOFZa7vK1eA
-                  JGt/a8JBSH1lsQtS9HogU+vHBSLU1rrHUvuHPUBPO73Crzl/QK3bpvAQwjrjZUeN
-                  PCuREUXAJBg70yRqEqPt4EmunnZq4ZWKZgW2xSxy66piIBTz0JnzwbWnHdVQso/i
-                  KnRrVFhPPcX4SqnJvqzKOLCWtJZxopgx4LFP1lfg4Eoof61jjWz7oT+MA4l2H+Oo
-                  FbM/vmTMljgbrcCwjvcwB/VkY6QKHHWT+xFItUueS50sJ7+2QPox5IUazZxJLz9p
-                  xkfKDIQIxJUJQmlAk7MdH5xka4h11v7dKls+MqpiRQssHPtshHXbmwJlHFyNkkRq
-                  6TH5KLunj2oHzZyjnLmSNePn0BGWfl0PDFjkTYBL+N0bZZP8purtD0jzeeppoGZi
-                  3XabV5WfGt8gs4kLh5CO/XUj+jTQ4y7PV4VroQmfIRsoPYVZZM3wtCADePFmAcMx
-                  MKPw8hzxx86FqriEjEq4hyNm74iZdsOAZuAVg/6vhtk/yvH9uUFy3RABLGGJaTBG
-                  KPfpi73l1xSmPtjTIUZkzYO754QJCwIDAQABAoICAAPDcjhxUWq+yghLfDOyrCLw
-                  5HlYoy3eMvBwkA9gncuv/Vv87PuBCGpkfo2AtQS+zLOuAgCuprTvK+xj5MVLl4OY
-                  xWiyTM3M0081qfOQTGJTwBCTwXh8sEN/AXUUpxevJP4MZiEeNweND7zU2ORZNzny
-                  TVFy33adFYQN7JiVEjdCyGSNNs7UmbtzfSKY9l5vhDw7FqBnPEstmitflCU7LlhH
-                  pmRdoqu5qhOiLthhQV+f5gkOuowfR3Uw8w7GoLK4mY9Tw57Tg8UAL5iNeGIv7F6T
-                  j2k53oULionltOch33+Fc7nbwWznUbWR4JXeBJhAS9ZpaQ6c6BI9mDdYs0kxHD1U
-                  zhMjAsgOgsMjJo8L/sKmKVUHni1sqXppM7iPEmBsDlLIWx/fz4S0s6xyyTjoPlBK
-                  9xBiNZ3vyHHWDg6A+Ftmb0M1p3/dbrM39dovLrrOZhX1CJA50M+YPGwzXlsqX2q5
-                  7fFyeJ+hVywZGREfv/WNUjwwoLTSAi6NbUAEw15m8sLdjaswf2kl9D1ccXq/++uV
-                  IVbU5ZhtNqMdyDXdd9BxE02GMF8Pxxa84E1HAJL37QJCMExmIGww8HdKthsx8gr0
-                  Pef1Oxf2X3lm5LqQ+8OEv0lClEKqa6qJqfASZT0SsAUI6k69vaV54GnyJq8m6tNh
-                  7R0wgXZzEKAwscLcDEApAoIBAQD9EVkSfTsCyHmV4rlAk5oAwBs7Ct4LrsaTqjWk
-                  1/qzMUGsDUVrtozsQbIUOsTkdBxYjKUXtVivQ0p2+XDBE3TIkDCfCtRSpiNRDi+9
-                  aMxLq1FXD7gUhUN/lI8qbvUZZmVOLJ2EZ8xHRCbFYlJtuZ+2PIOlTAaq9sze4jAe
-                  pNNR2oQW0sxariScxiXnxzUEQJrsUuuyhkfngVTd3RAYRBK+y4O0cht+SGnwCLn2
-                  3DuT/vFHCp6/zVZjLV+2o3z7jPI/FrB94jy2NHA6KiiEuvbVtbIYnZ7OV76GKJqz
-                  D22bhzsoWNtRuJDzovmh4qM7Qse4jx+86893sR7vwbexNZUFAoIBAQC4f64lR8zj
-                  CyCZACSATPSypkqR2/EZAQhuCHZkkOAiLuBxZxF3d3au0la/rgxjVc0CFQIuvbjO
-                  d/jNokc0zOWFUKRrgNb9QGJKbESuJkitO4ykA9p0Xg7gI9Fvp3dFLIpAGoMh4ZeL
-                  sxzDxJ4gc1sPF71ngvgAfmknRMn1FQ3Co6jVBiJryg+f+rpmqnD3A9MUcFLeehb0
-                  WZ+i6HjHTzjElgqM0hUbuNgPv0xFLJ/FlLiGyU8P8DHw3thiU6M3QkbpCVI3DLM1
-                  aa5kK4Lfei8e+h325IX6LgxTc4zc07VsNRB4MzS8nSEvuF4GneTF2kevv662LRHz
-                  FNCAUJUgtILPAoIBAQDOctCPXMo/QvytYgBuxfrkkdOlHwB112b4H+sTR36loJFK
-                  oqj3bj0Yn59/EVJ+bJqTQmmMJczrbaHZ3TQ2zoB+/eIsXNFJe29kOIaJpmzDbkc1
-                  FwW899pQwgjpPQuGZRpP4+W8llD38okOjV9hVAUOzd83ggYOgrgvO6a12RDrva/0
-                  TpOXhmkn3B4gL0r45Rt9n0fYo+MU4VUyiZ0Prrj8HVqcYlo7cye5QeUzlgakfV6n
-                  7eoD3qeS0Pk8LbNQI3OcNA5XI7ETk0Par3nOjhe/0DIyEqPzAXHUUFujp/pq3q9M
-                  AvEogcD+gP3VKuau+ZOk5F2n6Vee9UefoBES5/thAoIBAQCM1/urPgqs8FusMS2s
-                  PBM5JjUa8Bo3ilBTH2ayEt7neX2hVJtC5hHWF4Bdx5JxapicFEmcQP0JsRBgepd9
-                  OUWl5g/+eVal8jaWtdwgTd2BUUpmEwL7fqpAdVd2sxMb3YqUsSiV/s9fuBYnZLuJ
-                  7kX/WZIfqR2F0vqXHa5GyBG/GozSQmKYgqI28ILHySl/iI3ktnKsn+tSEfEJvgol
-                  rNabTCc1pVKz3QIj01d4Hz7A6G2Nh7QxaJ3XUWdCeLLKhm/3ikQW/jz4c3rLwWOh
-                  EndSYIHrbjzQ5cJHGpjYI04GEuRFvmFt803YThiJWJPCboX3Jo9LR1DCjos0yU9u
-                  rh6FAoIBAQCG0+7knnLypRiTq92JPWUpgRKAXJ26LkSMLyqg0AFNZTXVy48XnPCc
-                  ko8PX6+XfXS0Fj9Nyx6/X+DQrFnYTGPZqMWiKNzViiaP8FdRs/COD6XdJDE2CwvM
-                  Avn6FZ8AlxZzBooihUH2GP4gMgJVIuWlrRi+6cnjAYHeEGWiG4JK1WenrlEg7C3q
-                  NZ02wzT/Gpfd2uGWwfHkCn0aFAHEBfmWAQe08KGlLgq0jl7pwt1FcqQNI3j4/RPu
-                  Wx3uYUfHWzcR+JqO/zEgI18FkdYXow8I3BpxstZSJynnNIKXhrKbI/3MVJml0woP
-                  /1BnnfqOg7/4/8otKSLINf+hyfJNvmWh
-                  -----END PRIVATE KEY-----
+                path: '/secrets/authelia-secrets/AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY'
           
           # CORS
           cors:
@@ -469,10 +431,17 @@ spec:
           items:
             - key: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD'
               path: 'AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD' 
+        # Seules les cles listees ici sont montees : une cle presente dans le
+        # Secret mais absente de cette liste reste invisible au conteneur, et la
+        # reference faite plus haut echouerait au demarrage.
         authelia-secrets:
           items:
             - key: 'AUTHELIA_SESSION_SECRET'
               path: 'AUTHELIA_SESSION_SECRET'
+            - key: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET'
+              path: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET'
+            - key: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY'
+              path: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY'
         authelia-smtp:
           items:
             - key: 'password.txt'
