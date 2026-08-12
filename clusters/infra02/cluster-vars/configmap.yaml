@@ -34,6 +34,9 @@ data:
   # les groupes portent encore l'ancienne nomenclature : une politique en
   # « deny » par défaut y fermerait Grist à tout le monde.
   grist_authorization_policy: "grist-le-portail"
+  # La cle d'API existe desormais : la synchronisation des roles Grist peut
+  # tourner. Un passage a blanc l'a precedee, delta vide.
+  grist_sync_suspend: "false"
   # Branche Nextcloud sur l'annuaire : comptes par LDAP, SSO par OIDC. Absent
   # d'infra01 tant que le mapping d'identifiant n'y est pas éprouvé — mal réglé,
   # il ferait atterrir les utilisateurs sur un espace vide.
