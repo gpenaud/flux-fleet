@@ -103,11 +103,12 @@ data:
           "pluginVersion": "12.1.1",
           "targets": [
             {
-              "expr": "(sum(kube_pod_status_phase{phase=~\"Failed|Unknown\"}) OR vector(0)) + (sum(kube_pod_container_status_waiting_reason{reason=~\"CrashLoopBackOff|ImagePullBackOff|ErrImagePull\"}) OR vector(0))",
+              "expr": "(sum(kube_pod_status_phase{phase=~\"Failed|Unknown\"} * on(namespace,pod) group_left() kube_pod_owner{owner_kind!=\"Workflow\"}) OR vector(0)) + (sum(kube_pod_container_status_waiting_reason{reason=~\"CrashLoopBackOff|ImagePullBackOff|ErrImagePull\"}) OR vector(0))",
               "legendFormat": "Pods KO",
               "refId": "A"
             }
           ],
+          "description": "Pods applicatifs en echec. Les pods de Workflow Argo sont exclus : termines en erreur, ils restent en phase Failed indefiniment et la vignette affichait 10 en permanence, ne signalant plus rien. Les echecs de restauration se suivent dans Argo, ceux de sauvegarde dans la vignette voisine.",
           "title": "Pods KO",
           "type": "stat"
         },
