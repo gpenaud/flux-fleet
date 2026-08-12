@@ -41,6 +41,25 @@ data:
   # l'annuaire. Les trois groupes désignés existent bien sur ce cluster, sans
   # quoi le « deny » par défaut fermerait l'application à tout le monde.
   nextcloud_authorization_policy: "nextcloud-le-portail"
+  # Les deux WordPress du portail. Un seul groupe par site, sans le
+  # 'le-portail-admins' transverse des autres applications : quiconque franchit
+  # Authelia y devient administrateur. Le groupe est pour cette raison verifie
+  # une seconde fois cote WordPress, par le mu-plugin.
+  wordpress_directory: "1"
+  wordpress_site_authorization_policy: "wordpress-site-le-portail"
+  wordpress_epilibres_authorization_policy: "wordpress-epilibres-le-portail"
+  # Mode de connexion : « sso » redirige d'emblee vers Authelia, « mixed »
+  # laisse le formulaire local a cote du bouton. Le formulaire reste joignable
+  # dans les deux cas — « ?connexion-locale » sur wp-login.php, « /login?direct=1 »
+  # sur Nextcloud, ce dernier natif — sans quoi une panne de l'annuaire fermerait
+  # tout, comptes de depannage compris.
+  #
+  # Ni Grist ni Dolibarr n'y figurent : le premier, configure en OIDC, n'expose
+  # aucun formulaire local ; le second n'accepte de rediriger que si
+  # 'openid_connect' est le seul mode de dolibarr_auth, ce qui supprimerait le
+  # bind LDAP et les comptes locaux du meme coup.
+  wordpress_login_mode: "sso"
+  nextcloud_login_mode: "sso"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
