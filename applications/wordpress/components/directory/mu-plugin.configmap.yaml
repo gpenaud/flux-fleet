@@ -95,11 +95,14 @@ data:
         }
     );
 
-    // Le delai d'attente par defaut du plugin est de 5 secondes, et l'appel au
-    // point de terminaison de jeton en demande pres de 4 : la requete sort du
-    // cluster par l'adresse publique et y revient, negociation TLS comprise.
-    // La connexion echouait donc par intermittence, sur un « cURL error 28 »
-    // que rien ne rattachait a la cause.
+    // Le delai d'attente par defaut du plugin est de 5 secondes, ce qui ne
+    // suffisait pas : l'appel au point de terminaison de jeton sortait du
+    // cluster par l'adresse publique pour y revenir, de 0,6 a 16 secondes selon
+    // les mesures, d'ou un « cURL error 28 » intermittent.
+    //
+    // La cause est traitee par ailleurs — un hostAliases fait desormais joindre
+    // Authelia par l'interieur, en une vingtaine de millisecondes. Ce delai
+    // reste une marge : il ne coute rien tant que rien ne traine.
     add_filter(
         'openid-connect-generic-settings',
         function ( $settings ) {
