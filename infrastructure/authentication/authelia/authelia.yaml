@@ -199,11 +199,28 @@ spec:
           - subdomain: 'auth'
             domain: '${domain_prefix}jardinsvedas.com'
 
+      # Clé de chiffrement des données sensibles de la base — secrets TOTP,
+      # identifiants WebAuthn. Elle vivait ici en clair ; elle est desormais lue
+      # dans le Secret authelia-secrets, chiffré par SOPS, qui en portait déjà
+      # une copie rigoureusement identique. La bascule ne change donc aucune
+      # valeur, ce qui importe plus ici qu'ailleurs : une clé différente rendrait
+      # la base illisible.
+      #
+      # Ce n'est pas un simple rangement. Le chart fabriquait ce Secret lui-même
+      # et n'en conservait la valeur, d'un déploiement à l'autre, que par un
+      # lookup sur l'existant. Le Secret disparu, il en aurait tiré une nouvelle
+      # au hasard, et Authelia n'aurait plus rien su déchiffrer.
+      identity_validation:
+        reset_password:
+          secret:
+            secret_name: 'authelia-secrets'
+            path: 'AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET'
+
       # --- Storage : SQLite local
       storage:
         encryption_key:
-          # Le chart génère le Secret tout seul à partir de cette valeur
-          value: "AX03F64FzxEUUlZsI3/xrFnNZPjrsdljovjpeAWbE5eacWN2y7+Pwa98/MssUCX7TA+rMP"
+          secret_name: 'authelia-secrets'
+          path: 'AUTHELIA_STORAGE_ENCRYPTION_KEY'
         local:
           enabled: true
           path: '/config/db.sqlite3'
@@ -504,6 +521,10 @@ spec:
               path: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET'
             - key: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY'
               path: 'AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY'
+            - key: 'AUTHELIA_STORAGE_ENCRYPTION_KEY'
+              path: 'AUTHELIA_STORAGE_ENCRYPTION_KEY'
+            - key: 'AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET'
+              path: 'AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET'
         authelia-smtp:
           items:
             - key: 'password.txt'
