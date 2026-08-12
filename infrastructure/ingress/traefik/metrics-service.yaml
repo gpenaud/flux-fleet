@@ -1,0 +1,25 @@
+---
+# Expose l'entrypoint « metrics » de Traefik (port 8082), que le chart ne
+# publie sur aucun Service : Traefik produisait donc ses métriques Prometheus
+# sans que personne puisse les lire, et le tableau de bord restait vide.
+#
+# Service distinct de traefik-internal, qui ne porte que le 443 : mêler les
+# deux exposerait les métriques à qui atteint l'ingress interne.
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-metrics
+  namespace: controller-ingress
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/component: metrics
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: traefik-controller-ingress
+    app.kubernetes.io/name: traefik
+  ports:
+    - name: metrics
+      port: 8082
+      targetPort: metrics
+      protocol: TCP

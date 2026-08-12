@@ -1,0 +1,33 @@
+---
+# Collecte les métriques de Traefik, d'où sortent les taux de requêtes, d'erreur
+# et les latences par service du tableau de bord. Sans ce ServiceMonitor, la
+# métrique traefik_service_requests_total n'existait nulle part dans Prometheus
+# et le panneau « RED par service » restait désespérément vide.
+#
+# Cible le Service traefik-metrics, déclaré à côté de Traefik : le chart
+# n'expose pas l'entrypoint metrics de lui-même.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: traefik
+  namespace: controller-observability
+  labels:
+    app: traefik
+spec:
+  namespaceSelector:
+    matchNames:
+      - controller-ingress
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+      app.kubernetes.io/component: metrics
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      # honorLabels laissé à false, et c'est ce que le tableau de bord attend :
+      # Traefik émet un label « service », que Prometheus renomme alors en
+      # « exported_service » pour ne pas écraser le sien. Le passer à true
+      # ferait disparaître ce préfixe et viderait les panneaux.
+      honorLabels: false

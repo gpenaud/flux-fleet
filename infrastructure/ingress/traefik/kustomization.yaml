@@ -5,3 +5,4 @@ resources:
   - namespace.yaml
   - traefik.yaml
   - internal-service.yaml
+  - metrics-service.yaml

@@ -908,12 +908,13 @@ data:
           "pluginVersion": "12.1.1",
           "targets": [
             {
-              "expr": "100 * (1 - sum(node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"}) / sum(node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"}))",
+              "expr": "100 * (1 - sum(node_filesystem_avail_bytes{mountpoint=\"/var\",fstype!=\"tmpfs\"}) / sum(node_filesystem_size_bytes{mountpoint=\"/var\",fstype!=\"tmpfs\"}))",
               "legendFormat": "Disque /",
               "refId": "A"
             }
           ],
-          "title": "Disque cluster (/)",
+          "description": "Talos n'expose aucun point de montage / : le rootfs est en lecture seule et toutes les données vivent sur /var, seul volume réel du nœud.",
+          "title": "Disque cluster (/var)",
           "type": "gauge"
         },
         {
