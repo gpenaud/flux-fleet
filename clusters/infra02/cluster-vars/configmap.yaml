@@ -39,6 +39,13 @@ data:
   # il ferait atterrir les utilisateurs sur un espace vide.
   nextcloud_directory: "1"
   nextcloud_authorization_policy: "nextcloud-le-portail"
+  # Branche les deux WordPress du portail sur l'annuaire. Un seul groupe par
+  # site, sans le 'le-portail-admins' transverse : quiconque franchit Authelia
+  # y devient administrateur, la porte est donc etroite a dessein. Le groupe est
+  # verifie une seconde fois par le mu-plugin, cote WordPress.
+  wordpress_directory: "1"
+  wordpress_site_authorization_policy: "wordpress-site-le-portail"
+  wordpress_epilibres_authorization_policy: "wordpress-epilibres-le-portail"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12

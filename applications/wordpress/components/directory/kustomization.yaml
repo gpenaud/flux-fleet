@@ -1,0 +1,18 @@
+---
+# Un Component, et non une Kustomization : lui seul peut modifier les
+# ressources de celui qui l'inclut — ici la HelmRelease et le Namespace du
+# chart commun. Il s'inclut par « components: », jamais par « resources: ».
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - mu-plugin.configmap.yaml
+
+patches:
+  - path: values.patch.yaml
+    target:
+      kind: HelmRelease
+      name: wordpress
+  - path: namespace.patch.yaml
+    target:
+      kind: Namespace

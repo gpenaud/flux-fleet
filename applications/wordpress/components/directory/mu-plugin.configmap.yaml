@@ -1,0 +1,129 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress-directory
+data:
+  # Monte dans wp-content/mu-plugins : un « must-use plugin » est charge
+  # d'office par WordPress, avant les plugins ordinaires, sans activation ni
+  # ecriture en base. Toute la configuration du SSO tient donc dans ce fichier
+  # versionne, et se retablit d'elle-meme a chaque demarrage.
+  #
+  # Les variables PHP s'ecrivent SANS accolades : Flux substitue toute
+  # occurrence de la syntaxe a accolades dans le manifeste rendu, et vide celles
+  # qu'il ne connait pas. Seules les variables de cluster-vars en portent.
+  alter-it-annuaire.php: |
+    <?php
+    /**
+     * Plugin Name: Annuaire alter-it
+     * Description: Connexion unique par Authelia, adossee aux groupes de l'annuaire.
+     */
+
+    if ( ! defined( 'ABSPATH' ) ) {
+        exit;
+    }
+
+    // Interrupteur de cluster : tant que la variable ne vaut pas 1, ce fichier
+    // ne fait rien. C'est ce qui permet d'eprouver le SSO sur staging avant de
+    // le porter en production, le manifeste etant commun aux deux.
+    if ( '${wordpress_directory:=0}' !== '1' ) {
+        return;
+    }
+
+    // Seul groupe habilite. Quiconque le franchit devient administrateur du
+    // site : la porte est etroite a dessein, et Authelia la garde deja par sa
+    // politique d'autorisation. Le controle est refait ici parce qu'une
+    // politique restee au reglage par defaut ouvrirait sinon l'administration
+    // du site a tout l'annuaire.
+    $alterit_groupe = '${tenant}-${application}-admins';
+
+    // Le secret du client ne peut pas vivre dans une ConfigMap : il est monte
+    // depuis le Secret reflete par Authelia.
+    $alterit_secret = @file_get_contents( '/secrets/oidc/client_secret' );
+    if ( false === $alterit_secret ) {
+        error_log( 'annuaire alter-it : secret du client OIDC introuvable, SSO inactif' );
+        return;
+    }
+
+    $alterit_issuer = 'https://auth.${domain}';
+
+    // Ces constantes priment sur les reglages enregistres en base : le plugin
+    // les repose a chaque chargement, une modification faite depuis l'interface
+    // d'administration est donc sans effet.
+    define( 'OIDC_CLIENT_ID', '${application}-${tenant}' );
+    define( 'OIDC_CLIENT_SECRET', trim( $alterit_secret ) );
+    define( 'OIDC_CLIENT_SCOPE', 'openid email profile groups' );
+    define( 'OIDC_ISSUER', $alterit_issuer );
+    define( 'OIDC_ENDPOINT_LOGIN_URL', $alterit_issuer . '/api/oidc/authorization' );
+    define( 'OIDC_ENDPOINT_TOKEN_URL', $alterit_issuer . '/api/oidc/token' );
+    define( 'OIDC_ENDPOINT_USERINFO_URL', $alterit_issuer . '/api/oidc/userinfo' );
+    define( 'OIDC_ENDPOINT_JWKS_URL', $alterit_issuer . '/jwks.json' );
+    // « button » et non « auto » : le formulaire de wp-login.php reste affiche
+    // a cote du bouton, et demeure le recours si Authelia ou l'annuaire tombe.
+    define( 'OIDC_LOGIN_TYPE', 'button' );
+    define( 'OIDC_CREATE_IF_DOES_NOT_EXIST', 1 );
+    // Rattache par courriel un compte deja present plutot que d'en creer un
+    // second, qui laisserait l'interesse devant un site vide.
+    define( 'OIDC_LINK_EXISTING_USERS', 1 );
+    define( 'OIDC_REDIRECT_USER_BACK', 1 );
+
+    // Le plugin est depose sur le volume par un conteneur d'initialisation, et
+    // declare actif ici plutot qu'en base : rien n'est ecrit, et le reglage se
+    // retablit si quelqu'un le desactive depuis l'interface. Le filtre passe
+    // AVANT le chargement des plugins, il n'y a donc pas de double inclusion.
+    $alterit_plugin = 'daggerhart-openid-connect-generic/openid-connect-generic.php';
+    add_filter(
+        'option_active_plugins',
+        function ( $plugins ) use ( $alterit_plugin ) {
+            if ( ! is_array( $plugins ) ) {
+                return $plugins;
+            }
+            if ( ! in_array( $alterit_plugin, $plugins, true )
+                && file_exists( WP_PLUGIN_DIR . '/' . $alterit_plugin ) ) {
+                $plugins[] = $alterit_plugin;
+            }
+            return $plugins;
+        }
+    );
+
+    // Purge quotidienne des etats d'authentification expires, que le plugin
+    // programme d'ordinaire a son activation — laquelle n'a jamais lieu ici.
+    add_action(
+        'init',
+        function () {
+            if ( class_exists( 'OpenID_Connect_Generic' )
+                && ! wp_next_scheduled( 'openid-connect-generic-cron-daily' ) ) {
+                OpenID_Connect_Generic::setup_cron_jobs();
+            }
+        },
+        20
+    );
+
+    // Refus si le groupe attendu n'est pas dans le jeton. Un claim absent vaut
+    // refus : mieux vaut fermer la porte que l'ouvrir sur une configuration
+    // incomplete.
+    add_filter(
+        'openid-connect-generic-user-login-test',
+        function ( $autorise, $claim ) use ( $alterit_groupe ) {
+            $groupes = ( isset( $claim['groups'] ) && is_array( $claim['groups'] ) ) ? $claim['groups'] : array();
+            if ( ! in_array( $alterit_groupe, $groupes, true ) ) {
+                error_log( 'annuaire alter-it : connexion refusee, groupe ' . $alterit_groupe . ' absent du jeton' );
+                return false;
+            }
+            return $autorise;
+        },
+        10,
+        2
+    );
+
+    // Le groupe ne porte qu'un role, celui d'administrateur. Il est pose a la
+    // creation, puis verifie a chaque connexion — sans jamais retirer les
+    // droits d'un compte qui les a deja, pour ne pas declasser un
+    // administrateur local rattache par courriel.
+    $alterit_promouvoir = function ( $user ) {
+        if ( $user instanceof WP_User && ! user_can( $user, 'manage_options' ) ) {
+            $user->set_role( 'administrator' );
+        }
+    };
+    add_action( 'openid-connect-generic-user-create', $alterit_promouvoir, 10, 1 );
+    add_action( 'openid-connect-generic-update-user-using-current-claim', $alterit_promouvoir, 10, 1 );

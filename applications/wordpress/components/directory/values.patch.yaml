@@ -1,0 +1,90 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: wordpress
+spec:
+  values:
+    # Le chart ne sait pas configurer une instance deja installee :
+    # wordpressExtraConfigContent et customPostInitScripts ne servent qu'au tout
+    # premier demarrage, quand wp-config.php n'existe pas encore. Le SSO passe
+    # donc par un « must-use plugin » monte en volume, et par un conteneur
+    # d'initialisation qui depose le code du plugin sur le volume.
+    extraVolumes:
+      - name: directory-mu-plugin
+        configMap:
+          name: wordpress-directory
+      - name: directory-oidc-secret
+        secret:
+          secretName: ${application}-${tenant}-oidc-client-secret
+          optional: true
+
+    extraVolumeMounts:
+      # Le repertoire mu-plugins n'existe pas sur le volume : le monter en
+      # entier ne masque donc rien, et la ConfigMap s'y rafraichit d'elle-meme,
+      # ce qu'un montage fichier par fichier (subPath) ne ferait pas.
+      - name: directory-mu-plugin
+        mountPath: /bitnami/wordpress/wp-content/mu-plugins
+        readOnly: true
+      - name: directory-oidc-secret
+        mountPath: /secrets/oidc
+        readOnly: true
+
+    initContainers:
+      # Depose le plugin sur le volume, a version figee. Rejoue a chaque
+      # demarrage, mais ne telecharge que si le compte n'y est pas : le
+      # demarrage ne depend donc pas de la disponibilite de wordpress.org une
+      # fois le plugin en place.
+      - name: install-oidc-plugin
+        image: docker.io/bitnami/wordpress:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 1001
+          runAsNonRoot: true
+        command:
+          - /bin/bash
+          - -ec
+          - |
+            if [ "${wordpress_directory:=0}" != "1" ]; then
+              echo "Annuaire non active sur ce cluster, plugin non installe."
+              exit 0
+            fi
+
+            VERSION="3.11.3"
+            RACINE="/bitnami/wordpress/wp-content/plugins"
+            CIBLE="$RACINE/daggerhart-openid-connect-generic"
+            MARQUE="$CIBLE/.version-alter-it"
+
+            if [ "$(cat "$MARQUE" 2>/dev/null)" = "$VERSION" ]; then
+              echo "Plugin OIDC deja en version $VERSION."
+              exit 0
+            fi
+
+            echo "Installation du plugin OIDC $VERSION"
+            mkdir -p "$RACINE"
+            curl -sSfL --retry 3 --max-time 60 \
+              -o /tmp/oidc.zip \
+              "https://downloads.wordpress.org/plugin/daggerhart-openid-connect-generic.$VERSION.zip"
+
+            # unzip est absent de l'image ; PHP sait le faire.
+            rm -rf "$CIBLE"
+            php -r '
+              $zip = new ZipArchive();
+              if ( true !== $zip->open( "/tmp/oidc.zip" ) ) {
+                  fwrite( STDERR, "archive illisible\n" );
+                  exit( 1 );
+              }
+              $zip->extractTo( getenv( "RACINE" ) );
+              $zip->close();
+            '
+            rm -f /tmp/oidc.zip
+
+            echo "$VERSION" > "$MARQUE"
+            echo "Plugin OIDC installe."
+        env:
+          - name: RACINE
+            value: /bitnami/wordpress/wp-content/plugins
+        volumeMounts:
+          - name: wordpress-data
+            mountPath: /bitnami/wordpress
+            subPath: wordpress

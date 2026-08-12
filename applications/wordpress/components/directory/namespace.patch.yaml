@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wordpress
+  labels:
+    # Autorise reflector a recopier ici le secret du client OIDC, qui vit dans
+    # le namespace d'Authelia. Le label est pose par ce composant plutot que sur
+    # le namespace commun : les WordPress des autres tenants n'ont pas de client
+    # declare, et ne doivent donc rien attendre.
+    reflector/${application}-${tenant}-oidc-client-secret: "true"

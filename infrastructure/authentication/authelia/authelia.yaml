@@ -289,6 +289,22 @@ spec:
                     - 'group:le-portail-grist-writers'
                     - 'group:le-portail-grist-admins'
                     - 'group:le-portail-admins'
+            # Un seul groupe par site, sans le 'le-portail-admins' transverse que
+            # connaissent les autres applications : quiconque franchit Authelia
+            # ici devient administrateur du site, la porte est donc etroite a
+            # dessein.
+            wordpress-site-le-portail:
+              default_policy: 'deny'
+              rules:
+                - policy: 'one_factor'
+                  subject:
+                    - 'group:le-portail-wordpress-site-admins'
+            wordpress-epilibres-le-portail:
+              default_policy: 'deny'
+              rules:
+                - policy: 'one_factor'
+                  subject:
+                    - 'group:le-portail-wordpress-epilibres-admins'
 
           # Clients
           clients:
@@ -369,6 +385,52 @@ spec:
               # client_id et client_secret dans le corps du POST au token
               # endpoint (http_build_query), donc l'authentification Basic
               # échouerait en 401 au moment de l'échange du code.
+              token_endpoint_auth_method: 'client_secret_post'
+              consent_mode: 'implicit'
+
+            - client_id: 'wordpress-site-le-portail'
+              client_name: 'WordPress site - Ecolieu du Portail'
+              client_secret:
+                value: "$pbkdf2-sha512$310000$Iv83vfnag01nbzYY66t4LA$oEKyPTxzJREtAMKRmZ0KbOfBJHKLohhk759nO7qeuDj30tdcWv9YE4NHK03WbaGpTMynRccjUeBvkZOyqDB30Q"
+              public: false
+              authorization_policy: '${wordpress_site_authorization_policy:=one_factor}'
+              redirect_uris:
+                - 'https://www.${domain_prefix}leportail.org/wp-admin/admin-ajax.php?action=openid-connect-authorize'
+              scopes:
+                - 'openid'
+                - 'email'
+                - 'profile'
+                # Le groupe est verifie une seconde fois cote WordPress, dans le
+                # mu-plugin : une politique mal reglee ici donnerait sinon les
+                # pleins pouvoirs a tout l'annuaire.
+                - 'groups'
+              userinfo_signed_response_alg: 'none'
+              # client_secret_post : le plugin place client_id et client_secret
+              # dans le corps du POST au token endpoint.
+              token_endpoint_auth_method: 'client_secret_post'
+              consent_mode: 'implicit'
+
+            - client_id: 'wordpress-epilibres-le-portail'
+              client_name: 'WordPress epilibres - Ecolieu du Portail'
+              client_secret:
+                value: "$pbkdf2-sha512$310000$Xx9JMgJxu87ReqLL4SFdmQ$7n/zwXlpfiWgKpOicFovPv0PP/F44WXOBEp4UwRrwdoz2TXg0gYKivr/jSaERhUNp/2D/eawDD06xMBxWCf7IQ"
+              public: false
+              authorization_policy: '${wordpress_epilibres_authorization_policy:=one_factor}'
+              redirect_uris:
+                - 'https://epilibres.${domain_prefix}leportail.org/wp-admin/admin-ajax.php?action=openid-connect-authorize'
+                - 'https://epi-libres.${domain_prefix}leportail.org/wp-admin/admin-ajax.php?action=openid-connect-authorize'
+                - 'https://epis-libres.${domain_prefix}leportail.org/wp-admin/admin-ajax.php?action=openid-connect-authorize'
+              scopes:
+                - 'openid'
+                - 'email'
+                - 'profile'
+                # Le groupe est verifie une seconde fois cote WordPress, dans le
+                # mu-plugin : une politique mal reglee ici donnerait sinon les
+                # pleins pouvoirs a tout l'annuaire.
+                - 'groups'
+              userinfo_signed_response_alg: 'none'
+              # client_secret_post : le plugin place client_id et client_secret
+              # dans le corps du POST au token endpoint.
               token_endpoint_auth_method: 'client_secret_post'
               consent_mode: 'implicit'
 

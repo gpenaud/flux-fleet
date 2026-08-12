@@ -44,7 +44,8 @@ spec:
       limits:
         cpu: 1500m
         memory: 3Gi
-    initContainers: []
+    # initContainers n'est plus fige a la liste vide : c'est deja le defaut du
+    # chart, et le champ ecrasait celui qu'ajoute le composant « directory ».
     volumePermissions:
       enabled: false
       resourcesPreset: "none"

@@ -13,6 +13,12 @@ resources:
   # workflows
   - ../../../../../../workflows/restore/applications/wordpress
 
+# Branche le site sur l'annuaire : bouton de connexion unique a cote du
+# formulaire, qui reste le recours. Inerte tant que wordpress_directory ne vaut
+# pas 1 sur le cluster.
+components:
+  - ../../../../../../applications/wordpress/components/directory
+
 patches:
   - target:
       kind: HelmRelease
