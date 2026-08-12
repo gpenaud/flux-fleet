@@ -65,6 +65,13 @@ data:
   # locaux — le recours entier, sans porte de secours d'aucune sorte.
   wordpress_login_mode: "sso"
   nextcloud_login_mode: "sso"
+  # Version d'alterconso déployée ici, en avance sur la production qui reste au
+  # défaut du values.yaml tant que celle-ci n'est pas éprouvée.
+  #
+  # 80adf37 : fiche produit (stock et catégorie enfin enregistrés, saisie
+  # unitaire), quantité et prix unitaires sur toutes les vignettes, et les
+  # quatre niveaux de droits d'administration.
+  alterconso_image_tag: "80adf37"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12

@@ -8,11 +8,17 @@ spec:
     fullnameOverride: ""
     image:
       repository: ghcr.io/gpenaud/alterconso
-      # Quoté impérativement : un sha court tout en chiffres est sinon lu comme
-      # un nombre par YAML, et ressort en notation scientifique (4.254482e+06),
-      # donnant une image introuvable. Les sha contenant une lettre masquaient
-      # le piège jusqu'ici.
-      tag: "4254482"
+      # Piloté par cluster : ce fichier sert les deux, et sans variable une
+      # nouvelle version partirait en production en même temps qu'en staging.
+      # La valeur par défaut est celle en place en production ; c'est
+      # `alterconso_image_tag` dans cluster-vars qu'on pose pour la devancer.
+      #
+      # Le défaut porte le préfixe « sha- » et ce n'est pas cosmétique : les
+      # guillemets ne survivent pas au rendu Kustomize, qui les retire autour
+      # d'un ${...}. Un sha tout en chiffres ressortirait donc en nombre après
+      # substitution, puis en notation scientifique (4.254482e+06), désignant
+      # une image introuvable. sha-4254482 est le même digest que 4254482.
+      tag: "${alterconso_image_tag:=sha-4254482}"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
