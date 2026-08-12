@@ -62,6 +62,12 @@ data:
   # bind LDAP et les comptes locaux du meme coup.
   wordpress_login_mode: "sso"
   nextcloud_login_mode: "sso"
+  # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
+  #
+  # 80adf37 : fiche produit (stock et categorie enfin enregistres, saisie
+  # unitaire), quantite et prix unitaires sur toutes les vignettes, et les
+  # quatre niveaux de droits d'administration.
+  alterconso_image_tag: "80adf37"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
