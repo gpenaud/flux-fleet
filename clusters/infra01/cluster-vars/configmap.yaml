@@ -23,8 +23,10 @@ data:
   # Restreint l'entrée de Grist aux membres des groupes. Ils reprennent
   # exactement les accès en place, donc personne ne perd le sien.
   grist_authorization_policy: "grist-le-portail"
-  # grist_sync_suspend reste absent : la synchronisation des rôles Grist exige
-  # une clé d'API, qui n'existe pas encore.
+  # La clé d'API existe désormais, posée sur le compte propriétaire de
+  # l'instance : la synchronisation des rôles Grist peut tourner. Un passage à
+  # blanc l'a précédée sur les deux clusters, delta vide.
+  grist_sync_suspend: "false"
   #
   # Branche Nextcloud sur l'annuaire : comptes par LDAP, SSO par OIDC. Le point
   # qu'il fallait éprouver sur infra02 est le mapping d'identifiant — les deux
