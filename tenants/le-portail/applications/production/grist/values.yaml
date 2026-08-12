@@ -4,6 +4,19 @@ metadata:
   name: ${tenant}-grist
 spec:
   values:
+    # Fait resoudre le nom d'Authelia vers le service ClusterIP de Traefik, au
+    # lieu de l'adresse publique du noeud : la requete ne sort plus du cluster
+    # pour y revenir. Le nom, le certificat et l'issuer ne changent pas, seul le
+    # trajet — de 0,6 a 16 secondes de poignee de main TLS mesurees par
+    # l'exterieur, contre une vingtaine de millisecondes par l'interieur.
+    #
+    # Sans effet sur le navigateur, qui resout par le DNS public.
+    defaultPodOptions:
+      hostAliases:
+        - ip: ${internal_service_ip}
+          hostnames:
+            - auth.${domain}
+
     controllers:
       grist:
         type: deployment

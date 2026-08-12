@@ -10,6 +10,20 @@ spec:
     # premier demarrage, quand wp-config.php n'existe pas encore. Le SSO passe
     # donc par un « must-use plugin » monte en volume, et par un conteneur
     # d'initialisation qui depose le code du plugin sur le volume.
+    # Fait resoudre le nom d'Authelia vers le service ClusterIP de Traefik, au
+    # lieu de l'adresse publique du noeud. Le nom, le certificat et l'issuer ne
+    # changent pas — seul le trajet : la requete ne sort plus du cluster pour y
+    # revenir, ce qui coutait de 0,6 a 16 secondes de poignee de main TLS, contre
+    # une vingtaine de millisecondes par l'interieur. C'est ce qui provoquait le
+    # « cURL error 28 » du plugin.
+    #
+    # Sans effet sur le navigateur, qui resout par le DNS public : seuls les
+    # appels de serveur a serveur empruntent ce chemin.
+    hostAliases:
+      - ip: ${internal_service_ip}
+        hostnames:
+          - auth.${domain}
+
     extraVolumes:
       - name: directory-mu-plugin
         configMap:

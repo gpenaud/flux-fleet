@@ -145,3 +145,28 @@ spec:
           echo "Annuaire et SSO configures (mode de connexion : $MODE)."
     ingress:
       enabled: false
+
+  # Fait resoudre le nom d'Authelia vers le service ClusterIP de Traefik, au lieu
+  # de l'adresse publique du noeud : la requete ne sort plus du cluster pour y
+  # revenir. Le nom, le certificat et l'issuer ne changent pas, seul le trajet —
+  # de 0,6 a 16 secondes de poignee de main TLS mesurees par l'exterieur, contre
+  # une vingtaine de millisecondes par l'interieur.
+  #
+  # Sans effet sur le navigateur, qui resout par le DNS public : seuls les appels
+  # de serveur a serveur, dont l'echange du code contre le jeton, en profitent.
+  #
+  # Par un postRenderer, et non par les values : ce chart-ci est le seul des
+  # quatre a ne pas exposer hostAliases.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: nextcloud
+            patch: |
+              - op: add
+                path: /spec/template/spec/hostAliases
+                value:
+                  - ip: ${internal_service_ip}
+                    hostnames:
+                      - auth.${domain}
