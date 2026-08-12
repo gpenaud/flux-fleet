@@ -11,6 +11,16 @@ metadata:
 spec:
   entryPoints:
     - websecure
+    # « internal » sert la MEME route, sous le meme nom et le meme certificat,
+    # sur le service ClusterIP traefik-internal. Les applications qui appellent
+    # Authelia de serveur a serveur y accedent alors sans sortir du cluster :
+    # la requete partait jusqu'ici vers l'adresse publique du noeud et y
+    # revenait, ce qui coutait de 0,6 a 2,8 secondes de poignee de main TLS,
+    # contre 16 millisecondes par l'interieur.
+    #
+    # Le nom ne change pas, et c'est essentiel : il est l'issuer OIDC, inscrit
+    # dans les jetons et verifie par les clients.
+    - internal
   routes:
     - match: Host(`auth.${domain}`)
       kind: Rule
