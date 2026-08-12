@@ -881,7 +881,44 @@ data:
               },
               "unit": "percent"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Libre"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "decbytes"
+                  },
+                  {
+                    "id": "max",
+                    "value": 250000000000
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": 0
+                        },
+                        {
+                          "color": "orange",
+                          "value": 20000000000
+                        },
+                        {
+                          "color": "green",
+                          "value": 50000000000
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 6,
@@ -909,11 +946,16 @@ data:
           "targets": [
             {
               "expr": "100 * (1 - sum(node_filesystem_avail_bytes{mountpoint=\"/var\",fstype!=\"tmpfs\"}) / sum(node_filesystem_size_bytes{mountpoint=\"/var\",fstype!=\"tmpfs\"}))",
-              "legendFormat": "Disque /",
+              "legendFormat": "Utilisé",
               "refId": "A"
+            },
+            {
+              "expr": "sum(node_filesystem_avail_bytes{mountpoint=\"/var\",fstype!=\"tmpfs\"})",
+              "legendFormat": "Libre",
+              "refId": "B"
             }
           ],
-          "description": "Talos n'expose aucun point de montage / : le rootfs est en lecture seule et toutes les données vivent sur /var, seul volume réel du nœud.",
+          "description": "Talos n'expose aucun point de montage / : le rootfs est en lecture seule et toutes les données vivent sur /var, seul volume réel du nœud. La seconde jauge donne l'espace libre en Go ; son échelle va jusqu'à 250 Go pour couvrir les deux clusters (212 Go sur infra01, 241 sur infra02), la valeur affichée reste exacte.",
           "title": "Disque cluster (/var)",
           "type": "gauge"
         },
