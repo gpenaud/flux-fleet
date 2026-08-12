@@ -128,6 +128,20 @@ spec:
             --mapping-display-name=name \
             --mapping-email=email
 
-          echo "Annuaire et SSO configures."
+          # « mixed » : le formulaire de connexion s'affiche a cote du bouton
+          # Authelia. « sso » : /login redirige d'emblee vers Authelia, ce que
+          # Nextcloud ne fait que s'il n'existe qu'un seul fournisseur.
+          #
+          # La porte de secours est native et n'a pas a etre amenagee :
+          # /login?direct=1 ramene le formulaire, donc le compte local de
+          # depannage reste joignable si l'annuaire tombe.
+          MODE="${nextcloud_login_mode:=mixed}"
+          if [ "$MODE" = "sso" ]; then
+            php occ config:app:set user_oidc allow_multiple_user_backends --value="0"
+          else
+            php occ config:app:set user_oidc allow_multiple_user_backends --value="1"
+          fi
+
+          echo "Annuaire et SSO configures (mode de connexion : $MODE)."
     ingress:
       enabled: false

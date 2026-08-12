@@ -58,9 +58,18 @@ data:
     define( 'OIDC_ENDPOINT_TOKEN_URL', $alterit_issuer . '/api/oidc/token' );
     define( 'OIDC_ENDPOINT_USERINFO_URL', $alterit_issuer . '/api/oidc/userinfo' );
     define( 'OIDC_ENDPOINT_JWKS_URL', $alterit_issuer . '/jwks.json' );
-    // « button » et non « auto » : le formulaire de wp-login.php reste affiche
-    // a cote du bouton, et demeure le recours si Authelia ou l'annuaire tombe.
-    define( 'OIDC_LOGIN_TYPE', 'button' );
+
+    // « mixed » : le formulaire de wp-login.php s'affiche a cote du bouton de
+    // connexion unique. « sso » : wp-login.php redirige d'emblee vers Authelia.
+    //
+    // Meme en « sso », la porte de secours reste ouverte : « ?connexion-locale »
+    // sur wp-login.php ramene le formulaire. Sans quoi une panne de l'annuaire
+    // fermerait le site a tout le monde, y compris au compte d'administration
+    // local — c'est deja arrive sur infra01.
+    $alterit_mode = '${wordpress_login_mode:=mixed}';
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $alterit_secours = isset( $_GET['connexion-locale'] );
+    define( 'OIDC_LOGIN_TYPE', ( 'sso' === $alterit_mode && ! $alterit_secours ) ? 'auto' : 'button' );
     define( 'OIDC_CREATE_IF_DOES_NOT_EXIST', 1 );
     // Rattache par courriel un compte deja present plutot que d'en creer un
     // second, qui laisserait l'interesse devant un site vide.
@@ -83,6 +92,19 @@ data:
                 $plugins[] = $alterit_plugin;
             }
             return $plugins;
+        }
+    );
+
+    // Le delai d'attente par defaut du plugin est de 5 secondes, et l'appel au
+    // point de terminaison de jeton en demande pres de 4 : la requete sort du
+    // cluster par l'adresse publique et y revient, negociation TLS comprise.
+    // La connexion echouait donc par intermittence, sur un « cURL error 28 »
+    // que rien ne rattachait a la cause.
+    add_filter(
+        'openid-connect-generic-settings',
+        function ( $settings ) {
+            $settings->http_request_timeout = 30;
+            return $settings;
         }
     );
 

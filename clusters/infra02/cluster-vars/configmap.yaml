@@ -46,6 +46,22 @@ data:
   wordpress_directory: "1"
   wordpress_site_authorization_policy: "wordpress-site-le-portail"
   wordpress_epilibres_authorization_policy: "wordpress-epilibres-le-portail"
+  # Mode de connexion, commun a toutes les applications qui savent le distinguer.
+  #
+  #   mixed  formulaire local ET bouton de connexion unique (defaut)
+  #   sso    redirection d'emblee vers Authelia
+  #
+  # Meme en « sso », le formulaire reste joignable : « ?connexion-locale » sur
+  # wp-login.php, « /login?direct=1 » sur Nextcloud. Sans cela une panne de
+  # l'annuaire fermerait tout, y compris aux comptes de depannage.
+  #
+  # Grist n'apparait pas ici : configure en OIDC, il n'a aucun formulaire local,
+  # il est donc deja en « sso » sans qu'on puisse en decider. Dolibarr non plus :
+  # sa redirection automatique exige que 'openid_connect' soit le SEUL mode de
+  # dolibarr_auth, ce qui supprimerait du meme coup le bind LDAP et les comptes
+  # locaux — le recours entier, sans porte de secours d'aucune sorte.
+  wordpress_login_mode: "mixed"
+  nextcloud_login_mode: "mixed"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 5.161.32.22
   internal_service_cidr: 10.96.0.0/12
