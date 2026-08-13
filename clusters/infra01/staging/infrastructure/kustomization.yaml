@@ -1,0 +1,8 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Liste partagée par les deux environnements : c'est elle qu'on modifie en
+  # ajoutant une brique, et la dupliquer ferait diverger staging de production
+  # au premier oubli.
+  - ../../_common/infrastructure
