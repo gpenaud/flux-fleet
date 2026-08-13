@@ -6,7 +6,7 @@ metadata:
   namespace: controller-dns
 spec:
   endpoints:
-    - dnsName: ${cluster}.${domain}
+    - dnsName: ${domain_prefix}${project}.${domain}
       recordType: A
       targets:
         - "${cluster_endpoint_ip}"

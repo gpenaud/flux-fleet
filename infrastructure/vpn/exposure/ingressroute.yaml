@@ -5,18 +5,18 @@ metadata:
   name: headscale
   namespace: controller-vpn
   annotations:
-      external-dns.alpha.kubernetes.io/hostname: vpn.${cluster}.${domain}
-      external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
+      external-dns.alpha.kubernetes.io/hostname: vpn.${domain_prefix}${project}.${domain}
+      external-dns.alpha.kubernetes.io/target: ${domain_prefix}${project}.${domain}
       external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`vpn.${cluster}.${domain}`)
+    - match: Host(`vpn.${domain_prefix}${project}.${domain}`)
       kind: Rule
       services:
         - name: headscale
           port: 8080
           scheme: http
   tls:
-    secretName: wildcard.${cluster}.${domain}.tls
+    secretName: wildcard.${domain_prefix}${project}.${domain}.tls

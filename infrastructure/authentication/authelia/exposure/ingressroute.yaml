@@ -5,17 +5,17 @@ metadata:
   name: authelia-${cluster}-${domain}
   namespace: controller-authentication
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: auth.${cluster}.${domain}
-    external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/hostname: auth.${domain_prefix}${project}.${domain}
+    external-dns.alpha.kubernetes.io/target: ${domain_prefix}${project}.${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`auth.${cluster}.${domain}`)
+    - match: Host(`auth.${domain_prefix}${project}.${domain}`)
       kind: Rule
       services:
         - name: authelia
           port: 80
   tls:
-    secretName: wildcard.${cluster}.${domain}.tls
+    secretName: wildcard.${domain_prefix}${project}.${domain}.tls

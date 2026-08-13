@@ -5,14 +5,14 @@ metadata:
   name: lldap-ui
   namespace: controller-directory
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: directory.internal.${cluster}.${domain}
-    external-dns.alpha.kubernetes.io/target: internal.${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/hostname: directory.internal.${domain_prefix}${project}.${domain}
+    external-dns.alpha.kubernetes.io/target: internal.${domain_prefix}${project}.${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - internal
   routes:
-    - match: Host(`directory.internal.${cluster}.${domain}`)
+    - match: Host(`directory.internal.${domain_prefix}${project}.${domain}`)
       kind: Rule
       # middlewares:
       #   - name: tailnet-only
@@ -21,4 +21,4 @@ spec:
         - name: lldap
           port: 17170
   tls:
-    secretName: wildcard.${cluster}.${domain}.tls
+    secretName: wildcard.${domain_prefix}${project}.${domain}.tls

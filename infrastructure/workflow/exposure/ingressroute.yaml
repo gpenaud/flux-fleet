@@ -5,17 +5,17 @@ metadata:
   name: workflow
   namespace: controller-workflow
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: workflow.${cluster}.${domain}
-    external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/hostname: workflow.${domain_prefix}${project}.${domain}
+    external-dns.alpha.kubernetes.io/target: ${domain_prefix}${project}.${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`workflow.${cluster}.${domain}`)
+    - match: Host(`workflow.${domain_prefix}${project}.${domain}`)
       kind: Rule
       services:
         - name: argo-workflows-server
           port: 2746
   tls:
-    secretName: wildcard.${cluster}.${domain}.tls
+    secretName: wildcard.${domain_prefix}${project}.${domain}.tls

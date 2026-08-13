@@ -59,8 +59,8 @@ spec:
                   name: tailscale-authkey
                   key: TS_AUTHKEY
             - name: TS_EXTRA_ARGS
-              # value: "--login-server=https://vpn.${cluster}.${domain} --advertise-tags=tag:k8s-router"
-              value: "--login-server=https://vpn.${cluster}.${domain}"
+              # value: "--login-server=https://vpn.${domain_prefix}${project}.${domain} --advertise-tags=tag:k8s-router"
+              value: "--login-server=https://vpn.${domain_prefix}${project}.${domain}"
             - name: TS_ROUTES
               value: "${internal_service_cidr}"
             - name: TS_USERSPACE

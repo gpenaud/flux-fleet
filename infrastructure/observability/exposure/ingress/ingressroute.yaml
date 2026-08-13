@@ -5,8 +5,8 @@ metadata:
   name: monitoring
   namespace: controller-observability
   annotations:
-      external-dns.alpha.kubernetes.io/hostname: monitoring.internal.${cluster}.${domain}
-      external-dns.alpha.kubernetes.io/target: internal.${cluster}.${domain}
+      external-dns.alpha.kubernetes.io/hostname: monitoring.internal.${domain_prefix}${project}.${domain}
+      external-dns.alpha.kubernetes.io/target: internal.${domain_prefix}${project}.${domain}
       external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
@@ -14,7 +14,7 @@ spec:
   
   routes:
     # === Route 1 : Racine → redirect vers /grafana ===
-    - match: Host(`monitoring.internal.${cluster}.${domain}`) && Path(`/`)
+    - match: Host(`monitoring.internal.${domain_prefix}${project}.${domain}`) && Path(`/`)
       kind: Rule
       middlewares:
         - name: monitoring-redirect-root
@@ -26,7 +26,7 @@ spec:
           port: 80
     
     # === Route 2 : Grafana ===
-    - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/grafana`)
+    - match: Host(`monitoring.internal.${domain_prefix}${project}.${domain}`) && PathPrefix(`/grafana`)
       kind: Rule
       services:
         - name: grafana
@@ -34,25 +34,25 @@ spec:
       # Pas de middleware d'auth : Grafana gère sa propre login
     
     # === Route 3 : Prometheus ===
-    - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/prometheus`)
+    - match: Host(`monitoring.internal.${domain_prefix}${project}.${domain}`) && PathPrefix(`/prometheus`)
       kind: Rule
       services:
         - name: prometheus-operated
           port: 9090
     
     # === Route 4 : Alertmanager ===
-    - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/alertmanager`)
+    - match: Host(`monitoring.internal.${domain_prefix}${project}.${domain}`) && PathPrefix(`/alertmanager`)
       kind: Rule
       services:
         - name: alertmanager-operated
           port: 9093
 
       # === Route 5 : Alloy ===
-    - match: Host(`monitoring.internal.${cluster}.${domain}`) && PathPrefix(`/alloy`)
+    - match: Host(`monitoring.internal.${domain_prefix}${project}.${domain}`) && PathPrefix(`/alloy`)
       kind: Rule
       services:
         - name: alloy
           port: 12345
 
   tls:
-    secretName: monitoring.internal.${cluster}.${domain}.tls
+    secretName: monitoring.internal.${domain_prefix}${project}.${domain}.tls

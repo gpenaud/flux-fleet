@@ -2,10 +2,10 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wildcard.${cluster}.${domain}
+  name: wildcard.${domain_prefix}${project}.${domain}
   namespace: controller-certificate
 spec:
-  secretName: wildcard.${cluster}.${domain}.tls
+  secretName: wildcard.${domain_prefix}${project}.${domain}.tls
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
@@ -15,8 +15,8 @@ spec:
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: "${cluster}.${domain}"
+  commonName: "${domain_prefix}${project}.${domain}"
   dnsNames:
-    - "${cluster}.${domain}"
-    - "*.${cluster}.${domain}"
-    - "*.internal.${cluster}.${domain}"
+    - "${domain_prefix}${project}.${domain}"
+    - "*.${domain_prefix}${project}.${domain}"
+    - "*.internal.${domain_prefix}${project}.${domain}"

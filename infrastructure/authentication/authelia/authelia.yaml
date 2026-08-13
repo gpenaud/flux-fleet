@@ -163,7 +163,7 @@ spec:
               - 'group:le-portail-admins'
               - 'group:le-portail-users'
           # Authelia lui-même : bypass (sinon boucle infinie de login)
-          - domain: 'auth.${cluster}.${domain}'
+          - domain: 'auth.${domain_prefix}${project}.${domain}'
             policy: 'bypass'
 
       # --- Session
@@ -188,7 +188,12 @@ spec:
         # sur staging, les hôtes préfixés n'étaient couverts par aucune, et la
         # découverte OIDC répondait 500.
         cookies:
-          - subdomain: 'auth.${cluster}'
+          # Le domaine de service porte le préfixe d'environnement comme les
+          # autres : « auth.staging.infra01… » en staging. Écrit avec ${cluster}
+          # il aurait désigné l'instance et non le projet, et aucune entrée
+          # n'aurait couvert l'hôte réellement servi — Authelia répond alors 500
+          # sur la découverte OIDC, sans dire pourquoi.
+          - subdomain: 'auth.${domain_prefix}${project}'
             domain: '${domain}'
           - subdomain: 'auth'
             domain: '${domain_prefix}leportail.org'
@@ -238,7 +243,7 @@ spec:
           address: 'submissions://smtp.gmail.com:465'
           timeout: '10 seconds'
           sender: 'Authelia <ops.gpenaud@gmail.com>'
-          identifier: 'auth.${cluster}.${domain}'
+          identifier: 'auth.${domain_prefix}${project}.${domain}'
           subject: '[Authelia] {title}'
           startup_check_address: 'ops.gpenaud@gmail.com'
           disable_html_emails: false

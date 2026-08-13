@@ -6,7 +6,7 @@ metadata:
   namespace: controller-dns
 spec:
   endpoints:
-    - dnsName: internal.${cluster}.${domain}
+    - dnsName: internal.${domain_prefix}${project}.${domain}
       recordType: A
       targets:
         - ${internal_service_ip}

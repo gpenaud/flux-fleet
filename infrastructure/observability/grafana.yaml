@@ -50,8 +50,8 @@ spec:
 
     grafana.ini:
       server:
-        domain: monitoring.${cluster}.${domain}
-        root_url: https://monitoring.${cluster}.${domain}/grafana
+        domain: monitoring.${domain_prefix}${project}.${domain}
+        root_url: https://monitoring.${domain_prefix}${project}.${domain}/grafana
         serve_from_sub_path: true
       analytics:
         check_for_updates: false

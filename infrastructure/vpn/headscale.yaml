@@ -43,7 +43,7 @@ spec:
     # Configuration Headscale via variables d'environnement
     # cf. https://github.com/juanfont/headscale/blob/main/config-example.yaml
     env:
-      HEADSCALE_SERVER_URL: "https://vpn.${cluster}.${domain}"
+      HEADSCALE_SERVER_URL: "https://vpn.${domain_prefix}${project}.${domain}"
       HEADSCALE_LISTEN_ADDR: "0.0.0.0:8080"
       HEADSCALE_METRICS_LISTEN_ADDR: "0.0.0.0:9090"
       HEADSCALE_GRPC_LISTEN_ADDR: "127.0.0.1:50443"

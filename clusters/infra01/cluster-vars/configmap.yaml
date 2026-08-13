@@ -7,6 +7,16 @@ metadata:
 data:
   owner: alter-it
   cluster: infra01
+  # project : le groupe de clients hébergé, stable d'un environnement à l'autre.
+  # C'est lui qui nomme les domaines, précédé de domain_prefix —
+  #   production : vpn.internal.infra01.alter-it.eu
+  #   staging    : vpn.internal.staging.infra01.alter-it.eu
+  #
+  # cluster, juste au-dessus, désigne l'instance réellement déployée et diffère
+  # donc entre les deux. Il nomme les ressources qui ne doivent surtout pas se
+  # confondre : buckets de sauvegarde restic, blocs Loki et Mimir. Les mélanger
+  # ferait écrire staging et production dans le même dépôt.
+  project: infra01
   s3_region: sbg 
   domain: alter-it.eu
   domain_prefix: "" # only for applications, not used in cluster configuration, can be empty string if not needed
