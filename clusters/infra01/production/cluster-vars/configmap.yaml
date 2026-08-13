@@ -78,10 +78,11 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # 80adf37 : fiche produit (stock et categorie enfin enregistres, saisie
-  # unitaire), quantite et prix unitaires sur toutes les vignettes, et les
-  # quatre niveaux de droits d'administration.
-  alterconso_image_tag: "80adf37"
+  # a7129b2 : quantites decrites avec le conditionnement du produit (« 3 x
+  # 500 g » et non « 3 g »), liste d'emargement sans colonne producteur ni
+  # adresse email, courrier aux responsables restreint au responsable et au
+  # super-administrateur, et rappel aux adherents sans telephone.
+  alterconso_image_tag: "a7129b2"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
