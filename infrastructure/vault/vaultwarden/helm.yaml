@@ -103,11 +103,15 @@ spec:
       security: "force_tls"
       from: "ops.gpenaud@gmail.com"
       fromName: "Coffre alter-it"
-      username:
-        value: "ops.gpenaud@gmail.com"
-      password:
-        existingSecretKey: "password.txt"
+      # Les deux clés sont lues dans le secret : poser username.value ne suffit
+      # pas — dès qu'existingSecret est défini, le chart y cherche AUSSI le nom
+      # d'utilisateur, et le pod reste en CreateContainerConfigError sur une clé
+      # introuvable.
       existingSecret: "authelia-smtp"
+      username:
+        existingSecretKey: "SMTP_USERNAME"
+      password:
+        existingSecretKey: "SMTP_PASSWORD"
 
     # ── Exécution sans privilège ──────────────────────────────────────────────
     #
