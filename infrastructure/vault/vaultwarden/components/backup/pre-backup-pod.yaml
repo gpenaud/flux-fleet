@@ -1,0 +1,63 @@
+---
+# Sauvegarde cohérente du coffre.
+#
+# Vaultwarden garde tout dans un unique SQLite : comptes, organisations, et les
+# entrées chiffrées elles-mêmes. Une copie au niveau fichier attraperait la base
+# en pleine transaction sans emporter le journal de rollback, qui vit à côté —
+# on restaurerait une base possiblement corrompue, ce qu'on ne découvrirait
+# qu'au moment de s'en servir.
+#
+# `.backup` utilise l'API de sauvegarde en ligne de SQLite : instantané
+# cohérent, sans arrêter le service.
+#
+# Pod séparé parce que l'image Vaultwarden n'embarque pas sqlite3.
+#
+# CE QUE LA SAUVEGARDE NE PROTÈGE PAS : les entrées sont chiffrées par le mot de
+# passe maître de chacun, que rien ici ne conserve. Un coffre restauré reste
+# inutilisable sans lui — la sauvegarde protège de la perte du serveur, pas de
+# l'oubli d'un mot de passe.
+apiVersion: k8up.io/v1
+kind: PreBackupPod
+metadata:
+  name: vaultwarden-prebackup
+spec:
+  backupCommand: sh -c 'sqlite3 /data/db.sqlite3 ".backup /tmp/vaultwarden-backup.sqlite3" && cat /tmp/vaultwarden-backup.sqlite3'
+  fileExtension: .sqlite3
+  pod:
+    spec:
+      # securityContext complet, comme pour lldap : ce namespace applique
+      # PodSecurity « restricted ». Sans ces quatre réglages le pod est refusé à
+      # l'admission et la sauvegarde échoue chaque nuit, en silence.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: vaultwarden-dump
+          image: keinos/sqlite3
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            # En écriture, pas en lecture seule : après un arrêt brutal, SQLite
+            # doit pouvoir rejouer le journal avant de lire. En lecture seule la
+            # sauvegarde échouerait juste au cas où elle compte le plus.
+            - name: vaultwarden-data
+              mountPath: /data
+      volumes:
+        - name: vaultwarden-data
+          persistentVolumeClaim:
+            # Le chart déploie un StatefulSet, dont le volumeClaimTemplate
+            # « vaultwarden-data » produit un PVC nommé
+            # <template>-<statefulset>-<ordinal>. Écrire « vaultwarden-data »
+            # tout court ne désignerait rien, et la sauvegarde échouerait chaque
+            # nuit sans que la vignette du tableau de bord ne s'en émeuve.
+            #
+            # L'ordinal 0 est le seul : replicas vaut 1, et ce chart ne sait pas
+            # faire autrement — plusieurs instances se disputeraient le SQLite.
+            claimName: vaultwarden-data-vaultwarden-0

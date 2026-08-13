@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: controller-vault
+  labels:
+    # « restricted », comme controller-directory : c'est le service le plus
+    # sensible de la fleet — un coffre de mots de passe, exposé sur Internet.
+    # Vaultwarden tourne sans privilège pourvu que /data lui appartienne, d'où
+    # le fsGroup posé dans la HelmRelease.
+    pod-security.kubernetes.io/enforce: restricted
+    # Identifiants restic et S3 de la sauvegarde, recopiés depuis
+    # controller-backup.
+    reflector/k8up-credentials: "true"

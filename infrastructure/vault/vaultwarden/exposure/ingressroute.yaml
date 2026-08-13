@@ -1,0 +1,96 @@
+---
+# Route canonique. C'est celle que connaît Vaultwarden — cf. `domain` dans la
+# HelmRelease — et la seule sur laquelle les passkeys, les liens d'invitation
+# et les Sends fonctionnent.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vaultwarden
+  namespace: controller-vault
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: vault.${domain}
+    external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`vault.${domain}`)
+      kind: Rule
+      services:
+        - name: vaultwarden
+          port: 80
+  tls:
+    secretName: wildcard.${domain}.tls
+
+---
+# Redirection permanente vers le domaine canonique.
+#
+# Chaque structure garde l'adresse qui lui parle — vault.leportail.org,
+# vault.fermedujointout.fr — sans que rien ne se dégrade : servir réellement
+# l'application sur ces domaines casserait les passkeys, dont l'origine dérive
+# du seul `domain` de Vaultwarden.
+#
+# « permanent », pour que navigateurs et extensions retiennent l'adresse
+# canonique et cessent de repasser par l'alias — c'est aussi ce qui évite
+# qu'une clé WebAuthn soit enregistrée depuis une origine qui ne marchera plus.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: vaultwarden-redirect-canonique
+  namespace: controller-vault
+spec:
+  redirectRegex:
+    regex: "^https?://[^/]+(/.*)?$"
+    replacement: "https://vault.${domain}$${1}"
+    permanent: true
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vaultwarden-alias-le-portail
+  namespace: controller-vault
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: vault.${domain_prefix}leportail.org
+    external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`vault.${domain_prefix}leportail.org`)
+      kind: Rule
+      middlewares:
+        - name: vaultwarden-redirect-canonique
+      services:
+        # Jamais atteint : le middleware redirige avant. Traefik exige
+        # néanmoins un service sur la route.
+        - name: vaultwarden
+          port: 80
+  tls:
+    secretName: wildcard.${domain_prefix}leportail.org.tls
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vaultwarden-alias-ferme-du-jointout
+  namespace: controller-vault
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: vault.${domain_prefix}fermedujointout.fr
+    external-dns.alpha.kubernetes.io/target: ${cluster}.${domain}
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`vault.${domain_prefix}fermedujointout.fr`)
+      kind: Rule
+      middlewares:
+        - name: vaultwarden-redirect-canonique
+      services:
+        - name: vaultwarden
+          port: 80
+  tls:
+    secretName: wildcard.${domain_prefix}fermedujointout.fr.tls

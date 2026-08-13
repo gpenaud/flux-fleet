@@ -1,0 +1,27 @@
+---
+# Contexte de sécurité du pod de sauvegarde k8up lui-même (le conteneur restic),
+# référencé par le Schedule via podConfigRef.
+#
+# Même raison que pour le PreBackupPod : `restricted` s'applique à TOUS les pods
+# du namespace, y compris ceux que k8up crée. Le pod-config.yaml de Grist se
+# contente de fsGroup/runAsUser parce que son namespace n'impose rien.
+apiVersion: k8up.io/v1
+kind: PodConfig
+metadata:
+  name: podconfig
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backup
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

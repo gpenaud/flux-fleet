@@ -1,0 +1,115 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: guerzon
+  namespace: controller-vault
+spec:
+  interval: 24h
+  url: https://guerzon.github.io/vaultwarden
+
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vaultwarden
+  namespace: controller-vault
+spec:
+  releaseName: vaultwarden
+  chart:
+    spec:
+      chart: vaultwarden
+      version: "0.46.0"
+      sourceRef:
+        kind: HelmRepository
+        name: guerzon
+        namespace: controller-vault
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      strategy: rollback
+
+  values:
+    # ── Domaine ───────────────────────────────────────────────────────────────
+    #
+    # UNE seule valeur, et tout en dérive : l'origine des passkeys et des clés
+    # WebAuthn, les liens d'invitation et de réinitialisation envoyés par
+    # courriel, les URL de partage (Sends). Les autres domaines ne sont donc pas
+    # des alias mais des redirections (cf. exposure/), sans quoi une clé
+    # enregistrée depuis l'un serait rejetée par l'autre.
+    #
+    # Volontairement SANS le nom du cluster, contrairement aux autres services
+    # d'infrastructure : « vault.infra01.alter-it.eu » lierait l'origine des
+    # passkeys au cluster, et un jour de bascule les invaliderait toutes.
+    domain: "https://vault.${domain}"
+
+    # SQLite, défaut du chart : le coffre ne dépend alors d'aucune base
+    # extérieure. C'est ce qu'on attend d'un gestionnaire de mots de passe — il
+    # doit rester consultable quand le reste est en panne, c'est même le moment
+    # où l'on en a le plus besoin.
+    database:
+      type: "default"
+
+    storage:
+      data:
+        name: "vaultwarden-data"
+        size: "5Gi"
+        class: ${storage_class}
+        path: "/data"
+        accessMode: "ReadWriteOnce"
+        # Le volume survit à la désinstallation de la release : perdre le coffre
+        # sur une fausse manœuvre Helm serait irréparable.
+        keepPvc: true
+
+    # ── Accès ─────────────────────────────────────────────────────────────────
+    #
+    # Inscriptions fermées, entrée par invitation. Sans cela le formulaire est
+    # ouvert à qui trouve l'adresse — et elle est publique.
+    #
+    # Une seule instance pour toutes les structures : la séparation passe par
+    # les organisations Vaultwarden, chacune avec ses propres propriétaires qui
+    # invitent et révoquent leurs membres. C'est le modèle natif du produit, et
+    # il évite à qui appartient à deux structures d'avoir deux coffres et deux
+    # mots de passe maîtres.
+    signupsAllowed: "false"
+    invitationsAllowed: "true"
+
+    adminToken:
+      existingSecret: vaultwarden-admin
+      existingSecretKey: ADMIN_TOKEN
+
+    timeZone: "Europe/Paris"
+
+    # ── Exécution sans privilège ──────────────────────────────────────────────
+    #
+    # Exigé par PodSecurity « restricted » sur ce namespace. fsGroup donne au
+    # processus la propriété du volume : sans lui, Vaultwarden ne peut pas créer
+    # sa base et redémarre en boucle.
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      seccompProfile:
+        type: RuntimeDefault
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+
+    # L'exposition passe par une IngressRoute Traefik (cf. exposure/), comme
+    # partout ailleurs dans la fleet.
+    ingress:
+      enabled: false
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 512Mi

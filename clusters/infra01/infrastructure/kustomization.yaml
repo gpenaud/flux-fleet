@@ -37,6 +37,9 @@ resources:
   # authentication (SSO) controller - authelia
   - ../../../infrastructure/authentication/authelia/sync.yaml
   - ../../../infrastructure/authentication/authelia/exposure/sync.yaml
+  # vault controller - vaultwarden
+  - ../../../infrastructure/vault/vaultwarden/sync.yaml
+  - ../../../infrastructure/vault/vaultwarden/exposure/sync.yaml
   # backup controller - k8up
   - ../../../infrastructure/backup/k8up/sync.yaml
   # tenant controller - capsule

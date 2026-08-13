@@ -1,0 +1,41 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-vault-vaultwarden
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infrastructure-storage
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./infrastructure/vault/vaultwarden
+  prune: true
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    # Vaultwarden n'appartient à aucun tenant : on lui réserve le pseudo-tenant
+    # « controller », comme lldap.
+    #
+    # ⚠ Ces deux valeurs ne nomment PAS le bucket. Le Schedule mutualisé le
+    # dérive de ${tenant}-${application}, ce qui donnerait ici
+    # « controller-vaultwarden » — un dépôt qui n'a jamais existé. Le dépôt réel porte
+    # le nom du namespace, « controller-vault », et components/backup/
+    # schedule.yaml l'écrit donc en toutes lettres.
+    #
+    # Les buckets sont créés par :
+    #   infrastructure-as-code/infrastructure/s3-buckets/locals.tf   (infra01)
+    #   infrastructure-as-code/infrastructure/infra02/s3.tf          (infra02)
+    substitute:
+      application: vaultwarden
+      tenant: controller
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
