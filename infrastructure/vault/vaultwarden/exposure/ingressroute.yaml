@@ -8,20 +8,20 @@ metadata:
   name: vaultwarden
   namespace: controller-vault
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: vault.${domain}
+    external-dns.alpha.kubernetes.io/hostname: vault.${domain_prefix}${project}.${domain}
     external-dns.alpha.kubernetes.io/target: ${domain_prefix}${project}.${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`vault.${domain}`)
+    - match: Host(`vault.${domain_prefix}${project}.${domain}`)
       kind: Rule
       services:
         - name: vaultwarden
           port: 80
   tls:
-    secretName: wildcard.${domain}.tls
+    secretName: wildcard.${domain_prefix}${project}.${domain}.tls
 
 ---
 # Redirection permanente vers le domaine canonique.
@@ -42,7 +42,7 @@ metadata:
 spec:
   redirectRegex:
     regex: "^https?://[^/]+(/.*)?$"
-    replacement: "https://vault.${domain}$${1}"
+    replacement: "https://vault.${domain_prefix}${project}.${domain}$${1}"
     permanent: true
 
 ---

@@ -42,10 +42,14 @@ spec:
     # des alias mais des redirections (cf. exposure/), sans quoi une clé
     # enregistrée depuis l'un serait rejetée par l'autre.
     #
-    # Volontairement SANS le nom du cluster, contrairement aux autres services
-    # d'infrastructure : « vault.infra01.alter-it.eu » lierait l'origine des
-    # passkeys au cluster, et un jour de bascule les invaliderait toutes.
-    domain: "https://vault.${domain}"
+    # Le motif des services d'infrastructure : ${project} et non ${cluster}.
+    # Le projet est stable d'un environnement à l'autre, donc l'origine des
+    # passkeys ne bouge pas si le cluster change de nom — c'était la crainte
+    # initiale, que la séparation project / cluster a levée.
+    #
+    # Le préfixe d'environnement est indispensable : sans lui, staging et
+    # production réclameraient le même « vault.alter-it.eu ».
+    domain: "https://vault.${domain_prefix}${project}.${domain}"
 
     # SQLite, défaut du chart : le coffre ne dépend alors d'aucune base
     # extérieure. C'est ce qu'on attend d'un gestionnaire de mots de passe — il

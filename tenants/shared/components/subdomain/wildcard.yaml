@@ -8,13 +8,10 @@ spec:
   secretName: wildcard.${domain}.tls
   secretTemplate:
     annotations:
-      # controller-vault s'ajoute aux namespaces du tenant : le coffre y sert
-      # ce domaine, en propre pour alter-it.eu et en redirection pour les
-      # autres. Sans le certificat sur place, la route ne peut pas s'etablir.
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "${tenant}-.*,controller-vault"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "${tenant}-.*"
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
-      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "${tenant}-.*,controller-vault"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "${tenant}-.*"
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
