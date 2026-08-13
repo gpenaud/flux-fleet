@@ -12,3 +12,5 @@ metadata:
     # Identifiants restic et S3 de la sauvegarde, recopiés depuis
     # controller-backup.
     reflector/k8up-credentials: "true"
+    # Relais SMTP partagé avec Authelia, pour les invitations.
+    reflector/authelia-smtp: "true"

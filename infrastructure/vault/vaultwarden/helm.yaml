@@ -88,6 +88,27 @@ spec:
 
     timeZone: "Europe/Paris"
 
+    # ── Courrier ──────────────────────────────────────────────────────────────
+    #
+    # Sans relais, rien de ce qui fait entrer quelqu'un ne fonctionne : les
+    # invitations ne partent pas, et les inscriptions étant fermées, personne ne
+    # peut créer de compte. C'est ce qui laissait l'instance vide et l'interface
+    # sans rien à proposer.
+    #
+    # Même relais qu'Authelia, dont le secret est diffusé jusqu'ici par
+    # reflector : un seul compte SMTP, donc une seule rotation le jour venu.
+    smtp:
+      host: "smtp.gmail.com"
+      port: 465
+      security: "force_tls"
+      from: "ops.gpenaud@gmail.com"
+      fromName: "Coffre alter-it"
+      username:
+        value: "ops.gpenaud@gmail.com"
+      password:
+        existingSecretKey: "password.txt"
+      existingSecret: "authelia-smtp"
+
     # ── Exécution sans privilège ──────────────────────────────────────────────
     #
     # Exigé par PodSecurity « restricted » sur ce namespace. fsGroup donne au
