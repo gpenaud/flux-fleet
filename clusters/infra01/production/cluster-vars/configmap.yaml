@@ -78,11 +78,11 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # c03a7d7 : dates de commande reglables catalogue par catalogue (ouverture,
-  # cloture, livraison) depuis la fiche catalogue, commande saisie pour un
-  # membre via le shop plutot que ligne a ligne, et plus de « stock depasse »
-  # sur un produit dont la quantite n'a jamais ete renseignee.
-  alterconso_image_tag: "c03a7d7"
+  # 3b9fd1b : participation des producteurs modifiable depuis la distribution
+  # (et retrait refuse tant que des commandes existent), une seule distribution
+  # par jour et par groupe, date d'une distribution deplacable, et acces direct
+  # a l'ecran des dates depuis les producteurs participants.
+  alterconso_image_tag: "3b9fd1b"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
