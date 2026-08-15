@@ -103,10 +103,22 @@ data:
     // La cause est traitee par ailleurs — un hostAliases fait desormais joindre
     // Authelia par l'interieur, en une vingtaine de millisecondes. Ce delai
     // reste une marge : il ne coute rien tant que rien ne traine.
+    // allow_internal_idp : contrepartie de ce meme hostAliases.
+    //
+    // Depuis sa version 3.11, le plugin appelle l'IdP par wp_safe_remote_post,
+    // qui refuse toute adresse de reseau prive — une protection contre les
+    // requetes forgees vers l'interieur. Or auth.leportail.org resout justement
+    // en 10.96.0.100 depuis les pods, et l'echange du code contre un jeton
+    // echouait sur « http_request_failed : L'URL fournie n'est pas valide »,
+    // juste apres une authentification pourtant reussie.
+    //
+    // Lever la protection ne rouvre rien ici : l'URL appelee ne vient d'aucune
+    // saisie, elle est fixee par les constantes OIDC_ENDPOINT_* ci-dessus.
     add_filter(
         'openid-connect-generic-settings',
         function ( $settings ) {
             $settings->http_request_timeout = 30;
+            $settings->allow_internal_idp = 1;
             return $settings;
         }
     );
