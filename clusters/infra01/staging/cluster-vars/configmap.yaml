@@ -78,11 +78,15 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # c2f2d54 : fleches de periode reparees sur l'accueil et les distributions
-  # (elles ne depassaient jamais la periode voisine), marqueur « date propre au
-  # catalogue » qui ne s'allume plus que sur une reelle derogation, et la
-  # participation des producteurs modifiable depuis la distribution.
-  alterconso_image_tag: "c2f2d54"
+  # 2795467 : l'accueil affiche trois commandes par page au lieu de deux, et les
+  # messages envoyes depuis l'interface partent mis en forme — retours a la
+  # ligne conserves, expediteur « Alterconso du Val de Brenne » au lieu de
+  # l'adherent, sujets accentues enfin lisibles.
+  #
+  # Le prefixe « sha- » n'est pas cosmetique : ce sha est tout en chiffres, et
+  # sans lettre il ressort en nombre apres substitution Kustomize, puis en
+  # notation scientifique, designant une image introuvable.
+  alterconso_image_tag: "sha-2795467"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   # À RENSEIGNER à la création du cluster de staging : cette valeur est celle
   # de la production, recopiée avec le reste. Laissée telle quelle, external-dns
