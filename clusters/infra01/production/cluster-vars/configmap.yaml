@@ -78,11 +78,11 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # 3b9fd1b : participation des producteurs modifiable depuis la distribution
-  # (et retrait refuse tant que des commandes existent), une seule distribution
-  # par jour et par groupe, date d'une distribution deplacable, et acces direct
-  # a l'ecran des dates depuis les producteurs participants.
-  alterconso_image_tag: "3b9fd1b"
+  # c2f2d54 : fleches de periode reparees sur l'accueil et les distributions
+  # (elles ne depassaient jamais la periode voisine), marqueur « date propre au
+  # catalogue » qui ne s'allume plus que sur une reelle derogation, et la
+  # participation des producteurs modifiable depuis la distribution.
+  alterconso_image_tag: "c2f2d54"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
