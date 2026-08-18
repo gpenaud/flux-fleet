@@ -78,16 +78,16 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # b9b78d4 : une case des parametres cumule les deux adresses du responsable de
-  # groupe — celle de fonction declaree par le groupe et celle de son compte —
-  # la ou la premiere remplacait la seconde. Decochee par defaut : aucun groupe
-  # ne voit ses destinataires changer. Pas de migration de donnees, seulement
-  # une colonne ajoutee.
+  # 31df40e : ajoute `alterconso rights-report`, qui imprime les droits en
+  # vigueur sans rien ecrire — de quoi verifier ce qu'une correction a laisse
+  # sans sortir de mot de passe de son secret. Emporte aussi b9b78d4 : une case
+  # des parametres cumule les deux adresses du responsable de groupe, celle de
+  # fonction et celle de son compte, decochee par defaut.
   #
   # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
   # nombre apres substitution Kustomize, puis en notation scientifique, designant
   # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
-  alterconso_image_tag: "sha-b9b78d4"
+  alterconso_image_tag: "sha-31df40e"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   # À RENSEIGNER à la création du cluster de staging : cette valeur est celle
   # de la production, recopiée avec le reste. Laissée telle quelle, external-dns
