@@ -78,16 +78,15 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # 31df40e : ajoute `alterconso rights-report`, qui imprime les droits en
-  # vigueur sans rien ecrire — de quoi verifier ce qu'une correction a laisse
-  # sans sortir de mot de passe de son secret. Emporte aussi b9b78d4 : une case
-  # des parametres cumule les deux adresses du responsable de groupe, celle de
-  # fonction et celle de son compte, decochee par defaut.
+  # b0b05c0 : le courrier adresse au responsable du groupe ne part plus aussi au
+  # responsable technique — heritage du super-administrateur, qui figurait parmi
+  # les destinataires de chaque groupe et se renvoyait donc ses propres messages.
+  # Il gagne son entree propre dans la messagerie des gestionnaires.
   #
   # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
   # nombre apres substitution Kustomize, puis en notation scientifique, designant
   # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
-  alterconso_image_tag: "sha-31df40e"
+  alterconso_image_tag: "sha-b0b05c0"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
