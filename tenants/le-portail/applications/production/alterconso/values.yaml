@@ -104,10 +104,19 @@ spec:
       smtp_user: "a74b88001@smtp-brevo.com"
       default_email: alterconso@leportail.org
 
-      superadmin:
-        email: "alterconso@leportail.org"
-        first_name: Super
-        last_name: Admin
+      # Responsable technique de l'installation : seul role transverse, designe
+      # ici plutot qu'en base. C'est lui qui ouvre l'ecran des droits d'un
+      # groupe neuf et y designe son responsable, qui distribue ensuite les
+      # autres delegations.
+      #
+      # alterconso@leportail.org occupait cette place par defaut d'installation.
+      # C'est en realite la boite que consulte la responsable du groupe : elle y
+      # figurait donc comme responsable technique, et son droit « GroupAdmin »
+      # en base restait sans effet.
+      technical_manager:
+        email: "guillaume.penaud@gmail.com"
+        first_name: Guillaume
+        last_name: Penaud
 
       messages:
         recipient_categories:
