@@ -78,16 +78,16 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # bafe83a : repare en urgence l'elargissement de 7b99c75, qui prenait une liste
-  # de droits vide pour la trace d'un « DatabaseAdmin » retire — c'est l'etat
-  # ordinaire d'un adherent. 88 appartenances avaient ete elargies au lieu de 4 :
-  # les adherents concernes sont remis a zero, les quatre corrections legitimes
-  # conservees.
+  # b9b78d4 : une case des parametres cumule les deux adresses du responsable de
+  # groupe — celle de fonction declaree par le groupe et celle de son compte —
+  # la ou la premiere remplacait la seconde. Decochee par defaut : aucun groupe
+  # ne voit ses destinataires changer. Pas de migration de donnees, seulement
+  # une colonne ajoutee.
   #
   # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
   # nombre apres substitution Kustomize, puis en notation scientifique, designant
   # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
-  alterconso_image_tag: "sha-bafe83a"
+  alterconso_image_tag: "sha-b9b78d4"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
