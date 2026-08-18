@@ -78,15 +78,17 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
-  # 2795467 : l'accueil affiche trois commandes par page au lieu de deux, et les
-  # messages envoyes depuis l'interface partent mis en forme — retours a la
-  # ligne conserves, expediteur « Alterconso du Val de Brenne » au lieu de
-  # l'adherent, sujets accentues enfin lisibles.
+  # 9aa7277 : refonte des droits. Les « droits administrateur » laissent place a
+  # deux delegations — distributions, parametres — et le super-administrateur a
+  # un responsable technique unique, designe par technical_manager dans la
+  # configuration (l'ancienne cle superadmin reste lue). Une migration convertit
+  # les droits en place au demarrage. L'onglet « Producteurs » quitte le menu des
+  # adherents, reouvrable par ui.vendors_tab_for_members.
   #
-  # Le prefixe « sha- » n'est pas cosmetique : ce sha est tout en chiffres, et
-  # sans lettre il ressort en nombre apres substitution Kustomize, puis en
-  # notation scientifique, designant une image introuvable.
-  alterconso_image_tag: "sha-2795467"
+  # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
+  # nombre apres substitution Kustomize, puis en notation scientifique, designant
+  # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
+  alterconso_image_tag: "sha-9aa7277"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   # À RENSEIGNER à la création du cluster de staging : cette valeur est celle
   # de la production, recopiée avec le reste. Laissée telle quelle, external-dns
