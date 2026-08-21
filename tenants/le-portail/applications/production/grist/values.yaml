@@ -23,7 +23,7 @@ spec:
         strategy: Recreate # ← important pour éviter les problèmes de PV concurrents
         containers:
           app:
-            image:
+            image: &gristImage
               repository: gristlabs/grist
               tag: "1.7.17"
             env:
@@ -33,6 +33,11 @@ spec:
               TYPEORM_DATABASE: "/persist/home.sqlite3"
               GRIST_DATA_DIR: "/persist/docs"
               GRIST_SANDBOX_FLAVOR: "unsandboxed"
+              # Racine ou Grist cherche les plugins installes (<racine>/plugins).
+              # Un sous-dossier dedie plutot que /persist directement : la racine
+              # sert aussi d'espace de travail a Grist, et les documents n'ont
+              # rien a y faire.
+              GRIST_USER_ROOT: "/persist/grist-user"
 
               # === IDENTITY ===
               GRIST_FORCE_LOGIN: "true"
@@ -79,6 +84,80 @@ spec:
                     path: /status
                     port: 8484
 
+        initContainers:
+          # Installe une copie du widget calendrier qui s'ouvre sur le jour
+          # courant.
+          #
+          # Le widget d'origine suit le curseur : au chargement, Grist le pose
+          # sur la premiere ligne de la table, et le calendrier saute a la date
+          # de cet enregistrement — janvier, quand les donnees commencent la. Le
+          # widget n'offre aucun reglage pour cela, et le code distant est
+          # identique au code embarque : il faut donc le modifier.
+          #
+          # La copie vit dans le volume, hors de l'image, et se refait a chaque
+          # demarrage a partir de la version embarquee : une montee de version de
+          # Grist est ainsi reprise sans intervention.
+          #
+          # Si le motif attendu disparait du code amont, l'installation est
+          # abandonnee et le message le dit. On ne fait pas echouer le
+          # demarrage : mieux vaut le widget d'origine, meme mal cadre, qu'une
+          # instance qui ne demarre pas.
+          install-calendar-widget:
+            # Meme image que le conteneur principal, par ancre YAML : c'est
+            # d'elle qu'on copie le widget, et deux versions differentes
+            # installeraient le widget de l'ancienne dans la nouvelle.
+            image: *gristImage
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                SRC=/grist/node_modules/@gristlabs/grist-widget/dist/plugins/grist-bundled
+                DST=/persist/grist-user/plugins/calendrier-du-jour
+
+                rm -rf "$DST"
+                mkdir -p "$DST"
+                cp -r "$SRC/archive" "$DST/archive"
+
+                PAGE="$DST/archive/widgets/calendar/page.js"
+                AVANT=$(grep -c "this.calendar.setDate(startDate);" "$PAGE" || true)
+                if [ "$AVANT" != "1" ]; then
+                  echo "AVERTISSEMENT : motif attendu introuvable dans page.js ($AVANT occurrence(s))."
+                  echo "Widget calendrier non installe ; le widget d'origine reste disponible."
+                  rm -rf "$DST"
+                  exit 0
+                fi
+
+                # Le premier positionnement est ignore : la vue reste sur le jour
+                # courant. Les suivants — clic sur une ligne — deplacent le
+                # calendrier comme avant.
+                sed -i \
+                  's|this.calendar.setDate(startDate);|if (this._gristVueInitiale) { this.calendar.setDate(startDate); } this._gristVueInitiale = true;|' \
+                  "$PAGE"
+
+                # printf plutot qu'un heredoc : le contenu ne depend alors
+                # d'aucune indentation, que le rendu YAML de ce bloc rognerait
+                # de facon difficile a prevoir.
+                printf '%s\n' \
+                  'name: calendrier-du-jour' \
+                  'components:' \
+                  '  widgets: archive/manifest.json' \
+                  > "$DST/manifest.yml"
+
+                printf '%s\n' \
+                  '[' \
+                  '  {' \
+                  '    "name": "Calendrier (jour courant)",' \
+                  '    "url": "./widgets/calendar/index.html",' \
+                  '    "widgetId": "leportail/widget-calendar-jour-courant",' \
+                  '    "published": true,' \
+                  '    "accessLevel": "full",' \
+                  '    "renderAfterReady": true' \
+                  '  }' \
+                  ']' \
+                  > "$DST/archive/manifest.json"
+
+                echo "Widget « Calendrier (jour courant) » installe dans $DST."
     service:
       app:
         controller: grist
