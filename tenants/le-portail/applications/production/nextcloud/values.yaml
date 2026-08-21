@@ -116,6 +116,24 @@ spec:
           php occ ldap:set-config s01 ldapGroupMemberAssocAttr "member"
           php occ ldap:set-config s01 ldapConfigurationActive "1"
 
+          # Promeut le groupe des administrateurs du tenant en groupe
+          # administrateur de l'instance : ses membres obtiennent les pleins
+          # pouvoirs, la ou l'appartenance au groupe ne servait qu'a franchir le
+          # filtre de connexion — un nom finissant par « -admins » ne dit rien a
+          # Nextcloud.
+          #
+          # Un seul groupe promu par configuration LDAP, d'ou le choix de celui
+          # qui porte le nom le plus etroit. La commande est idempotente et se
+          # place ici plutot que dans l'interface : sans elle, une configuration
+          # s01 recreee perdrait la promotion sans que rien ne le signale.
+          #
+          # L'echec n'est pas fatal : a la toute premiere installation, l'annuaire
+          # n'a pas encore ete parcouru et le groupe n'existe pas cote Nextcloud.
+          # Le demarrage suivant le trouvera.
+          if ! php occ ldap:promote-group "${tenant}-nextcloud-admins" -y; then
+            echo "Groupe ${tenant}-nextcloud-admins pas encore connu, promotion reportee au prochain demarrage."
+          fi
+
           php occ app:install user_oidc >/dev/null 2>&1 || php occ app:enable user_oidc >/dev/null
           # Le secret passe par l'environnement plutot que par la ligne de
           # commande, ou il serait lisible dans la liste des processus.
