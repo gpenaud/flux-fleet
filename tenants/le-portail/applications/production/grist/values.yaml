@@ -144,32 +144,18 @@ spec:
                   '  widgets: archive/manifest.json' \
                   > "$DST/manifest.yml"
 
-                # Le manifeste est DERIVE de celui d'origine, jamais reecrit :
-                # il porte un bloc « archive » qui declare les domaines
-                # embarques et les points d'entree i18n. Un manifeste minimal
-                # les perd, et le widget s'affiche alors vide.
-                #
-                # Seuls le nom et l'identifiant changent — l'identifiant parce
-                # qu'il doit differer de celui du widget d'origine, sans quoi
-                # les deux se confondraient.
-                node -e '
-                  const fs = require("fs");
-                  const chemin = process.argv[1];
-                  const tous = JSON.parse(fs.readFileSync(chemin, "utf8"));
-                  const cal = tous.find(w => w.widgetId === "@gristlabs/widget-calendar");
-                  if (!cal) {
-                    console.error("Entree calendrier introuvable dans le manifeste amont.");
-                    process.exit(1);
-                  }
-                  cal.name = "Calendrier (jour courant)";
-                  cal.widgetId = "leportail/widget-calendar-jour-courant";
-                  cal.description = "Comme le calendrier standard, mais ouvre sur le jour courant.";
-                  fs.writeFileSync(chemin, JSON.stringify([cal], null, 2));
-                ' "$DST/archive/manifest.json" || {
-                  echo "AVERTISSEMENT : manifeste non derivable, widget non installe."
-                  rm -rf "$DST"
-                  exit 0
-                }
+                printf '%s\n' \
+                  '[' \
+                  '  {' \
+                  '    "name": "Calendrier (jour courant)",' \
+                  '    "url": "./widgets/calendar/index.html",' \
+                  '    "widgetId": "leportail/widget-calendar-jour-courant",' \
+                  '    "published": true,' \
+                  '    "accessLevel": "full",' \
+                  '    "renderAfterReady": true' \
+                  '  }' \
+                  ']' \
+                  > "$DST/archive/manifest.json"
 
                 echo "Widget « Calendrier (jour courant) » installe dans $DST."
     service:
