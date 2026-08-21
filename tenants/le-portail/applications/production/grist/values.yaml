@@ -23,7 +23,10 @@ spec:
         strategy: Recreate # ← important pour éviter les problèmes de PV concurrents
         containers:
           app:
-            image:
+            # Ancre : l initContainer qui installe le widget copie depuis cette
+            # meme image, et deux versions differentes y installeraient le
+            # widget de l ancienne.
+            image: &gristImage
               repository: gristlabs/grist
               tag: "1.7.17"
             env:
@@ -33,6 +36,8 @@ spec:
               TYPEORM_DATABASE: "/persist/home.sqlite3"
               GRIST_DATA_DIR: "/persist/docs"
               GRIST_SANDBOX_FLAVOR: "unsandboxed"
+              # Racine ou Grist cherche les plugins installes (<racine>/plugins).
+              GRIST_USER_ROOT: "/persist/grist-user"
 
               # === IDENTITY ===
               GRIST_FORCE_LOGIN: "true"
@@ -79,6 +84,88 @@ spec:
                     path: /status
                     port: 8484
 
+        initContainers:
+          # Installe une copie du widget calendrier qui s ouvre sur le jour
+          # courant. Le widget d origine suit le curseur : au chargement, Grist
+          # le pose sur la premiere ligne de la table et le calendrier saute a
+          # la date de cet enregistrement.
+          #
+          # Ce script est celui qui a ete eprouve sur une instance jetable de
+          # meme version, a l identique.
+          install-calendar-widget:
+            # Meme image que le conteneur principal : c est d elle qu on copie
+            # le widget, et deux versions differentes installeraient le widget
+            # de l ancienne dans la nouvelle.
+            image: *gristImage
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                SRC=/grist/node_modules/@gristlabs/grist-widget/dist/plugins/grist-bundled
+                DST=/persist/grist-user/plugins/calendrier-du-jour
+
+                rm -rf "$DST"
+                mkdir -p "$DST"
+                cp -r "$SRC/archive" "$DST/archive"
+
+                PAGE="$DST/archive/widgets/calendar/page.js"
+                AVANT=$(grep -c "this.calendar.setDate(startDate);" "$PAGE" || true)
+                if [ "$AVANT" != "1" ]; then
+                  echo "AVERTISSEMENT : motif attendu introuvable dans page.js ($AVANT occurrence(s))."
+                  echo "Widget calendrier non installe ; le widget d origine reste disponible."
+                  rm -rf "$DST"
+                  exit 0
+                fi
+
+                # Deux substitutions. La premiere pose un repere temporel au chargement, la
+                # seconde ne suit le curseur qu au dela.
+                #
+                # Compter les positionnements initiaux serait plus fin, mais on ignore combien
+                # Grist en envoie : un seul, ou un avant les donnees et un apres. Une fenetre de
+                # silence ne depend pas de ce nombre. Un clic dans les deux premieres secondes
+                # est ignore, ce qui est sans consequence : la vue est deja sur le jour courant.
+                sed -i \
+                  '1i const _gristChargeLe = Date.now();' \
+                  "$PAGE"
+
+                sed -i \
+                  's|this.calendar.setDate(startDate);|if (Date.now() - _gristChargeLe > 2000) { this.calendar.setDate(startDate); }|' \
+                  "$PAGE"
+
+                printf '%s\n' \
+                  'name: calendrier-du-jour' \
+                  'components:' \
+                  '  widgets: archive/manifest.json' \
+                  > "$DST/manifest.yml"
+
+                # Le manifeste est derive de celui d amont : il porte un bloc archive qui
+                # declare les domaines embarques et les points d entree i18n, qu un manifeste
+                # ecrit a la main perdrait.
+                #
+                # Aucune apostrophe dans ce bloc : il est passe a node entre apostrophes, et
+                # une seule refermerait la chaine, privant le script de son chemin.
+                MANIFESTE="$DST/archive/manifest.json" node -e '
+                  const fs = require("fs");
+                  const chemin = process.env.MANIFESTE;
+                  const tous = JSON.parse(fs.readFileSync(chemin, "utf8"));
+                  const cal = tous.find(w => w.widgetId === "@gristlabs/widget-calendar");
+                  if (!cal) {
+                    console.error("Entree calendrier introuvable dans le manifeste amont.");
+                    process.exit(1);
+                  }
+                  cal.name = "Calendrier (jour courant)";
+                  cal.widgetId = "leportail/widget-calendar-jour-courant";
+                  cal.description = "Comme le calendrier standard, mais ouvre sur le jour courant.";
+                  cal.published = true;
+                  fs.writeFileSync(chemin, JSON.stringify([cal], null, 2));
+                ' || {
+                  echo "AVERTISSEMENT : manifeste non derivable, widget non installe."
+                  rm -rf "$DST"
+                  exit 0
+                }
+
+                echo "Widget « Calendrier (jour courant) » installe dans $DST."
     service:
       app:
         controller: grist
