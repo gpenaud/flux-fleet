@@ -18,5 +18,17 @@ spec:
       services:
         - name: grist
           port: 8484
+    # Domaine des widgets (APP_UNTRUSTED_URL) : la meme instance, jointe sous un
+    # autre nom. C'est ce cloisonnement que Grist attend pour executer du code
+    # tiers hors de la session de l'utilisateur.
+    #
+    # Sans authentification devant, comme les deux routes ci-dessus : ce nom ne
+    # sert que des iframes, et une redirection SSO y laisserait le widget vide —
+    # le symptome meme qu'on corrige.
+    - match: Host(`grist-widgets.${domain}`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: grist
+          port: 8484
   tls:
     secretName: wildcard.${domain}.tls

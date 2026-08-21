@@ -41,6 +41,16 @@ spec:
 
               # === PUBLIC URLS ===
               APP_HOME_URL: "https://grist.${domain}"
+              # Domaine d'ou sont servis les widgets, tenu a l'ecart du domaine
+              # principal : leur code est tiers, et l'isoler evite qu'il
+              # s'execute dans la session de l'utilisateur.
+              #
+              # Sans cette valeur, Grist retombe sur son adresse d'ecoute et
+              # publie ses widgets embarques sous « http://0.0.0.0:35587/... »,
+              # que le navigateur ne peut pas joindre : le calendrier restait
+              # vide. L'image 1.7.17 a commence a embarquer ses widgets, jusque-la
+              # tous distants, ce qui a rendu le defaut visible.
+              APP_UNTRUSTED_URL: "https://grist-widgets.${domain}"
               GRIST_OIDC_SP_HOST: "https://grist.${domain}"
 
               # === OIDC ===
