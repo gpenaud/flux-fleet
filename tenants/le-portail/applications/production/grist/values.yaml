@@ -163,11 +163,6 @@ spec:
                   }
                   cal.name = "Calendrier (jour courant)";
                   cal.widgetId = "leportail/widget-calendar-jour-courant";
-                  // Le manifeste amont porte published:false — l\'entree
-                  // embarquee est doublee par celle du depot distant, publiee.
-                  // Reprise telle quelle, notre copie n\'apparait pas dans le
-                  // choix des vues personnalisees.
-                  cal.published = true;
                   cal.description = "Comme le calendrier standard, mais ouvre sur le jour courant.";
                   fs.writeFileSync(chemin, JSON.stringify([cal], null, 2));
                 ' "$DST/archive/manifest.json" || {
