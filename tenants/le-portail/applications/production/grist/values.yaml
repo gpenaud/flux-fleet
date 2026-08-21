@@ -133,6 +133,22 @@ spec:
                   's|this.calendar.setDate(startDate);|if (Date.now() - _gristChargeLe > 2000) { this.calendar.setDate(startDate); }|' \
                   "$PAGE"
 
+                # Vue mensuelle par defaut. Deux endroits la fixent : la configuration initiale
+                # du calendrier, et le repli quand le document ne porte aucune preference. Le
+                # choix de l utilisateur, lui, reste enregistre et prime sur ce repli.
+                #
+                # Expressions delimitees par des guillemets doubles : les motifs contiennent des
+                # apostrophes, et les mettre entre apostrophes refermerait la chaine — c est
+                # ainsi que Grist est tombe une premiere fois.
+                VUES=$(grep -c "defaultView: 'week'" "$PAGE" || true)
+                REPLI=$(grep -c "calendarViewPerspective ?? 'week'" "$PAGE" || true)
+                if [ "$VUES" = "1" ] && [ "$REPLI" = "1" ]; then
+                  sed -i "s|defaultView: 'week'|defaultView: 'month'|" "$PAGE"
+                  sed -i "s|calendarViewPerspective ?? 'week'|calendarViewPerspective ?? 'month'|" "$PAGE"
+                else
+                  echo "AVERTISSEMENT : vue par defaut non forcee (defaultView=$VUES, repli=$REPLI)."
+                fi
+
                 printf '%s\n' \
                   'name: calendrier-du-jour' \
                   'components:' \
