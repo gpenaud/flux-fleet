@@ -4,5 +4,5 @@ tasks:
   connect:
     desc: 'Connect to the VPN (optional shortcut: task vpn:connect)'
     cmds:
-      - sudo tailscale up --auth-key=$(kubectl --context admin@{{.CLUSTER}} -n controller-vpn get secret tailscale-authkey -o jsonpath='{.data.TS_AUTHKEY}' | base64 -d) --login-server=https://vpn.{{.CLUSTER}}.alter-it.eu --accept-routes --hostname=gpenaud-laptop-work
+      - sudo tailscale up --auth-key=$(kubectl --context admin@{{.CLUSTER}} -n controller-vpn get secret tailscale-authkey -o jsonpath='{.data.TS_AUTHKEY}' | base64 -d) --login-server=https://vpn.{{.CLUSTER}}.alter-it.eu --accept-routes --force-reauth --hostname=gpenaud-laptop-work
     silent: false

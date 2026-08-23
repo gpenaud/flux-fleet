@@ -48,7 +48,20 @@ spec:
       HEADSCALE_METRICS_LISTEN_ADDR: "0.0.0.0:9090"
       HEADSCALE_GRPC_LISTEN_ADDR: "127.0.0.1:50443"
       HEADSCALE_GRPC_ALLOW_INSECURE: "true"
-      HEADSCALE_PREFIXES_V4: "100.64.0.0/10"
+      # Un /16 et non le /10 par defaut, pour laisser la place a d'autres
+      # tailnets sur les memes machines. Toute tailnet puise par defaut dans
+      # 100.64.0.0/10 : deux serveurs de controle distincts y attribueraient
+      # des adresses qui se recouvrent, et un client connecte aux deux verrait
+      # ses routes se disputer — des pairs joignables par intermittence, sans
+      # erreur franche.
+      #
+      # Restreindre ne reattribue rien : un nœud garde l'adresse inscrite en
+      # base tant qu'elle tient dans la nouvelle plage. Verifie le 23 aout
+      # 2026 sur les deux nœuds enregistres, 100.64.0.1 et 100.64.0.8. A
+      # refaire avant tout nouveau retrecissement.
+      #
+      # Decoupage retenu : .64 ici, .65 et .66 pour les tailnets suivants.
+      HEADSCALE_PREFIXES_V4: "100.64.0.0/16"
       HEADSCALE_PREFIXES_V6: "fd7a:115c:a1e0::/48"
       HEADSCALE_DNS_BASE_DOMAIN: "ts.${domain}"
       HEADSCALE_DNS_MAGIC_DNS: "true"
