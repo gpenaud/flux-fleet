@@ -86,7 +86,7 @@ data:
   # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
   # nombre apres substitution Kustomize, puis en notation scientifique, designant
   # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
-  alterconso_image_tag: "sha-506e156"
+  alterconso_image_tag: "sha-d2735b9"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   # À RENSEIGNER à la création du cluster de staging : cette valeur est celle
   # de la production, recopiée avec le reste. Laissée telle quelle, external-dns
