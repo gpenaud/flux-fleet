@@ -86,7 +86,7 @@ data:
   # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
   # nombre apres substitution Kustomize, puis en notation scientifique, designant
   # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
-  alterconso_image_tag: "sha-d2735b9"
+  alterconso_image_tag: "sha-b168796"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
