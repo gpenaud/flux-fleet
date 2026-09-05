@@ -16,8 +16,13 @@ spec:
       # porte pas. La faire suivre la variable de cluster reviendrait a lui
       # faire montrer ce qui tourne deja a cote.
       #
-      # rc-c725f25 : tete de la branche refonte-front au 5 septembre 2026.
-      tag: "rc-c725f25"
+      # rc-53badd3 : tete de la branche refonte-front au 5 septembre 2026.
+      #
+      # Emporte la correction du repli SPA : sous rc-c725f25, les dix-sept
+      # ecrans de /refonte recevaient un 404 a l ouverture de leur adresse, le
+      # serveur ne servant index.html que pour /login, /profile, /groups et
+      # /shop/. La refonte etait deployee sans etre joignable.
+      tag: "rc-53badd3"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
