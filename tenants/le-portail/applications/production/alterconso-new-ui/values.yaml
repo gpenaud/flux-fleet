@@ -16,7 +16,7 @@ spec:
       # porte pas. La faire suivre la variable de cluster reviendrait a lui
       # faire montrer ce qui tourne deja a cote.
       #
-      # rc-931e546 : tete de refonte-ui. La branche s appelait
+      # rc-60ec758 : tete de refonte-ui. La branche s appelait
       # refonte-legacy-29aout, du jour ou la refonte de l interface historique
       # a ete reconstituee ; elle porte seule la refonte desormais, et
       # refonte-front — la SPA React, jamais servie ici — est archivee sous le
@@ -37,9 +37,11 @@ spec:
       #
       # Puis l ouverture d un catalogue, qui ne se faisait qu en dupliquant un
       # autre : le premier catalogue d un producteur nouvellement saisi n avait
-      # aucun moyen d exister. Sans migration cette fois — l ecran n ecrit que
-      # dans des colonnes deja la.
-      tag: "rc-931e546"
+      # aucun moyen d exister. Et sa fermeture, qui n existait pas du tout —
+      # refusee des qu une commande y tient, les ecritures comptables ne
+      # s effacant pas. Sans migration pour ces deux-la : les ecrans n ecrivent
+      # que dans des colonnes deja en place.
+      tag: "rc-60ec758"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
