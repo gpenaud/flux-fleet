@@ -16,13 +16,18 @@ spec:
       # porte pas. La faire suivre la variable de cluster reviendrait a lui
       # faire montrer ce qui tourne deja a cote.
       #
-      # rc-53badd3 : tete de la branche refonte-front au 5 septembre 2026.
+      # rc-4715a2b : tete de refonte-legacy-29aout, la refonte de l interface
+      # historique des 29 et 30 aout.
       #
-      # Emporte la correction du repli SPA : sous rc-c725f25, les dix-sept
-      # ecrans de /refonte recevaient un 404 a l ouverture de leur adresse, le
-      # serveur ne servant index.html que pour /login, /profile, /groups et
-      # /shop/. La refonte etait deployee sans etre joignable.
-      tag: "rc-53badd3"
+      # Ce n est plus refonte-front qui est servi ici. Ce travail-la n avait
+      # jamais ete commite — son arbre vivait sous /tmp et le nettoyage l a
+      # emporte — et il a ete reconstitue en rejouant, dans l ordre, les
+      # ecritures que le transcript de la session conserve.
+      #
+      # Il part de d2735b9 et ne porte donc pas la numerotation des paniers du
+      # 5 septembre. La base de cette instance, elle, l a deja subie : les index
+      # d unicite qu elle pose restent en place, ce que ce code ne contredit pas.
+      tag: "rc-4715a2b"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
