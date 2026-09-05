@@ -16,18 +16,25 @@ spec:
       # porte pas. La faire suivre la variable de cluster reviendrait a lui
       # faire montrer ce qui tourne deja a cote.
       #
-      # rc-4715a2b : tete de refonte-legacy-29aout, la refonte de l interface
-      # historique des 29 et 30 aout.
+      # rc-13452df : tete de refonte-ui. La branche s appelait
+      # refonte-legacy-29aout, du jour ou la refonte de l interface historique
+      # a ete reconstituee ; elle porte seule la refonte desormais, et
+      # refonte-front — la SPA React, jamais servie ici — est archivee sous le
+      # tag archive/refonte-front.
       #
-      # Ce n est plus refonte-front qui est servi ici. Ce travail-la n avait
-      # jamais ete commite — son arbre vivait sous /tmp et le nettoyage l a
-      # emporte — et il a ete reconstitue en rejouant, dans l ordre, les
-      # ecritures que le transcript de la session conserve.
+      # Elle ne part plus de d2735b9 : les quatre commits que la production
+      # avait pris depuis y sont reportes — les producteurs clos qui ne
+      # bloquent plus toute la commande, le tri sur le nom de famille et la
+      # numerotation des paniers du 5 septembre. Les index d unicite que la
+      # base de cette instance porte deja s accordent donc au code, au lieu
+      # d en attendre la suite.
       #
-      # Il part de d2735b9 et ne porte donc pas la numerotation des paniers du
-      # 5 septembre. La base de cette instance, elle, l a deja subie : les index
-      # d unicite qu elle pose restent en place, ce que ce code ne contredit pas.
-      tag: "rc-4715a2b"
+      # S y ajoutent l ecriture des fiches producteurs — creation, correction
+      # et suppression, jusqu ici possibles par la seule API JSON — et deux
+      # mises d aplomb sur telephone. La premiere ajoute une colonne :
+      # vendors.group_id, posee au demarrage par AutoMigrate, nullable, que
+      # rien d autre ne lit.
+      tag: "rc-13452df"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
