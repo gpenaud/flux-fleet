@@ -16,7 +16,7 @@ spec:
       # porte pas. La faire suivre la variable de cluster reviendrait a lui
       # faire montrer ce qui tourne deja a cote.
       #
-      # rc-13452df : tete de refonte-ui. La branche s appelait
+      # rc-931e546 : tete de refonte-ui. La branche s appelait
       # refonte-legacy-29aout, du jour ou la refonte de l interface historique
       # a ete reconstituee ; elle porte seule la refonte desormais, et
       # refonte-front — la SPA React, jamais servie ici — est archivee sous le
@@ -34,7 +34,12 @@ spec:
       # mises d aplomb sur telephone. La premiere ajoute une colonne :
       # vendors.group_id, posee au demarrage par AutoMigrate, nullable, que
       # rien d autre ne lit.
-      tag: "rc-13452df"
+      #
+      # Puis l ouverture d un catalogue, qui ne se faisait qu en dupliquant un
+      # autre : le premier catalogue d un producteur nouvellement saisi n avait
+      # aucun moyen d exister. Sans migration cette fois — l ecran n ecrit que
+      # dans des colonnes deja la.
+      tag: "rc-931e546"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
