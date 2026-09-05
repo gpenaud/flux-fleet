@@ -1,0 +1,30 @@
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alterconso-new-ui
+  namespace: ${tenant}-alterconso-new-ui
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: new-ui-alterconso.${domain}
+    external-dns.alpha.kubernetes.io/target: ${domain}
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Un nom de domaine plutot qu'un chemin sous celui de la production. La SPA
+    # est montee a la racine — vite.config.ts sans base, BrowserRouter sans
+    # basename, axios sur /api, et cote Go r.Static("/assets") plus un NoRoute :
+    # servie sous /v2, elle reclamerait ses assets a la racine, donc a
+    # l'instance de production. Un sous-domaine ne demande aucune de ces
+    # modifications.
+    #
+    # new-ui-alterconso et non v2.alterconso : le certificat couvre
+    # *.leportail.org, qui ne s'etend pas au troisieme niveau.
+    - match: Host(`new-ui-alterconso.${domain}`)
+      kind: Rule
+      services:
+        - name: alterconso-new-ui
+          port: 80
+  tls:
+    secretName: wildcard.${domain}.tls

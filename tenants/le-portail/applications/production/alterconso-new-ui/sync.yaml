@@ -1,0 +1,32 @@
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tenant-le-portail-alterconso-new-ui
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: tenant-le-portail
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./tenants/le-portail/applications/production/alterconso-new-ui
+  prune: true
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age-private-key
+  postBuild:
+    substitute:
+      application: alterconso-new-ui
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
+        optional: false
+      - kind: ConfigMap
+        name: tenant-le-portail-vars
+        optional: false

@@ -26,6 +26,11 @@ resources:
   - ../../../../tenants/le-portail/applications/production/grist/sync.yaml
   - ../../../../tenants/le-portail/applications/production/nextcloud/sync.yaml
   - ../../../../tenants/le-portail/applications/production/alterconso/sync.yaml
+  # Instance de recette de la refonte d'interface, sur new-ui-alterconso.
+  # Base et namespace distincts de ceux de la production : elle porte une
+  # version que la production ne porte pas encore, et dont les migrations de
+  # demarrage ecrivent en base.
+  - ../../../../tenants/le-portail/applications/production/alterconso-new-ui/sync.yaml
   # - ../../../../tenants/le-portail/applications/production/wordpress/sync.yaml
   - ../../../../tenants/le-portail/applications/production/wordpress/site/sync.yaml
   - ../../../../tenants/le-portail/applications/production/wordpress/epilibres/sync.yaml

@@ -1,0 +1,112 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alterconso
+spec:
+  values:
+    # Nom distinct de celui de la production : les deux instances vivent dans
+    # des namespaces separes, mais un nom propre evite qu'un kubectl lance dans
+    # le mauvais contexte designe l'autre sans qu'on s'en apercoive.
+    nameOverride: "alterconso-new-ui"
+    fullnameOverride: "alterconso-new-ui"
+    image:
+      repository: ghcr.io/gpenaud/alterconso
+      # Tag fixe, et non ${alterconso_image_tag} comme en production : cette
+      # instance sert precisement a eprouver une version que la production ne
+      # porte pas. La faire suivre la variable de cluster reviendrait a lui
+      # faire montrer ce qui tourne deja a cote.
+      #
+      # rc-c725f25 : tete de la branche refonte-front au 5 septembre 2026.
+      tag: "rc-c725f25"
+    imagePullSecrets:
+      - name: regcred
+    replicaCount: 1
+    waitForDatabase:
+      enabled: true
+      image: mysql:8.4
+      timeoutSeconds: 60
+
+    # Meme raison qu'en production : l'application compare time.Now() a des
+    # dates ecrites en heure locale francaise, sans conversion.
+    extraEnv:
+      - name: TZ
+        value: Europe/Paris
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+    ingress:
+      enabled: false
+
+    database:
+      external:
+        host: mariadb.controller-database.svc.cluster.local
+        port: "3306"
+      init:
+        enabled: true
+        image: mysql:8.4
+        adminSecret: "database"
+        passwordSecretKey: "mariadb-root"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+
+    secrets:
+      existingSecret: alterconso-new-ui
+    config:
+      port: "80"
+      debug: false
+
+      # Base distincte de lp-alterconso, et c'est le point qui compte le plus
+      # ici. L'application execute a chaque demarrage db.Migrate puis sept
+      # migrations de donnees, dont BackfillBasketNumbers, qui fusionne des
+      # paniers, en cree, les numerote et pose deux index d'unicite. Branchee
+      # sur la base de production, cette instance ne serait pas un deploiement
+      # a cote : elle migrerait la production avec du code que la production ne
+      # porte pas encore.
+      #
+      # L'initContainer init-db la cree si elle n'existe pas. Elle nait donc
+      # vide ; c'est une copie de lp-alterconso qui la remplit, refaite quand
+      # on veut repartir de l'etat courant.
+      db_user: alterconso
+      db_name: lp-alterconso-new-ui
+
+      jwt_expiry_hours: 168
+      host: new-ui-alterconso.${domain}
+
+      smtp_host: smtp-relay.brevo.com
+      smtp_port: 587
+      # Identifiant SMTP et cles d'API laisses vides, ici et dans le Secret :
+      # cette instance travaille sur une copie des donnees de production, donc
+      # sur les vraies adresses des adherents. Un message parti d'un ecran en
+      # cours de refonte arriverait chez eux. Les envois echouent, et c'est
+      # l'effet recherche.
+      smtp_user: ""
+      default_email: alterconso@leportail.org
+
+      technical_manager:
+        email: "guillaume.penaud@gmail.com"
+        first_name: Guillaume
+        last_name: Penaud
+
+      messages:
+        recipient_categories:
+          - name: "Membres réguliers"
+            pattern: ">= 3 commandes sur 3m"
+          - name: "Membres occasionnels"
+            pattern: ">= 1 commande sur 6m"
+          - name: "Membres inactifs"
+            pattern: "< 1 commande sur 6m"
+
+      notifications:
+        enabled: false
+        recipient_category: "Membres réguliers"

@@ -1,0 +1,20 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ${tenant}-alterconso-new-ui
+
+resources:
+  - ../../../../../applications/alterconso
+  - ingressroute.yaml
+  - secrets.enc.yaml
+
+# Ni le composant de sauvegarde ni le workflow de restauration, presents sur
+# l'instance de production : cette instance ne detient aucune donnee qui lui
+# soit propre. Sa base est une copie, refaite a chaque fois qu'on veut repartir
+# de l'etat de la production.
+
+patches:
+  - target:
+      kind: HelmRelease
+    path: values.yaml
