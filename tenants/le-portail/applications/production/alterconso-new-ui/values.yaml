@@ -16,7 +16,7 @@ spec:
       # porte pas. La faire suivre la variable de cluster reviendrait a lui
       # faire montrer ce qui tourne deja a cote.
       #
-      # rc-60ec758 : tete de refonte-ui. La branche s appelait
+      # rc-07f3ee8 : tete de refonte-ui. La branche s appelait
       # refonte-legacy-29aout, du jour ou la refonte de l interface historique
       # a ete reconstituee ; elle porte seule la refonte desormais, et
       # refonte-front — la SPA React, jamais servie ici — est archivee sous le
@@ -41,7 +41,11 @@ spec:
       # refusee des qu une commande y tient, les ecritures comptables ne
       # s effacant pas. Sans migration pour ces deux-la : les ecrans n ecrivent
       # que dans des colonnes deja en place.
-      tag: "rc-60ec758"
+      #
+      # Enfin une bande d image entre la prochaine distribution et la suite de
+      # l accueil, les deux images de la page etant au passage attenuees pour
+      # peser moins que ce qu elles accompagnent.
+      tag: "rc-07f3ee8"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
