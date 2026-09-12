@@ -78,6 +78,21 @@ data:
   nextcloud_login_mode: "sso"
   # Version d'alterconso, eprouvee sur infra02 avant d'arriver ici.
   #
+  # 66c7360 : rend les commandes du jour a qui tient la distribution. Le droit
+  # « Gestion des distributions » ouvrait le calendrier mais pas la liste des
+  # commandes, sa repartition par producteur ni son export — ces ecrans vivent
+  # sous « /contractAdmin » par heritage et en avaient garde le droit. Seuls le
+  # responsable de groupe et le responsable technique y entraient. Les actions
+  # qui corrigent une commande sur place suivent.
+  #
+  # CE SAUT EMPORTE TROIS AUTRES COMMITS, dont deux touchent aux DONNEES :
+  # « BackfillBasketNumbers » tourne au demarrage du serveur et fusionne les
+  # paniers en double, cree les absents, les numerote dans l'ordre des premieres
+  # commandes, rattache les commandes importees, puis pose deux index
+  # d'unicite. Idempotente, mais elle ecrit. La sauvegarde du 12 septembre a ete
+  # verifiee avant : dump entier, 27 tables effectivement restaurees dans une
+  # base jetable.
+  #
   # 506e156 : ajoute `alterconso rights-revoke`, qui retire un droit a un compte
   # en montrant l'avant et l'apres, et n'ecrit qu'avec --apply. Emporte b0b05c0 :
   # le courrier adresse au responsable du groupe ne part plus aussi au
@@ -86,7 +101,7 @@ data:
   # Le prefixe « sha- » n'est pas cosmetique : un sha tout en chiffres ressort en
   # nombre apres substitution Kustomize, puis en notation scientifique, designant
   # une image introuvable. Celui-ci en porte, le prefixe reste par coherence.
-  alterconso_image_tag: "sha-b168796"
+  alterconso_image_tag: "sha-66c7360"
   tenant: shared # default tenant for shared resources, can be overridden in by-tenant kustomization
   cluster_endpoint_ip: 72.62.185.244
   internal_service_cidr: 10.96.0.0/12
