@@ -82,7 +82,19 @@ spec:
       # de l image, que plus aucun gabarit ni aucune feuille de style ne
       # nommait depuis que la banniere a change de photo — trois cent cinquante-
       # sept kilo-octets embarques pour rien.
-      tag: "rc-be6191e"
+      #
+      # rc-55df059 detache l accroche de la banniere des titres du site — elle
+      # portait le brun qui NOMME les choses, alors qu elle ne designe rien —
+      # et surtout donne aux feuilles de style une adresse qui change avec
+      # elles.
+      #
+      # CE DERNIER POINT N EST PAS COSMETIQUE. Les gabarits demandaient
+      # « /css/alterconso.css » sans version : un navigateur qui tenait
+      # l ancienne feuille en cache la resservait avec le HTML neuf, et ce que
+      # la nouvelle devait cacher s affichait. On a vu sur cette instance les
+      # trois lignes d informations ET le bouton cense les remplacer. Cela
+      # valait pour chaque adherent a chaque livraison.
+      tag: "rc-55df059"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
