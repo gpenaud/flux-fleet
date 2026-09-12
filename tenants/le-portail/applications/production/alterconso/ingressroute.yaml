@@ -5,14 +5,17 @@ metadata:
   name: alterconso
   namespace: ${tenant}-alterconso
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: alterconso.${domain}
+    # Recule sur « alterconso-legacy » : la refonte prend le nom d'usage.
+    # external-dns cree l'enregistrement depuis cette annotation, et le
+    # certificat joker *.${domain} le couvre sans rien demander.
+    external-dns.alpha.kubernetes.io/hostname: alterconso-legacy.${domain}
     external-dns.alpha.kubernetes.io/target: ${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`alterconso.${domain}`)
+    - match: Host(`alterconso-legacy.${domain}`)
       kind: Rule
       services:
         - name: alterconso

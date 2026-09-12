@@ -180,7 +180,10 @@ spec:
       db_name: lp-alterconso-new-ui
 
       jwt_expiry_hours: 168
-      host: new-ui-alterconso.${domain}
+      # Le nom d'usage, repris a l'ancienne instance. L'IngressRoute continue
+      # de repondre a « new-ui-alterconso » pour les liens deja partages, mais
+      # c'est celui-ci que les courriels porteront.
+      host: alterconso.${domain}
 
       smtp_host: smtp-relay.brevo.com
       smtp_port: 587

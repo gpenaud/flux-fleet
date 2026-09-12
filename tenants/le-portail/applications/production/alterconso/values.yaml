@@ -97,7 +97,10 @@ spec:
       db_name: lp-alterconso
 
       jwt_expiry_hours: 168
-      host: alterconso.${domain}
+      # Le nom sous lequel cette instance se sait joignable : il signe les
+      # liens des courriels. L'oublier ici enverrait les adherents vers une
+      # adresse que la refonte sert desormais.
+      host: alterconso-legacy.${domain}
 
       smtp_host: smtp-relay.brevo.com
       smtp_port: 587
