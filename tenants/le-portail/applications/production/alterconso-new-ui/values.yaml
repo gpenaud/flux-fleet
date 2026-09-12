@@ -77,7 +77,12 @@ spec:
       # tombait a 1,33:1, trois fois moins que le minimum lisible — d ou un
       # voile creme et le brun terre de la charte, a 7,9:1. La bande d image du
       # bas disparait.
-      tag: "rc-79607f1"
+      #
+      # rc-be6191e ne change rien a l ecran : elle retire « default-banner.jpg »
+      # de l image, que plus aucun gabarit ni aucune feuille de style ne
+      # nommait depuis que la banniere a change de photo — trois cent cinquante-
+      # sept kilo-octets embarques pour rien.
+      tag: "rc-be6191e"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
