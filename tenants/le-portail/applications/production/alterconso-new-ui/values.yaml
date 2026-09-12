@@ -94,7 +94,14 @@ spec:
       # la nouvelle devait cacher s affichait. On a vu sur cette instance les
       # trois lignes d informations ET le bouton cense les remplacer. Cela
       # valait pour chaque adherent a chaque livraison.
-      tag: "rc-55df059"
+      #
+      # rc-d156431 ramene a la distribution qu on vient de commander plutot
+      # qu en haut de l accueil, et met en retrait les producteurs dont la
+      # commande n est pas encore ouverte — chacun ouvre quand il veut, si bien
+      # qu une distribution ouverte peut en compter qu on ne peut pas encore
+      # commander. Ils restent listes, avec la mention qui l explique : les
+      # retirer les ferait passer pour absents alors qu ils viennent.
+      tag: "rc-d156431"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
