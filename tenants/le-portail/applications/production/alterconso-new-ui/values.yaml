@@ -45,7 +45,20 @@ spec:
       # Enfin une bande d image entre la prochaine distribution et la suite de
       # l accueil, les deux images de la page etant au passage attenuees pour
       # peser moins que ce qu elles accompagnent.
-      tag: "rc-07f3ee8"
+      #
+      # rc-a7c58cd reporte la correction partie en production le 12 septembre :
+      # le droit « Gestion des distributions » ouvre desormais la liste des
+      # commandes d une date, sa repartition par producteur, son export, et les
+      # actions qui corrigent une commande sur place. Ces ecrans vivent sous
+      # « /contractAdmin » par heritage et en avaient garde le droit
+      # « catalogues », si bien que celui qui tient la distribution se les
+      # voyait refuser le jour meme.
+      #
+      # Reportee et non fusionnee, comme les quatre commits precedents : cette
+      # branche porte la refonte, que master n a pas. L ouverture d un
+      # catalogue, qu elle seule connait, reste au droit « catalogues » — elle
+      # n est pas un geste de distribution.
+      tag: "rc-a7c58cd"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
