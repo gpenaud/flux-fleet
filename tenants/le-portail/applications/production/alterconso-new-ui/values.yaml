@@ -58,7 +58,26 @@ spec:
       # branche porte la refonte, que master n a pas. L ouverture d un
       # catalogue, qu elle seule connait, reste au droit « catalogues » — elle
       # n est pas un geste de distribution.
-      tag: "rc-a7c58cd"
+      #
+      # rc-79607f1 rend l accueil lisible d un pouce. Mesure a 360 px de large,
+      # une carte de distribution occupait presque tout l ecran : horaire,
+      # adresse et permanences y prenaient quatre rangees, l adresse deux a
+      # elle seule. Elles passent dans un volet sous le bouton de commande,
+      # avec le meme mecanisme que celui des producteurs ; sur grand ecran
+      # elles restent a droite de la pastille, ou elles comblent le vide
+      # qu elle laisse.
+      #
+      # S y ajoutent l etat des commandes sur la ligne du lieu — en un mot sur
+      # telephone, en phrase sur grand ecran — et la date centree dans sa
+      # pastille, qui s etirait sans que son contenu suive.
+      #
+      # La banniere change d image et de couleur AVEC : les cagettes
+      # remplacent l ancienne photo, agrandies de 215 a 270 px. L ancienne
+      # etait sombre et portait du blanc ; celle-ci est claire — le blanc y
+      # tombait a 1,33:1, trois fois moins que le minimum lisible — d ou un
+      # voile creme et le brun terre de la charte, a 7,9:1. La bande d image du
+      # bas disparait.
+      tag: "rc-79607f1"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
