@@ -5,7 +5,14 @@ metadata:
   name: alterconso-new-ui
   namespace: ${tenant}-alterconso-new-ui
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: new-ui-alterconso.${domain}
+    # Prend le nom d'usage. L'ancien reste servi plus bas : les favoris et les
+    # liens deja partages ne doivent pas tomber a plat du jour au lendemain.
+    # LES DEUX NOMS, et non le seul nouveau : external-dns tient les
+    # enregistrements d'apres cette annotation, et retirer l'ancien d'ici
+    # l'aurait supprime du DNS — la route de compatibilite plus bas n'aurait
+    # alors plus rien a servir. Meme facon de faire que dolibarr, qui repond a
+    # « dolibarr » comme a « compta ».
+    external-dns.alpha.kubernetes.io/hostname: alterconso.${domain},new-ui-alterconso.${domain}
     external-dns.alpha.kubernetes.io/target: ${domain}
     external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
@@ -21,7 +28,7 @@ spec:
     #
     # new-ui-alterconso et non v2.alterconso : le certificat couvre
     # *.leportail.org, qui ne s'etend pas au troisieme niveau.
-    - match: Host(`new-ui-alterconso.${domain}`)
+    - match: Host(`alterconso.${domain}`) || Host(`new-ui-alterconso.${domain}`)
       kind: Rule
       services:
         - name: alterconso-new-ui
