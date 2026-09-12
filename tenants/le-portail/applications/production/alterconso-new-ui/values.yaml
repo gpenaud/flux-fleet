@@ -105,7 +105,18 @@ spec:
       # rc-3a1ce42 baisse d un cran le titre de la banniere — il pesait
       # davantage que celui de la carte juste en dessous, laquelle porte
       # pourtant ce qu on vient chercher.
-      tag: "rc-3a1ce42"
+      #
+      # rc-8ee09de range le volet des producteurs sur deux criteres : les
+      # signales d abord — une mise en avant est un arbitrage explicite du
+      # groupe, et elle l emporte meme si la commande n est pas encore ouverte
+      # — puis ceux dont la commande est ouverte. Il remplace un epinglage qui
+      # ne remontait qu un producteur, le premier rencontre : deux campagnes le
+      # meme jour n en voyaient qu une passer devant.
+      #
+      # Le titre du bandeau-image descend encore, a 1,6 em et 1,2 sur
+      # telephone : c est la police de titre et la graisse qui font desormais
+      # l ecart avec le texte, plus que la taille.
+      tag: "rc-8ee09de"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
