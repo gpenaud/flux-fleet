@@ -187,12 +187,22 @@ spec:
 
       smtp_host: smtp-relay.brevo.com
       smtp_port: 587
-      # Identifiant SMTP et cles d'API laisses vides, ici et dans le Secret :
-      # cette instance travaille sur une copie des donnees de production, donc
-      # sur les vraies adresses des adherents. Un message parti d'un ecran en
-      # cours de refonte arriverait chez eux. Les envois echouent, et c'est
-      # l'effet recherche.
-      smtp_user: ""
+      # LE GARDE-FOU EST LEVE, ET LA RAISON S'EST RETOURNEE. Cet identifiant et
+      # les cles du Secret etaient vides a dessein : l'instance travaillait sur
+      # une copie des donnees de production, donc sur les vraies adresses des
+      # adherents, et un message parti d'un ecran en cours de refonte serait
+      # arrive chez eux. Les envois echouaient, et c'etait l'effet recherche.
+      #
+      # Depuis la bascule du 12 septembre, c'est cette instance qui repond sur
+      # alterconso.${domain} : ce ne sont plus des adherents qu'on protege d'un
+      # ecran d'essai, ce sont les siens qui attendent leur courrier. Six envois
+      # ont echoue en deux jours sur « 535 Authentication failed », dont quatre
+      # reinitialisations de mot de passe — demandees precisement parce que la
+      # bascule avait fait tomber les sessions.
+      #
+      # Le commentaire est reecrit plutot que supprime : laisse tel quel, il
+      # aurait justifie demain de revider ce qu'on vient de remplir.
+      smtp_user: "a74b88001@smtp-brevo.com"
       default_email: alterconso@leportail.org
 
       technical_manager:
