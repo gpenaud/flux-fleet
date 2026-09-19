@@ -116,7 +116,20 @@ spec:
       # Le titre du bandeau-image descend encore, a 1,6 em et 1,2 sur
       # telephone : c est la police de titre et la graisse qui font desormais
       # l ecart avec le texte, plus que la taille.
-      tag: "rc-8ee09de"
+      #
+      # rc-092626b additionne les pesees dans le champ « Apres pesee ». Un
+      # producteur qui livre trois pieces les pese une a une, obtient trois
+      # prix, et posait l addition de tete devant l adherent qui attend : la
+      # case accepte desormais la suite et se reduit a son total. Le serveur
+      # applique la meme regle — valider avec Entree n enleve pas toujours le
+      # focus, et l expression partait alors telle quelle pour etre ignoree
+      # sans un mot.
+      #
+      # Elle corrige aussi l empreinte des feuilles de style, qui valait
+      # « dev » en production : l image ne porte que les formes precompressees,
+      # et le fichier source qu on y cherchait n existe pas. Le versionnage du
+      # CSS etait donc inoperant depuis sa pose.
+      tag: "rc-092626b"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
