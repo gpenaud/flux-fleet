@@ -8,6 +8,7 @@ spec:
     wordpressExistingSecret: wordpress
     wordpressEmail: contact@${domain}
     wordpressHostname: www.${domain}
+    wordpressScheme: https
     overrideDatabaseSettings: true
     mariadb:
       enabled: false
