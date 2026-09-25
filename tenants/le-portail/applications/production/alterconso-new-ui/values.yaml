@@ -129,7 +129,14 @@ spec:
       # « dev » en production : l image ne porte que les formes precompressees,
       # et le fichier source qu on y cherchait n existe pas. Le versionnage du
       # CSS etait donc inoperant depuis sa pose.
-      tag: "rc-092626b"
+      #
+      # rc-979d0e3 laisse qui tient la distribution corriger une commande
+      # close. Le droit « Gestion des distributions » ouvrait les commandes
+      # du jour mais pas leur correction par le shop, reservee au responsable
+      # de groupe — et au responsable technique par ses pleins pouvoirs. Le
+      # gestionnaire de distribution modifie et ajoute desormais une commande
+      # au meme titre, catalogue clos ou producteur clos compris.
+      tag: "rc-979d0e3"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
