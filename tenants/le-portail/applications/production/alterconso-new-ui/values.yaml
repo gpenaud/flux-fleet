@@ -142,7 +142,11 @@ spec:
       # suite, un producteur par page, sans prix ; quatre tailles de texte),
       # puis la page imprimable. Reporte depuis master, ou il etait parti
       # servir l hote legacy que personne ne regarde. Aucun changement de base.
-      tag: "rc-25ae4c3"
+      #
+      # rc-4ebf90e mene « Totaux par producteur » droit a l ecran d options
+      # d impression depuis la liste des commandes ; Retour y ramene, et la vue
+      # ecran reste a un clic par « Voir a l ecran ».
+      tag: "rc-4ebf90e"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
