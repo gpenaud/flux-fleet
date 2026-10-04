@@ -134,7 +134,11 @@ spec:
           start_tls: false
           base_dn: 'dc=alter-it,dc=eu'
           additional_users_dn: 'ou=people'
-          users_filter: '(&({username_attribute}={input})(objectClass=person))'
+          # Identifiant OU adresse mail : les gens saisissent l'un comme
+          # l'autre, et la réinitialisation de mot de passe passe par la
+          # même recherche. Sur uid seul, une adresse donnait « user not
+          # found » côté serveur et « mail envoyé » côté écran, sans mail.
+          users_filter: '(&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=person))'
           additional_groups_dn: 'ou=groups'
           groups_filter: '(member={dn})'
           user: 'uid=authelia,ou=people,dc=alter-it,dc=eu'
