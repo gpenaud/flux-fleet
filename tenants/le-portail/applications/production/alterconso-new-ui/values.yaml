@@ -136,7 +136,13 @@ spec:
       # de groupe — et au responsable technique par ses pleins pouvoirs. Le
       # gestionnaire de distribution modifie et ajoute desormais une commande
       # au meme titre, catalogue clos ou producteur clos compris.
-      tag: "rc-979d0e3"
+      #
+      # rc-25ae4c3 donne aux totaux par producteur le parcours d impression de
+      # la liste d emargement : bouton Imprimer, ecran d options (tout a la
+      # suite, un producteur par page, sans prix ; quatre tailles de texte),
+      # puis la page imprimable. Reporte depuis master, ou il etait parti
+      # servir l hote legacy que personne ne regarde. Aucun changement de base.
+      tag: "rc-25ae4c3"
     imagePullSecrets:
       - name: regcred
     replicaCount: 1
